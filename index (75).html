@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Summit — Track Every Scottish Hill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* OS Maps palette */
+  --paper:      #f4eddf;
+  --paper-mid:  #ede4d2;
+  --paper-dark: #e2d8c4;
+  --canvas:     #faf6ee;
+  --forest:     #2d5a3d;
+  --forest-deep:#1e3d29;
+  --moss:       #4a7c59;
+  --sage:       #7aab87;
+  --sage-lt:    #a8c9b2;
+  --earth:      #8b6914;
+  --contour:    #b8996a;
+  --contour-lt: #d4bfa0;
+  --text:       #1a1916;
+  --text-mid:   #3d3830;
+  --muted:      #7a7060;
+  --light-muted:#9e9486;
+  --border:     #d6cbb8;
+  --border-lt:  #e4dcd0;
+  --water:      #5b8fa8;
+  --water-lt:   rgba(91,143,168,0.12);
+  --path:       #c44a0a;
+  --bagged-bg:  rgba(45,90,61,0.08);
+  --shadow-sm:  0 1px 4px rgba(26,25,22,0.08);
+  --shadow-md:  0 4px 16px rgba(26,25,22,0.1);
+  --shadow-lg:  0 8px 32px rgba(26,25,22,0.12);
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.6;overflow-x:hidden;min-height:100vh}
+button{cursor:pointer;font-family:'DM Sans',sans-serif}
+.view{display:none;min-height:100vh}
+.view.active{display:block}
+
+/* ── TOPO LOGO SVG ── */
+.logo-mark{display:inline-block;vertical-align:middle}
+
+/* ═══════════════ LANDING ═══════════════ */
+#landing{background:var(--canvas);overflow:hidden}
+
+/* Subtle topo-line background texture */
+#landing::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% 0%,rgba(45,90,61,0.04) 0%,transparent 60%),
+    repeating-linear-gradient(35deg,transparent,transparent 48px,rgba(184,153,106,0.06) 49px,transparent 50px),
+    repeating-linear-gradient(-35deg,transparent,transparent 48px,rgba(184,153,106,0.04) 49px,transparent 50px);
+}
+
+.landing-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 5%;
+  background:rgba(244,237,223,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  display:flex;align-items:center;gap:0.6rem;
+  text-decoration:none;
+}
+.logo-type{
+  font-family:'Libre Baskerville',serif;
+  font-size:1.25rem;font-weight:700;
+  color:var(--forest);letter-spacing:-0.01em;
+}
+.nav-cta{
+  background:var(--forest);color:var(--canvas);
+  border:none;padding:0.55rem 1.3rem;border-radius:4px;
+  font-size:0.875rem;font-weight:500;
+  transition:background 0.2s,transform 0.15s;
+}
+.nav-cta:hover{background:var(--forest-deep);transform:translateY(-1px)}
+
+/* Hero */
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:8rem 5% 5rem;position:relative;z-index:1;
+}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  border:1px solid var(--contour);color:var(--earth);
+  font-size:0.75rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.3rem 0.85rem;border-radius:2px;
+  margin-bottom:1.4rem;
+  opacity:0;animation:fadeUp 0.5s 0.1s forwards;
+}
+.hero-h1{
+  font-family:'Libre Baskerville',serif;
+  font-size:clamp(2.8rem,5vw,4.2rem);
+  font-weight:700;line-height:1.1;
+  color:var(--text);letter-spacing:-0.03em;
+  margin-bottom:1.2rem;
+  opacity:0;animation:fadeUp 0.6s 0.2s forwards;
+}
+.hero-h1 em{color:var(--forest);font-style:italic}
+.hero-sub{
+  font-size:1.05rem;color:var(--muted);line-height:1.75;
+  max-width:480px;margin-bottom:2.5rem;font-weight:300;
+  opacity:0;animation:fadeUp 0.6s 0.3s forwards;
+}
+.hero-actions{
+  display:flex;flex-direction:column;align-items:flex-start;gap:0.9rem;
+  opacity:0;animation:fadeUp 0.6s 0.4s forwards;
+}
+.strava-btn{
+  display:inline-flex;align-items:center;gap:0.75rem;
+  background:#FC4C02;color:white;border:none;
+  padding:0.9rem 1.8rem;border-radius:5px;
+  font-size:0.95rem;font-weight:500;
+  box-shadow:0 4px 16px rgba(252,76,2,0.25);
+  transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+}
+.strava-btn:hover{background:#e04400;transform:translateY(-2px);box-shadow:0 8px 24px rgba(252,76,2,0.35)}
+.strava-btn svg{width:20px;height:20px;fill:white}
+.hero-note{font-size:0.78rem;color:var(--light-muted)}
+
+/* Hero visual — topo map card */
+.hero-visual{
+  opacity:0;animation:fadeIn 0.8s 0.5s forwards;
+  position:relative;
+}
+.map-card{
+  background:var(--canvas);
+  border:1px solid var(--border);
+  border-radius:8px;
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+  position:relative;
+}
+.map-card-header{
+  padding:0.9rem 1.2rem;
+  border-bottom:1px solid var(--border-lt);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--paper-mid);
+}
+.map-card-title{font-size:0.8rem;font-weight:500;color:var(--text-mid);letter-spacing:0.02em}
+.map-card-badge{
+  font-size:0.7rem;background:var(--bagged-bg);
+  border:1px solid rgba(45,90,61,0.2);color:var(--forest);
+  padding:0.2rem 0.6rem;border-radius:2px;font-weight:500;
+}
+.stat-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid var(--border-lt);
+}
+.strip-item{
+  padding:0.9rem 1rem;border-right:1px solid var(--border-lt);text-align:center;
+}
+.strip-item:last-child{border-right:none}
+.strip-num{font-family:'Libre Baskerville',serif;font-size:1.6rem;font-weight:700;color:var(--forest);line-height:1}
+.strip-label{font-size:0.68rem;color:var(--light-muted);margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.05em}
+
+/* Features */
+.features-section{padding:6rem 5%;background:var(--paper)}
+.section-label{font-size:0.72rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--earth);margin-bottom:0.8rem}
+.section-h{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--text);letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
+.section-sub{font-size:1rem;color:var(--muted);line-height:1.75;font-weight:300;max-width:500px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:3rem}
+.feat-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;padding:1.8rem;
+  transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;
+}
+.feat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--contour)}
+.feat-icon{
+  width:40px;height:40px;border-radius:6px;
+  background:var(--bagged-bg);border:1px solid rgba(45,90,61,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;margin-bottom:1rem;
+}
+.feat-title{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.5rem}
+.feat-text{font-size:0.85rem;color:var(--muted);line-height:1.7;font-weight:300}
+
+/* Lists section */
+.lists-section{padding:5rem 5%;background:var(--paper-mid)}
+.lists-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.list-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;padding:1.3rem;
+  display:flex;flex-direction:column;gap:0.2rem;
+  transition:border-color 0.15s;
+}
+.list-card:hover{border-color:var(--moss)}
+.list-count{font-family:'Libre Baskerville',serif;font-size:1.8rem;font-weight:700;color:var(--forest)}
+.list-name{font-size:0.875rem;font-weight:500;color:var(--text)}
+.list-desc{font-size:0.75rem;color:var(--light-muted)}
+
+/* ═══════════════ APP ═══════════════ */
+#app{background:var(--paper)}
+.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{
+  background:var(--paper-mid);border-right:1px solid var(--border);
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sidebar-logo{
+  padding:1.2rem 1rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:0.6rem;
+}
+.sidebar-logo-type{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:var(--forest)}
+.sidebar-nav{padding:0.75rem;flex:1}
+.nav-section-label{
+  font-size:0.65rem;font-weight:500;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--light-muted);
+  padding:0.6rem 0.5rem 0.25rem;margin-top:0.25rem;
+}
+.nav-item{
+  display:flex;align-items:center;gap:0.65rem;
+  padding:0.55rem 0.65rem;border-radius:4px;
+  font-size:0.85rem;color:var(--muted);
+  cursor:pointer;transition:all 0.12s;
+  margin-bottom:1px;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--paper-dark);color:var(--text)}
+.nav-item.active{background:var(--bagged-bg);color:var(--forest);font-weight:500}
+.nav-item-icon{font-size:0.9rem;width:18px;text-align:center;flex-shrink:0}
+.nav-count{margin-left:auto;font-size:0.7rem;color:var(--light-muted)}
+.nav-item.active .nav-count{color:var(--moss)}
+.sidebar-footer{
+  padding:0.9rem;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:0.65rem;
+}
+.avatar-sm{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--forest),var(--moss));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.78rem;font-weight:700;color:white;
+}
+.footer-name{font-size:0.82rem;font-weight:500;color:var(--text)}
+.footer-sub{font-size:0.7rem;color:var(--forest)}
+
+/* Main */
+.main-content{overflow-y:auto;min-height:100vh;background:var(--paper)}
+.page-header{
+  padding:1.6rem 2rem 1.2rem;
+  border-bottom:1px solid var(--border);
+  background:var(--canvas);
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:1rem;
+}
+.page-title{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.page-sub{font-size:0.82rem;color:var(--muted);margin-top:0.2rem}
+.content-area{padding:1.75rem 2rem}
+.app-page{display:none}
+.app-page.active{display:block}
+
+/* ── Buttons ── */
+.btn-forest{
+  background:var(--forest);color:white;border:none;
+  padding:0.6rem 1.3rem;border-radius:4px;
+  font-size:0.85rem;font-weight:500;
+  transition:background 0.15s;
+  white-space:nowrap;
+}
+.btn-forest:hover{background:var(--forest-deep)}
+.btn-outline{
+  background:var(--canvas);border:1px solid var(--border);
+  color:var(--text-mid);padding:0.55rem 1.1rem;border-radius:4px;
+  font-size:0.82rem;transition:all 0.12s;
+}
+.btn-outline:hover{border-color:var(--moss);color:var(--forest)}
+
+/* ── Cards ── */
+.card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;
+}
+.card-header{
+  padding:1rem 1.3rem;border-bottom:1px solid var(--border-lt);
+  background:var(--paper-mid);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:0.82rem;font-weight:500;color:var(--text-mid);letter-spacing:0.01em}
+.card-link{font-size:0.75rem;color:var(--moss);background:none;border:none;cursor:pointer}
+.card-link:hover{color:var(--forest)}
+.card-body{padding:1.3rem}
+
+/* ── DASHBOARD ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;padding:1.2rem;
+  border-left:3px solid var(--border);
+}
+.stat-card.green{border-left-color:var(--forest)}
+.stat-card.earth{border-left-color:var(--earth)}
+.stat-card.water{border-left-color:var(--water)}
+.stat-label{font-size:0.68rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--light-muted);margin-bottom:0.4rem}
+.stat-value{font-family:'Libre Baskerville',serif;font-size:1.9rem;font-weight:700;color:var(--text);line-height:1}
+.stat-sub{font-size:0.75rem;color:var(--muted);margin-top:0.25rem}
+.stat-change{font-size:0.72rem;color:var(--forest);margin-top:0.3rem;font-weight:500}
+
+.dash-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
+
+/* Scotland Map */
+.scotland-map-wrap{padding:1.2rem;display:flex;justify-content:center;background:var(--paper-mid)}
+.scotland-map{width:100%;max-width:340px}
+.mountain-dot{cursor:pointer;transition:all 0.2s}
+.mountain-dot.bagged circle{fill:var(--forest)}
+.mountain-dot.bagged:hover circle{r:7;fill:var(--moss)}
+.mountain-dot.bagged text{fill:var(--forest);font-size:7px;font-family:sans-serif}
+.mountain-dot.unbagged circle{fill:var(--contour-lt);stroke:var(--contour);stroke-width:1}
+.mountain-dot.unbagged:hover circle{fill:var(--contour);stroke:var(--earth)}
+.map-legend{display:flex;gap:1.2rem;padding:0 1.2rem 1rem;font-size:0.72rem;color:var(--muted)}
+.legend-swatch{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:0.35rem;vertical-align:middle}
+.legend-swatch.b{background:var(--forest)}
+.legend-swatch.u{background:var(--contour-lt);border:1px solid var(--contour)}
+
+/* Progress */
+.progress-section{display:flex;flex-direction:column;align-items:center;padding:1.5rem 1.2rem}
+.progress-ring-wrap{position:relative;width:140px;height:140px;margin-bottom:1rem}
+.progress-ring-bg{fill:none;stroke:var(--border);stroke-width:10}
+.progress-ring-fill{fill:none;stroke:var(--forest);stroke-width:10;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1.5s ease}
+.progress-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.progress-num{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--text);line-height:1}
+.progress-den{font-size:0.72rem;color:var(--muted)}
+.list-pills{display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;margin-top:0.8rem}
+.list-pill-sm{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:3px;padding:0.25rem 0.6rem;
+  font-size:0.7rem;color:var(--muted);
+}
+.list-pill-sm strong{color:var(--forest)}
+
+/* Activity feed */
+.activity-list{display:flex;flex-direction:column}
+.activity-row{
+  display:flex;align-items:center;gap:0.9rem;
+  padding:0.8rem 0;border-bottom:1px solid var(--border-lt);
+}
+.activity-row:last-child{border-bottom:none;padding-bottom:0}
+.activity-dot{
+  width:30px;height:30px;border-radius:5px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:0.85rem;
+}
+.ad-strava{background:rgba(252,76,2,0.1);color:#FC4C02}
+.ad-manual{background:var(--bagged-bg);color:var(--forest)}
+.activity-main{flex:1}
+.activity-name{font-size:0.85rem;font-weight:500;color:var(--text)}
+.activity-meta{font-size:0.72rem;color:var(--light-muted);margin-top:0.1rem}
+.strava-pill{
+  display:inline-flex;align-items:center;gap:0.2rem;
+  background:rgba(252,76,2,0.08);color:#e04400;
+  font-size:0.62rem;font-weight:500;padding:0.1rem 0.4rem;border-radius:2px;
+  margin-left:0.3rem;vertical-align:middle;
+}
+.activity-ht{font-size:0.78rem;color:var(--earth);font-weight:500;white-space:nowrap}
+
+/* ── MUNROS LIST ── */
+.list-controls{display:flex;gap:0.75rem;margin-bottom:1.3rem;flex-wrap:wrap;align-items:center}
+.search-input{
+  flex:1;min-width:180px;
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:4px;padding:0.55rem 0.9rem;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  outline:none;transition:border-color 0.15s;
+}
+.search-input:focus{border-color:var(--moss)}
+.search-input::placeholder{color:var(--light-muted)}
+.filter-sel{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:4px;padding:0.55rem 0.9rem;
+  color:var(--text);font-size:0.82rem;outline:none;cursor:pointer;
+}
+.filter-toggle{
+  display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;
+}
+.ftog-btn{
+  background:var(--canvas);border:none;border-right:1px solid var(--border);
+  padding:0.5rem 0.9rem;font-size:0.8rem;color:var(--muted);
+  transition:all 0.12s;
+}
+.ftog-btn:last-child{border-right:none}
+.ftog-btn.active{background:var(--forest);color:white}
+.ftog-btn:hover:not(.active){background:var(--paper-dark);color:var(--text)}
+
+.munro-grid{background:var(--canvas);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.munro-table{width:100%;border-collapse:collapse}
+.munro-table th{
+  text-align:left;font-size:0.68rem;font-weight:500;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--light-muted);
+  padding:0.65rem 1rem;border-bottom:1px solid var(--border);
+  background:var(--paper-mid);
+}
+.munro-table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border-lt);font-size:0.85rem;vertical-align:middle}
+.munro-table tr:last-child td{border-bottom:none}
+.munro-table tbody tr{cursor:pointer;transition:background 0.1s}
+.munro-table tbody tr:hover td{background:var(--paper-mid)}
+.mname{font-weight:500;color:var(--text)}
+.mgaelic{font-size:0.72rem;color:var(--light-muted);font-style:italic;margin-top:0.1rem}
+.mheight{color:var(--earth);font-weight:500;font-family:'Libre Baskerville',serif}
+.mregion{color:var(--muted);font-size:0.78rem}
+.mdate{color:var(--forest);font-size:0.78rem;font-weight:500}
+.badge-yes{
+  display:inline-flex;align-items:center;gap:0.25rem;
+  background:var(--bagged-bg);color:var(--forest);border:1px solid rgba(45,90,61,0.15);
+  font-size:0.68rem;font-weight:500;padding:0.18rem 0.5rem;border-radius:2px;
+}
+.badge-no{
+  background:var(--paper-mid);color:var(--light-muted);border:1px solid var(--border);
+  font-size:0.68rem;padding:0.18rem 0.5rem;border-radius:2px;
+  display:inline-flex;align-items:center;
+}
+
+/* ── HILL DETAIL ── */
+.hill-layout{display:grid;grid-template-columns:1fr 320px;gap:1.25rem}
+.hill-banner{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:6px;padding:2rem;
+  position:relative;overflow:hidden;
+}
+.hill-banner::after{
+  content:'';position:absolute;right:-20px;bottom:-20px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,90,61,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+/* Topo pattern on banner */
+.hill-banner::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    repeating-radial-gradient(circle at 85% 30%,transparent 30px,transparent 44px,rgba(184,153,106,0.08) 45px,transparent 46px),
+    repeating-radial-gradient(circle at 85% 30%,transparent 60px,transparent 74px,rgba(184,153,106,0.05) 75px,transparent 76px);
+}
+.hill-eyebrow{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  border:1px solid var(--contour);color:var(--earth);background:rgba(139,105,20,0.06);
+  font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
+  padding:0.25rem 0.7rem;border-radius:2px;margin-bottom:1rem;
+}
+.hill-name-lg{font-family:'Libre Baskerville',serif;font-size:2.4rem;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:0.3rem}
+.hill-gaelic-lg{font-family:'Libre Baskerville',serif;font-style:italic;font-size:1rem;color:var(--muted);margin-bottom:0.9rem}
+.hill-tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.3rem}
+.hill-tag{
+  font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:2px;font-weight:500;
+}
+.tag-bagged{background:var(--bagged-bg);color:var(--forest);border:1px solid rgba(45,90,61,0.15)}
+.tag-strava{background:rgba(252,76,2,0.08);color:#e04400;border:1px solid rgba(252,76,2,0.2)}
+.hill-stats{display:flex;gap:2.5rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+.hstat-val{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;color:var(--text)}
+.hstat-key{font-size:0.68rem;color:var(--light-muted);letter-spacing:0.05em;text-transform:uppercase;margin-top:0.15rem}
+
+.ascent-item{padding:1rem;border-bottom:1px solid var(--border-lt)}
+.ascent-item:last-child{border-bottom:none}
+.ascent-date{font-size:0.72rem;font-weight:500;color:var(--forest);margin-bottom:0.3rem;display:flex;align-items:center;gap:0.4rem}
+.ascent-companions{font-size:0.82rem;color:var(--text)}
+.ascent-companions span{color:var(--muted)}
+.ascent-notes{font-size:0.78rem;color:var(--muted);margin-top:0.3rem;line-height:1.6;font-style:italic}
+.ascent-source-tag{font-size:0.65rem;color:var(--light-muted);margin-top:0.35rem;display:flex;align-items:center;gap:0.3rem}
+
+.log-full-btn{
+  width:100%;background:var(--forest);color:white;border:none;
+  padding:0.75rem;border-radius:4px;font-size:0.875rem;font-weight:500;
+  margin:1rem 0 0;transition:background 0.15s;
+}
+.log-full-btn:hover{background:var(--forest-deep)}
+
+.info-card{background:var(--canvas);border:1px solid var(--border);border-radius:6px;margin-top:1.2rem;overflow:hidden}
+.info-body{padding:1.1rem 1.3rem}
+.info-body p{font-size:0.85rem;color:var(--muted);line-height:1.75;font-weight:300}
+.pron-big{font-family:'Libre Baskerville',serif;font-size:1.2rem;color:var(--text);margin-bottom:0.3rem}
+.pron-ipa{font-size:0.82rem;color:var(--muted);margin-bottom:0.5rem}
+.pron-note{font-size:0.78rem;color:var(--light-muted);line-height:1.6}
+
+.cond-item{padding:0.9rem;border-bottom:1px solid var(--border-lt)}
+.cond-item:last-child{border-bottom:none}
+.cond-date{font-size:0.7rem;color:var(--light-muted);margin-bottom:0.25rem}
+.cond-text{font-size:0.82rem;color:var(--text);line-height:1.55}
+
+/* ── PROFILE ── */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.profile-top{grid-column:1/-1;background:var(--canvas);border:1px solid var(--border);border-radius:6px;padding:1.8rem;display:flex;align-items:center;gap:1.5rem}
+.avatar-lg{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--sage));display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:white;flex-shrink:0}
+.profile-name-lg{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:0.2rem}
+.profile-loc{font-size:0.85rem;color:var(--muted)}
+.strava-connected{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:rgba(252,76,2,0.08);border:1px solid rgba(252,76,2,0.2);
+  color:#e04400;font-size:0.75rem;padding:0.3rem 0.7rem;border-radius:3px;margin-top:0.7rem;
+}
+.achievements{display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:1rem}
+.achiev{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:3px;padding:0.5rem 0.8rem;
+  font-size:0.78rem;color:var(--text);
+  display:flex;align-items:center;gap:0.4rem;
+}
+.export-list{display:flex;flex-direction:column;gap:0.6rem;padding:1rem}
+.export-row{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:4px;padding:0.7rem 1rem;
+  display:flex;align-items:center;gap:0.75rem;
+  transition:border-color 0.12s,background 0.12s;
+}
+.export-row:hover{border-color:var(--moss);background:var(--canvas);cursor:pointer}
+.export-icon{color:var(--forest);font-size:0.95rem}
+.export-title{font-size:0.85rem;font-weight:500;color:var(--text)}
+.export-sub{font-size:0.72rem;color:var(--light-muted);margin-top:0.1rem}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(26,25,22,0.55);
+  backdrop-filter:blur(4px);z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:8px;padding:1.8rem;width:90%;max-width:460px;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(16px);transition:transform 0.2s;
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:'Libre Baskerville',serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:0.2rem}
+.modal-sub{font-size:0.82rem;color:var(--muted);margin-bottom:1.4rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border-lt)}
+.form-group{margin-bottom:1.1rem}
+.form-label{display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
+.form-input{
+  width:100%;background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:4px;padding:0.65rem 0.9rem;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;
+  outline:none;transition:border-color 0.15s;
+}
+.form-input:focus{border-color:var(--moss)}
+.form-input::placeholder{color:var(--light-muted)}
+textarea.form-input{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem}
+.modal-actions{display:flex;gap:0.65rem;margin-top:1.3rem}
+.btn-modal-primary{flex:1;background:var(--forest);color:white;border:none;padding:0.75rem;border-radius:4px;font-size:0.875rem;font-weight:500;transition:background 0.15s}
+.btn-modal-primary:hover{background:var(--forest-deep)}
+.btn-modal-cancel{background:var(--paper-mid);border:1px solid var(--border);color:var(--muted);padding:0.75rem 1.2rem;border-radius:4px;font-size:0.875rem}
+
+.back-btn{display:inline-flex;align-items:center;gap:0.4rem;background:none;border:none;color:var(--muted);font-size:0.82rem;padding:0;margin-bottom:1.2rem;transition:color 0.12s}
+.back-btn:hover{color:var(--forest)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--forest);display:inline-block;margin-right:0.4rem;animation:pulse 2.5s infinite}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .dash-grid,.hill-layout,.profile-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .feat-grid{grid-template-columns:1fr}
+  .lists-grid{grid-template-columns:1fr 1fr}
+  .hero-inner{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ LANDING ════════════ -->
+<div id="landing" class="view active">
+  <nav class="landing-nav">
+    <a href="#" class="logo" onclick="return false">
+      <!-- Topo contour logo -->
+      <svg class="logo-mark" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
+        <ellipse cx="16" cy="17" rx="10" ry="5" stroke="#4a7c59" stroke-width="1.3" opacity="0.6"/>
+        <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.8"/>
+        <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5" opacity="1"/>
+        <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
+        <!-- tick mark at top -->
+        <line x1="16" y1="4" x2="16" y2="8" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13.5" y1="6" x2="18.5" y2="6" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-type">Summit</span>
+    </a>
+    <button class="nav-cta" onclick="enterApp()">Get Started</button>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-kicker">⛰ Scotland's hills, mapped</div>
+        <h1 class="hero-h1">Every summit.<br><em>Finally logged.</em></h1>
+        <p class="hero-sub">Connect Strava and Summit automatically detects every Munro, Corbett and Graham you've ever climbed — from your full GPS history. No manual entry.</p>
+        <div class="hero-actions">
+          <button class="strava-btn" onclick="enterApp()">
+            <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+            Connect with Strava — it's free
+          </button>
+          <span class="hero-note">No credit card · Import full history · Works with existing Strava account</span>
+        </div>
+      </div>
+
+      <!-- Preview card -->
+      <div class="hero-visual">
+        <div class="map-card">
+          <div class="map-card-header">
+            <span class="map-card-title">Jamie's Progress</span>
+            <span class="map-card-badge">✓ 47 Munros</span>
+          </div>
+          <div class="stat-strip">
+            <div class="strip-item"><div class="strip-num" style="color:var(--forest)">47</div><div class="strip-label">Bagged</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--earth)">94km</div><div class="strip-label">Vertical</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--water)">61</div><div class="strip-label">Ascents</div></div>
+          </div>
+          <!-- Mini map preview -->
+          <div style="padding:1.2rem;background:var(--paper-mid)">
+            <svg width="100%" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
+              <path d="M148,8 L165,20 L182,17 L198,28 L194,42 L207,55 L215,70 L210,84 L218,97 L223,115 L214,132 L227,146 L222,164 L230,178 L226,196 L217,210 L203,222 L190,230 L178,238 L163,242 L148,238 L133,230 L120,222 L108,210 L100,196 L96,182 L92,168 L88,154 L84,140 L81,126 L79,112 L84,98 L77,84 L72,70 L80,56 L90,42 L88,28 L103,20 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.2"/>
+              <path d="M42,148 L51,140 L57,148 L53,156 L45,159 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+              <path d="M33,122 L47,113 L54,121 L50,133 L37,136 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+              <!-- Bagged -->
+              <circle cx="102" cy="162" r="5" fill="var(--forest)"/>
+              <circle cx="173" cy="140" r="5" fill="var(--forest)"/>
+              <circle cx="179" cy="147" r="5" fill="var(--forest)"/>
+              <circle cx="140" cy="212" r="5" fill="var(--forest)"/>
+              <circle cx="147" cy="204" r="5" fill="var(--forest)"/>
+              <circle cx="130" cy="182" r="5" fill="var(--forest)"/>
+              <circle cx="116" cy="185" r="5" fill="var(--forest)"/>
+              <circle cx="120" cy="195" r="5" fill="var(--forest)"/>
+              <circle cx="91" cy="124" r="5" fill="var(--forest)"/>
+              <circle cx="160" cy="196" r="5" fill="var(--forest)"/>
+              <!-- Unbagged -->
+              <circle cx="91" cy="108" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
+              <circle cx="86" cy="118" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
+              <circle cx="143" cy="58" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
+              <circle cx="108" cy="80" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
+              <circle cx="200" cy="132" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
+              <circle cx="208" cy="145" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
+            </svg>
+          </div>
+          <div style="padding:0.8rem 1.2rem;border-top:1px solid var(--border-lt);font-size:0.72rem;color:var(--light-muted);display:flex;align-items:center;gap:0.4rem">
+            <span class="sync-dot"></span>Strava synced 2 minutes ago · 3 new summits detected
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <div style="max-width:1100px;margin:0 auto">
+      <p class="section-label">Why Summit</p>
+      <h2 class="section-h">Everything asked for.<br>Nothing missing.</h2>
+      <p class="section-sub">Every feature Munro Bagger users requested — notes, companions, multiple rounds, area search — and automatic Strava detection nobody else has built.</p>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon">⚡</div>
+          <h3 class="feat-title">Strava Auto-Detection</h3>
+          <p class="feat-text">Connect once. Summit scans every GPS track you've ever recorded and automatically marks each summit you passed within 100m. Five years of hillwalking, populated in seconds.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📝</div>
+          <h3 class="feat-title">Rich Ascent Logs</h3>
+          <p class="feat-text">Notes, companions, conditions, photos — per ascent, not per hill. Log your second round separately. Every detail of every day in the hills, preserved properly.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔍</div>
+          <h3 class="feat-title">Search by Area</h3>
+          <p class="feat-text">Filter by region, height, remoteness, season, or stalking closure. Find every Munro in Torridon, or every hill you climbed in winter. Not just by name.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+          <h3 class="feat-title">Gaelic Pronunciations</h3>
+          <p class="feat-text">Every hill name with correct Gaelic pronunciation — IPA notation and a phonetic guide. Know how to say "A' Bhuidheanach Bheag" before someone asks at the compleation dinner.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">👥</div>
+          <h3 class="feat-title">Live Conditions</h3>
+          <p class="feat-text">Community conditions reports — snow cover, path state, river crossings, midges. Real intelligence from people on the hill today, not last summer.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">⬇</div>
+          <h3 class="feat-title">Export Anywhere</h3>
+          <p class="feat-text">Download your full log as CSV or in formats compatible with hill-bagging.co.uk and Hill Lists. Your data stays yours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lists-section">
+    <div style="max-width:1100px;margin:0 auto">
+      <p class="section-label">Included lists</p>
+      <h2 class="section-h">Munros to Marilyns.</h2>
+      <p class="section-sub">Free for Munros. Premium unlocks every list — one app for a lifetime of bagging.</p>
+      <div class="lists-grid">
+        <div class="list-card"><div class="list-count">282</div><div class="list-name">Munros</div><div class="list-desc">Scotland's 3000ft peaks · Free</div></div>
+        <div class="list-card"><div class="list-count">222</div><div class="list-name">Corbetts</div><div class="list-desc">2500–3000ft Scottish hills</div></div>
+        <div class="list-card"><div class="list-count">221</div><div class="list-name">Grahams</div><div class="list-desc">2000–2500ft Scottish hills</div></div>
+        <div class="list-card"><div class="list-count">89</div><div class="list-name">Donalds</div><div class="list-desc">Southern Upland 2000ft hills</div></div>
+        <div class="list-card"><div class="list-count">226</div><div class="list-name">Munro Tops</div><div class="list-desc">All subsidiary tops</div></div>
+        <div class="list-card"><div class="list-count">214</div><div class="list-name">Wainwrights</div><div class="list-desc">Lake District fells</div></div>
+        <div class="list-card"><div class="list-count">1,556</div><div class="list-name">Marilyns</div><div class="list-desc">UK prominent summits</div></div>
+        <div class="list-card"><div class="list-count">15</div><div class="list-name">Welsh 3000s</div><div class="list-desc">Wales's highest peaks</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════ APP ════════════ -->
+<div id="app" class="view">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+          <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
+          <ellipse cx="16" cy="17" rx="10" ry="5" stroke="#4a7c59" stroke-width="1.3" opacity="0.65"/>
+          <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
+          <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5"/>
+          <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
+          <line x1="16" y1="4" x2="16" y2="8" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13.5" y1="6" x2="18.5" y2="6" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="sidebar-logo-type">Summit</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">My Hills</div>
+        <button class="nav-item active" onclick="showPage('dashboard')"><span class="nav-item-icon">⊞</span>Dashboard</button>
+        <button class="nav-item" onclick="showPage('list')"><span class="nav-item-icon">≡</span>All Munros<span class="nav-count">47/282</span></button>
+        <div class="nav-section-label">Lists</div>
+        <button class="nav-item" onclick="showPage('list')"><span class="nav-item-icon">▲</span>Munros<span class="nav-count">47/282</span></button>
+        <button class="nav-item"><span class="nav-item-icon">△</span>Corbetts<span class="nav-count">12/222</span></button>
+        <button class="nav-item"><span class="nav-item-icon">◇</span>Grahams<span class="nav-count">3/221</span></button>
+        <div class="nav-section-label">Account</div>
+        <button class="nav-item" onclick="showPage('profile')"><span class="nav-item-icon">○</span>Profile</button>
+        <button class="nav-item"><span class="nav-item-icon">⚙</span>Settings</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="avatar-sm">JM</div>
+        <div><div class="footer-name">Jamie MacLeod</div><div class="footer-sub">47 Munros · 16.6%</div></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="app-page active">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Good morning, Jamie</div>
+            <div class="page-sub"><span class="sync-dot"></span>Strava synced 2 min ago · 3 new summits detected</div>
+          </div>
+          <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
+        </div>
+        <div class="content-area">
+          <div class="stats-row">
+            <div class="stat-card green">
+              <div class="stat-label">Munros Bagged</div>
+              <div class="stat-value">47</div>
+              <div class="stat-sub">of 282 · 16.6%</div>
+              <div class="stat-change">↑ +3 this month</div>
+            </div>
+            <div class="stat-card earth">
+              <div class="stat-label">Total Ascents</div>
+              <div class="stat-value">61</div>
+              <div class="stat-sub">inc. repeat summits</div>
+            </div>
+            <div class="stat-card water">
+              <div class="stat-label">Vertical Climbed</div>
+              <div class="stat-value">94km</div>
+              <div class="stat-sub">total elevation gain</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Highest Summit</div>
+              <div class="stat-value" style="font-size:1.3rem;line-height:1.2">Ben Nevis</div>
+              <div class="stat-sub">1,345m · Aug 2023</div>
+            </div>
+          </div>
+
+          <div class="dash-grid">
+            <!-- Map -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Scotland — My Munros</span>
+                <button class="card-link" onclick="showPage('list')">View full list →</button>
+              </div>
+              <div class="scotland-map-wrap">
+                <svg class="scotland-map" viewBox="0 0 300 440" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M148,8 L165,20 L182,17 L198,28 L194,42 L207,55 L215,70 L210,84 L218,97 L223,115 L214,132 L227,146 L222,164 L230,178 L226,196 L217,210 L203,222 L190,230 L178,238 L163,242 L148,238 L133,230 L120,222 L108,210 L100,196 L96,182 L92,168 L88,154 L84,140 L81,126 L79,112 L84,98 L77,84 L72,70 L80,56 L90,42 L88,28 L103,20 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.5"/>
+                  <path d="M42,148 L51,140 L57,148 L53,156 L45,159 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+                  <path d="M33,122 L47,113 L54,121 L50,133 L37,136 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+                  <path d="M24,94 L40,84 L47,93 L43,104 L28,107 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+                  <path d="M70,112 L82,103 L87,112 L80,121 L73,119 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+                  <!-- Bagged - forest green -->
+                  <g class="mountain-dot bagged" onclick="openHill('ben-nevis')"><circle cx="102" cy="162" r="5"/><title>Ben Nevis · 1,345m</title></g>
+                  <g class="mountain-dot bagged" onclick="openHill('ben-macdui')"><circle cx="173" cy="140" r="5"/><title>Ben Macdui · 1,309m</title></g>
+                  <g class="mountain-dot bagged"><circle cx="179" cy="147" r="5"/><title>Cairn Gorm · 1,245m</title></g>
+                  <g class="mountain-dot bagged" onclick="openHill('ben-lawers')"><circle cx="140" cy="212" r="5"/><title>Ben Lawers · 1,214m</title></g>
+                  <g class="mountain-dot bagged" onclick="openHill('schiehallion')"><circle cx="147" cy="204" r="5"/><title>Schiehallion · 1,083m</title></g>
+                  <g class="mountain-dot bagged" onclick="openHill('ben-lomond')"><circle cx="130" cy="248" r="5"/><title>Ben Lomond · 974m</title></g>
+                  <g class="mountain-dot bagged" onclick="openHill('buachaille')"><circle cx="116" cy="185" r="5"/><title>Buachaille Etive Mòr · 1,022m</title></g>
+                  <g class="mountain-dot bagged" onclick="openHill('beinn-eighe')"><circle cx="91" cy="124" r="5"/><title>Beinn Eighe · 1,010m</title></g>
+                  <g class="mountain-dot bagged"><circle cx="120" cy="175" r="5"/><title>Aonach Mòr · 1,221m</title></g>
+                  <g class="mountain-dot bagged"><circle cx="163" cy="132" r="5"/><title>Braeriach · 1,296m</title></g>
+                  <g class="mountain-dot bagged"><circle cx="155" cy="222" r="5"/><title>Stob Ghabhar · 1,090m</title></g>
+                  <g class="mountain-dot bagged"><circle cx="109" cy="198" r="5"/><title>Bidean nam Bian · 1,150m</title></g>
+                  <!-- Unbagged - light contour -->
+                  <g class="mountain-dot unbagged"><circle cx="88" cy="108" r="4"/><title>An Teallach · 1,062m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="83" cy="118" r="4"/><title>Liathach · 1,055m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="140" cy="58" r="4"/><title>Ben Hope · 927m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="106" cy="80" r="4"/><title>Ben More Assynt · 998m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="197" cy="128" r="4"/><title>Lochnagar · 1,155m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="125" cy="235" r="4"/><title>Ben Cruachan · 1,126m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="155" cy="127" r="4"/><title>Cairn Toul · 1,291m</title></g>
+                  <g class="mountain-dot unbagged"><circle cx="162" cy="120" r="4"/><title>Sgor an Lochain Uaine · 1,258m</title></g>
+                </svg>
+              </div>
+              <div class="map-legend">
+                <span><span class="legend-swatch b"></span>Bagged (47)</span>
+                <span><span class="legend-swatch u"></span>Remaining (235)</span>
+              </div>
+            </div>
+
+            <!-- Right -->
+            <div style="display:flex;flex-direction:column;gap:1.1rem">
+              <!-- Progress ring -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Munro Progress</span></div>
+                <div class="progress-section">
+                  <div class="progress-ring-wrap">
+                    <svg width="140" height="140" viewBox="0 0 140 140">
+                      <circle class="progress-ring-bg" cx="70" cy="70" r="56"/>
+                      <circle class="progress-ring-fill" id="progress-ring" cx="70" cy="70" r="56" stroke-dasharray="351.86" stroke-dashoffset="293.22"/>
+                    </svg>
+                    <div class="progress-center">
+                      <div class="progress-num">47</div>
+                      <div class="progress-den">of 282</div>
+                    </div>
+                  </div>
+                  <div class="list-pills">
+                    <div class="list-pill-sm">Corbetts <strong>12/222</strong></div>
+                    <div class="list-pill-sm">Grahams <strong>3/221</strong></div>
+                    <div class="list-pill-sm">Donalds <strong>0/89</strong></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Recent -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">Recent Ascents</span>
+                  <button class="card-link" onclick="showPage('list')">All →</button>
+                </div>
+                <div style="padding:0 1.1rem">
+                  <div class="activity-list">
+                    <div class="activity-row">
+                      <div class="activity-dot ad-strava">⚡</div>
+                      <div class="activity-main">
+                        <div class="activity-name">Cairn Gorm<span class="strava-pill">⚡ Strava</span></div>
+                        <div class="activity-meta">3 Apr 2026 · with Sarah K.</div>
+                      </div>
+                      <div class="activity-ht">1,245m</div>
+                    </div>
+                    <div class="activity-row">
+                      <div class="activity-dot ad-strava">⚡</div>
+                      <div class="activity-main">
+                        <div class="activity-name">Ben Macdui<span class="strava-pill">⚡ Strava</span></div>
+                        <div class="activity-meta">3 Apr 2026 · Cairngorm plateau</div>
+                      </div>
+                      <div class="activity-ht">1,309m</div>
+                    </div>
+                    <div class="activity-row">
+                      <div class="activity-dot ad-manual">✎</div>
+                      <div class="activity-main">
+                        <div class="activity-name">Beinn Eighe</div>
+                        <div class="activity-meta">22 Mar 2026 · solo</div>
+                      </div>
+                      <div class="activity-ht">1,010m</div>
+                    </div>
+                    <div class="activity-row">
+                      <div class="activity-dot ad-strava">⚡</div>
+                      <div class="activity-main">
+                        <div class="activity-name">Schiehallion<span class="strava-pill">⚡ Strava</span></div>
+                        <div class="activity-meta">8 Mar 2026 · David T., Fiona</div>
+                      </div>
+                      <div class="activity-ht">1,083m</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST -->
+      <div id="page-list" class="app-page">
+        <div class="page-header">
+          <div><div class="page-title">All Munros</div><div class="page-sub">282 summits · 47 bagged · 235 remaining</div></div>
+          <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
+        </div>
+        <div class="content-area">
+          <div class="list-controls">
+            <input class="search-input" id="munro-search" type="text" placeholder="Search by name or Gaelic…" oninput="filterMunros()"/>
+            <select class="filter-sel" id="region-filter" onchange="filterMunros()">
+              <option value="">All Regions</option>
+              <option>Cairngorms</option>
+              <option>Northwest Highlands</option>
+              <option>Central Highlands</option>
+              <option>Southern Highlands</option>
+              <option>Glencoe & Glen Etive</option>
+              <option>Torridon</option>
+            </select>
+            <div class="filter-toggle">
+              <button class="ftog-btn active" id="btn-all" onclick="setFilter('all')">All</button>
+              <button class="ftog-btn" id="btn-bagged" onclick="setFilter('bagged')">✓ Bagged</button>
+              <button class="ftog-btn" id="btn-remaining" onclick="setFilter('remaining')">○ Remaining</button>
+            </div>
+          </div>
+          <div class="munro-grid">
+            <table class="munro-table">
+              <thead><tr>
+                <th>Mountain</th><th>Height</th><th>Region</th><th>Date Bagged</th><th>Status</th>
+              </tr></thead>
+              <tbody id="munro-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- HILL DETAIL -->
+      <div id="page-hill" class="app-page">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="detail-title">Ben Nevis</div>
+            <div class="page-sub" id="detail-crumb">Munros · Northwest Highlands</div>
+          </div>
+          <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
+        </div>
+        <div class="content-area">
+          <button class="back-btn" onclick="showPage('list')">← All Munros</button>
+          <div class="hill-layout">
+            <div>
+              <div class="hill-banner">
+                <div class="hill-eyebrow">▲ Munro · No. 1 by height</div>
+                <h1 class="hill-name-lg" id="detail-name">Ben Nevis</h1>
+                <div class="hill-gaelic-lg" id="detail-gaelic">Beinn Nibheis — "Mountain of Heaven"</div>
+                <div class="hill-tags">
+                  <span class="hill-tag tag-bagged">✓ Bagged · 2 ascents</span>
+                  <span class="hill-tag tag-strava">⚡ Last via Strava</span>
+                </div>
+                <div class="hill-stats">
+                  <div><div class="hstat-val" id="detail-height">1,345m</div><div class="hstat-key">Height</div></div>
+                  <div><div class="hstat-val">4,409ft</div><div class="hstat-key">Imperial</div></div>
+                  <div><div class="hstat-val" id="detail-region">NW Highlands</div><div class="hstat-key">Region</div></div>
+                  <div><div class="hstat-val">NN 166 712</div><div class="hstat-key">Grid Ref</div></div>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="card-header"><span class="card-title">About this hill</span></div>
+                <div class="info-body"><p id="detail-desc">Ben Nevis is the highest mountain in the British Isles at 1,345 metres. Located near Fort William in the Lochaber area, it attracts around 125,000 ascents every year. The summit plateau — about 100 acres — contains the ruins of an observatory staffed from 1883 to 1904. The most popular route is the Mountain Track ascending from Glen Nevis.</p></div>
+              </div>
+
+              <div class="info-card">
+                <div class="card-header"><span class="card-title">Conditions — community reports</span></div>
+                <div class="cond-item"><div class="cond-date">2 days ago · via Summit</div><div class="cond-text">Good visibility on summit. Path icy above 900m — crampons strongly recommended on the descent.</div></div>
+                <div class="cond-item"><div class="cond-date">5 days ago · via Summit</div><div class="cond-text">Clear skies, fantastic views to the Cairngorms. Snow cornices still present on the north face — give a wide berth.</div></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <div class="card-header"><span class="card-title">My Ascents (2)</span></div>
+                <div class="ascent-item">
+                  <div class="ascent-date">↑ 14 August 2023 <span class="strava-pill">⚡ Strava</span></div>
+                  <div class="ascent-companions">With: <span>Sarah K., David T.</span></div>
+                  <div class="ascent-notes">"Perfect summer day, views across to Glencoe. Sarah got her first Munro! Tourist track up, abseil path down — knees were screaming by the end."</div>
+                  <div class="ascent-source-tag">⚡ Auto-detected from Strava activity</div>
+                </div>
+                <div class="ascent-item">
+                  <div class="ascent-date">↑ 3 November 2019</div>
+                  <div class="ascent-companions">With: <span>Solo</span></div>
+                  <div class="ascent-notes">"First ever Munro. Claggy on the summit — couldn't see a thing. Still counts."</div>
+                  <div class="ascent-source-tag">✎ Manually logged</div>
+                </div>
+                <div style="padding:0 1rem 1rem">
+                  <button class="log-full-btn" onclick="openLogModal()">+ Log Another Ascent</button>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="card-header"><span class="card-title">Gaelic Pronunciation</span></div>
+                <div class="info-body">
+                  <div class="pron-big">Beinn Nibheis</div>
+                  <div class="pron-ipa">/beɪn ˈniː.ɪʃ/ · Say: "Ben Nee-vish"</div>
+                  <div class="pron-note">From Old Gaelic — possibly Beinn Nèamhais ("Heaven's Mountain") or alternatively "Venomous Mountain", perhaps a reference to the frequently severe summit weather.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="page-profile" class="app-page">
+        <div class="page-header"><div><div class="page-title">Profile</div><div class="page-sub">Account, Strava & export</div></div></div>
+        <div class="content-area">
+          <div class="profile-grid">
+            <div class="profile-top">
+              <div class="avatar-lg">JM</div>
+              <div>
+                <div class="profile-name-lg">Jamie MacLeod</div>
+                <div class="profile-loc">Hillwalker · Dumfries, Scotland</div>
+                <div class="strava-connected">⚡ Strava connected · Synced 2 min ago · 47 summits detected</div>
+                <div class="achievements">
+                  <div class="achiev">🏔 47 Munros</div>
+                  <div class="achiev">△ 12 Corbetts</div>
+                  <div class="achiev">⛰ Ben Nevis ×2</div>
+                  <div class="achiev">❄ 3 Winter summits</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Export Data</span></div>
+              <div class="export-list">
+                <div class="export-row" onclick="exportCSV()">
+                  <span class="export-icon">⬇</span>
+                  <div><div class="export-title">Download CSV</div><div class="export-sub">All ascents with dates, notes, companions</div></div>
+                </div>
+                <div class="export-row">
+                  <span class="export-icon">⬇</span>
+                  <div><div class="export-title">Export for hill-bagging.co.uk</div><div class="export-sub">Compatible import format</div></div>
+                </div>
+                <div class="export-row">
+                  <span class="export-icon">⬇</span>
+                  <div><div class="export-title">Export for Hill Lists app</div><div class="export-sub">Graham Haley import format</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Strava Connection</span></div>
+              <div class="card-body">
+                <div style="background:rgba(252,76,2,0.06);border:1px solid rgba(252,76,2,0.15);border-radius:4px;padding:1rem;margin-bottom:1rem;display:flex;gap:0.9rem;align-items:center">
+                  <span style="font-size:1.3rem">⚡</span>
+                  <div><div style="font-size:0.875rem;font-weight:500">Connected as Jamie MacLeod</div><div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem">47 summits auto-detected from 312 activities</div></div>
+                </div>
+                <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Summit scans GPS tracks and detects summits within 100m of known hill coordinates. New activities are checked within minutes of upload to Strava.</p>
+                <button class="btn-outline" style="width:100%">Re-scan full history</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="log-modal">
+  <div class="modal">
+    <div class="modal-title">Log an Ascent</div>
+    <div class="modal-sub" id="modal-hill-sub">Recording a summit in your logbook</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mountain</label><input class="form-input" id="log-hill" type="text" placeholder="e.g. Ben Nevis"/></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="log-date" type="date"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Who were you with?</label><input class="form-input" id="log-companions" type="text" placeholder="Names, or leave blank for solo"/></div>
+    <div class="form-group"><label class="form-label">Conditions</label><input class="form-input" id="log-conditions" type="text" placeholder="e.g. Clear, snow above 900m, strong wind"/></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="log-notes" placeholder="Your memories — visibility, route, how it felt…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-modal-primary" onclick="saveAscent()">Save Ascent</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MUNROS=[
+  {id:'ben-nevis',name:'Ben Nevis',gaelic:'Beinn Nibheis',height:1345,region:'Northwest Highlands',bagged:true,date:'14 Aug 2023',source:'strava',desc:'The highest mountain in the British Isles at 1,345 metres, near Fort William. The summit plateau contains ruins of an observatory staffed continuously 1883–1904.'},
+  {id:'ben-macdui',name:'Ben Macdui',gaelic:'Beinn MacDuibh',height:1309,region:'Cairngorms',bagged:true,date:'3 Apr 2026',source:'strava',desc:'Second highest in the UK, deep in the Cairngorm massif. Legendary haunt of the Am Fear Liath Mòr — the Big Grey Man.'},
+  {id:'braeriach',name:'Braeriach',gaelic:'Bràigh Riabhach',height:1296,region:'Cairngorms',bagged:true,date:'3 Apr 2026',source:'strava',desc:'Third highest in the UK. The Grey Brae — part of the vast Cairngorm plateau above the Lairig Ghru.'},
+  {id:'cairn-toul',name:'Cairn Toul',gaelic:'Càrn an t-Sabhail',height:1291,region:'Cairngorms',bagged:false,date:null,desc:'The Cairn of the Barn. Fourth highest in the UK, overlooking the spectacular Garbh Choire Mòr.'},
+  {id:'sgor-lochain',name:'Sgor an Lochain Uaine',gaelic:'Sgòr an Lochan Uaine',height:1258,region:'Cairngorms',bagged:false,date:null,desc:'The Angel\'s Peak. One of the most dramatic summits in the Cairngorms.'},
+  {id:'cairn-gorm',name:'Cairn Gorm',gaelic:'Càrn Gorm',height:1245,region:'Cairngorms',bagged:true,date:'3 Apr 2026',source:'strava',desc:'The Blue Cairn. Gives its name to the entire massif. Accessible by funicular railway.'},
+  {id:'aonach-mor',name:'Aonach Mòr',gaelic:'Aonach Mòr',height:1221,region:'Northwest Highlands',bagged:true,date:'Sep 2022',source:'manual',desc:'The Great Ridge. Home to Nevis Range ski area. Connected to Aonach Beag by a high plateau.'},
+  {id:'ben-lawers',name:'Ben Lawers',gaelic:'Beinn Labhair',height:1214,region:'Southern Highlands',bagged:true,date:'Jun 2022',source:'strava',desc:'Highest in the Southern Highlands, internationally renowned for its arctic-alpine flora. Run by the National Trust for Scotland.'},
+  {id:'an-teallach',name:'An Teallach',gaelic:'An Teallach',height:1062,region:'Northwest Highlands',bagged:false,date:null,desc:'The Forge. One of Scotland\'s finest ridges — the traverse of Corrag Bhuidhe and Sgurr Fiona is among the most exhilarating walks in the country.'},
+  {id:'liathach',name:'Liathach',gaelic:'Liathach',height:1055,region:'Torridon',bagged:false,date:null,desc:'The Grey One. A fearsome Torridonian sandstone ridge rising 900m directly from the glen. The Am Fasarinen pinnacles require scrambling.'},
+  {id:'buachaille',name:'Buachaille Etive Mòr',gaelic:'Buachaille Eite Mòr',height:1022,region:'Glencoe & Glen Etive',bagged:true,date:'Oct 2021',source:'strava',desc:'The Great Herdsman of Etive. Perhaps the most photographed mountain in Scotland, guarding the entrance to Glencoe from the east.'},
+  {id:'beinn-eighe',name:'Beinn Eighe',gaelic:'Beinn Eighe',height:1010,region:'Torridon',bagged:true,date:'22 Mar 2026',source:'manual',desc:'Britain\'s first National Nature Reserve, designated 1951. The quartzite cap gives it an eternally snow-capped appearance.'},
+  {id:'schiehallion',name:'Schiehallion',gaelic:'Sìdhean Chailleann',height:1083,region:'Southern Highlands',bagged:true,date:'8 Mar 2026',source:'strava',desc:'The Fairy Hill of the Caledonians. Used in Maskelyne\'s 1774 Schiehallion Experiment to estimate the mass of the Earth.'},
+  {id:'ben-lomond',name:'Ben Lomond',gaelic:'Beinn Laomainn',height:974,region:'Southern Highlands',bagged:true,date:'May 2019',source:'manual',desc:'The most southerly and most climbed Munro after Ben Nevis. Overlooking Loch Lomond, clearly visible from central Scotland.'},
+  {id:'ben-hope',name:'Ben Hope',gaelic:'Beinn Hòb',height:927,region:'Northwest Highlands',bagged:false,date:null,desc:'The most northerly Munro. Isolated and majestic above the Kyle of Tongue. Often the first or last on a Munroist\'s list.'},
+  {id:'lochnagar',name:'Lochnagar',gaelic:'Loch na Gaire',height:1155,region:'Cairngorms',bagged:false,date:null,desc:'Immortalised by Byron in "Dark Lochnagar". Overlooks the Balmoral estate. The approach from Glen Muick is straightforward.'},
+  {id:'stob-ghabhar',name:'Stob Ghabhar',gaelic:'Stob Ghabhar',height:1090,region:'Southern Highlands',bagged:true,date:'Jul 2023',source:'strava',desc:'Part of the Black Mount, a remote and beautiful range above Loch Tulla.'},
+  {id:'bidean-nam-bian',name:'Bidean nam Bian',gaelic:'Bidean nam Bian',height:1150,region:'Glencoe & Glen Etive',bagged:true,date:'Apr 2022',source:'strava',desc:'The highest peak in Argyll. Hidden behind the Three Sisters of Glencoe, it rewards with superb views toward Rannoch Moor.'},
+  {id:'ben-more-assynt',name:'Ben More Assynt',gaelic:'Beinn Mhòr Asainte',height:998,region:'Northwest Highlands',bagged:false,date:null,desc:'Remote summit requiring a long approach across boggy moorland. The traverse over Conival is one of the finest in Assynt.'},
+  {id:'beinn-a-chleibh',name:'Beinn a\' Chleibh',gaelic:'Beinn a\' Chleibh',height:916,region:'Central Highlands',bagged:false,date:null,desc:'A quieter Munro on the southern flanks of Ben Lui. Often combined with its higher neighbour.'},
+];
+
+let currentFilter='all', currentHill=null;
+
+function enterApp(){
+  document.getElementById('landing').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  renderTable(MUNROS);
+  animateRing();
+}
+
+function showPage(p){
+  document.querySelectorAll('.app-page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const pg=document.getElementById('page-'+p);
+  if(pg) pg.classList.add('active');
+  const map={dashboard:'Dashboard',list:'All Munros',profile:'Profile'};
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(map[p]&&n.textContent.trim().startsWith(map[p].charAt(0))||n.textContent.includes(map[p])) n.classList.add('active');
+  });
+}
+
+function openHill(id){
+  const h=MUNROS.find(m=>m.id===id)||MUNROS[0];
+  currentHill=h;
+  document.getElementById('detail-title').textContent=h.name;
+  document.getElementById('detail-crumb').textContent='Munros · '+h.region;
+  document.getElementById('detail-name').textContent=h.name;
+  document.getElementById('detail-gaelic').textContent=h.gaelic+(h.desc?' ':'');
+  document.getElementById('detail-height').textContent=h.height.toLocaleString()+'m';
+  document.getElementById('detail-region').textContent=h.region.replace('Northwest','NW').replace('Southern','S.').replace('Central','Central');
+  document.getElementById('detail-desc').textContent=h.desc||'';
+  document.getElementById('log-hill').value=h.name;
+  showPage('hill');
+}
+
+function renderTable(data){
+  document.getElementById('munro-tbody').innerHTML=data.map(m=>`
+    <tr onclick="openHill('${m.id}')">
+      <td><div class="mname">${m.name}</div><div class="mgaelic">${m.gaelic}</div></td>
+      <td class="mheight">${m.height.toLocaleString()}m</td>
+      <td class="mregion">${m.region}</td>
+      <td class="mdate">${m.date||'—'}</td>
+      <td>${m.bagged
+        ?`<span class="badge-yes">✓ ${m.source==='strava'?'⚡ ':''}Bagged</span>`
+        :'<span class="badge-no">○ Remaining</span>'}</td>
+    </tr>`).join('');
+}
+
+function filterMunros(){
+  const q=document.getElementById('munro-search').value.toLowerCase();
+  const r=document.getElementById('region-filter').value;
+  renderTable(MUNROS.filter(m=>{
+    const mq=!q||m.name.toLowerCase().includes(q)||m.gaelic.toLowerCase().includes(q)||m.region.toLowerCase().includes(q);
+    const mr=!r||m.region===r;
+    const mf=currentFilter==='all'||(currentFilter==='bagged'&&m.bagged)||(currentFilter==='remaining'&&!m.bagged);
+    return mq&&mr&&mf;
+  }));
+}
+
+function setFilter(f){
+  currentFilter=f;
+  ['all','bagged','remaining'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===f));
+  filterMunros();
+}
+
+function animateRing(){
+  const ring=document.getElementById('progress-ring');
+  if(!ring) return;
+  const r=56,c=2*Math.PI*r;
+  ring.setAttribute('stroke-dasharray',c);
+  ring.setAttribute('stroke-dashoffset',c);
+  setTimeout(()=>ring.setAttribute('stroke-dashoffset',c*(1-47/282)),300);
+}
+
+function openLogModal(){
+  document.getElementById('log-modal').classList.add('open');
+  document.getElementById('log-date').value=new Date().toISOString().split('T')[0];
+  if(currentHill){
+    document.getElementById('log-hill').value=currentHill.name;
+    document.getElementById('modal-hill-sub').textContent=currentHill.name+' · '+currentHill.height+'m';
+  }
+}
+function closeModal(){document.getElementById('log-modal').classList.remove('open')}
+document.getElementById('log-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+
+function saveAscent(){
+  const h=document.getElementById('log-hill').value;
+  if(!h){document.getElementById('log-hill').style.borderColor='var(--earth)';return}
+  closeModal();
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:1.5rem;right:1.5rem;background:var(--forest);color:white;padding:0.7rem 1.2rem;border-radius:4px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:var(--shadow-md);animation:fadeUp 0.3s forwards`;
+  t.textContent='✓ Ascent of '+h+' saved';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2800);
+}
+
+function exportCSV(){
+  const rows=MUNROS.filter(m=>m.bagged).map(m=>`"${m.name}","${m.gaelic}",${m.height},"${m.region}","${m.date||''}","${m.source||'manual'}"`);
+  const blob=new Blob(['Name,Gaelic,Height (m),Region,Date,Source\n'+rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='summit-munros.csv';a.click();
+}
+
+renderTable(MUNROS);
+</script>
+</body>
+</html>
