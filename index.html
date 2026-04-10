@@ -1638,43 +1638,58 @@ async function init() {
 
   if (!session) return; // stay on landing page
 
-  // 3. If session is missing user_id (old session), force re-auth to get it
-  if (!session.user_id) {
-    updateSyncStatus('Session expired — reconnecting…');
-    setTimeout(() => connectStrava(), 1500);
-    applySession(session);
-    enterApp();
-    return;
+  // 3. If session is missing user_id, look it up silently by athlete_id
+  if (!session.user_id || session.user_id === 'undefined' || session.user_id === 'null') {
+    try {
+      updateSyncStatus('Restoring your account…');
+      const res = await fetch(`${WORKER}/api/user?athlete_id=${session.athlete_id}`);
+      if (res.ok) {
+        const data = await res.json();
+        session.user_id = data.user_id;
+        saveSession(session);
+      } else {
+        // User not in DB at all — need a fresh Strava auth
+        showReconnectBanner();
+        applySession(session);
+        enterApp();
+        return;
+      }
+    } catch (e) {
+      showReconnectBanner();
+      applySession(session);
+      enterApp();
+      return;
+    }
   }
 
   applySession(session);
   enterApp();
 
-  // 4. Load saved ascents from Supabase FIRST, then update UI
+  // 4. Load saved ascents then update UI
   updateSyncStatus('Loading your summits…');
   const loaded = await loadAscents(session);
 
-  // Always update UI after load attempt
   updateDashboard();
   filterHills();
   updateRecentAscents();
   renderMap();
 
   if (loaded > 0) {
-    updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync()" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
+    updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
   } else if (fresh) {
-    // Brand new login — run full sync
     setTimeout(() => syncStrava(session), 400);
   } else {
-    updateSyncStatus(`No summits found · <a href="#" onclick="resync()" style="color:var(--forest);text-decoration:underline">Run Strava sync</a>`);
+    updateSyncStatus(`No summits found · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Run Strava sync</a>`);
   }
 }
 
-// Re-sync button
+function showReconnectBanner() {
+  updateSyncStatus(`Session needs refresh · <a href="#" onclick="connectStrava();return false" style="color:var(--forest);font-weight:500;text-decoration:underline">Reconnect Strava</a>`);
+}
+
 function resync() {
   const session = getSession();
   if (session) syncStrava(session);
-  return false;
 }
 
 init();
