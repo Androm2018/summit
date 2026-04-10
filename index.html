@@ -1167,12 +1167,39 @@ function setFilter(f){
 }
 
 function animateRing(){
-  const ring=document.getElementById('progress-ring');
-  if(!ring) return;
-  const r=56,c=2*Math.PI*r;
-  ring.setAttribute('stroke-dasharray',c);
-  ring.setAttribute('stroke-dashoffset',c);
-  setTimeout(()=>ring.setAttribute('stroke-dashoffset',c*(1-47/282)),300);
+  const bagged = MUNROS.filter(m => m.bagged);
+  const total = MUNROS.length;
+  const pct = bagged.length / total;
+
+  // Update progress ring
+  const ring = document.getElementById('progress-ring');
+  if(ring){
+    const r=56, c=2*Math.PI*r;
+    ring.setAttribute('stroke-dasharray', c);
+    ring.setAttribute('stroke-dashoffset', c);
+    setTimeout(() => ring.setAttribute('stroke-dashoffset', c*(1-pct)), 300);
+  }
+
+  // Update stat cards
+  const statEls = document.querySelectorAll('.stat-value');
+  if(statEls[0]) statEls[0].textContent = bagged.length;
+
+  // Update progress center number
+  const progNum = document.querySelector('.progress-num');
+  if(progNum) progNum.textContent = bagged.length;
+
+  // Update sidebar count
+  const navCount = document.querySelector('.nav-count');
+  if(navCount) navCount.textContent = `${bagged.length}/${total}`;
+
+  // Update footer
+  const footerSub = document.querySelector('.footer-sub');
+  if(footerSub) footerSub.textContent = `${bagged.length} Munros · ${Math.round(pct*100*10)/10}%`;
+
+  // Update page subtitle
+  const listSub = document.querySelector('#page-list .page-sub');
+  if(listSub) listSub.textContent = `${total} summits · ${bagged.length} bagged · ${total-bagged.length} remaining`;
+}
 }
 
 function openLogModal(){
