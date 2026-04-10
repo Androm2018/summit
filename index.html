@@ -786,16 +786,20 @@ textarea.form-input{resize:vertical;min-height:80px}
             <!-- Map -->
             <div class="card">
               <div class="card-header">
-                <span class="card-title">Scotland — My Munros</span>
+                <span class="card-title">Great Britain — My Hills</span>
                 <button class="card-link" onclick="showPage('list')">View full list →</button>
               </div>
               <div class="scotland-map-wrap">
-                <svg id="scotland-map-svg" class="scotland-map" viewBox="0 0 300 440" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M148,8 L165,20 L182,17 L198,28 L194,42 L207,55 L215,70 L210,84 L218,97 L223,115 L214,132 L227,146 L222,164 L230,178 L226,196 L217,210 L203,222 L190,230 L178,238 L163,242 L148,238 L133,230 L120,222 L108,210 L100,196 L96,182 L92,168 L88,154 L84,140 L81,126 L79,112 L84,98 L77,84 L72,70 L80,56 L90,42 L88,28 L103,20 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.5"/>
-                  <path d="M42,148 L51,140 L57,148 L53,156 L45,159 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
-                  <path d="M33,122 L47,113 L54,121 L50,133 L37,136 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
-                  <path d="M24,94 L40,84 L47,93 L43,104 L28,107 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
-                  <path d="M70,112 L82,103 L87,112 L80,121 L73,119 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
+                <svg id="scotland-map-svg" class="scotland-map" viewBox="0 0 300 480" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Great Britain mainland — projected from real lat/lng coordinates -->
+                  <path d="M65.2,107.5 L80.9,111.7 L125.9,106.8 L128.0,112.7 L102.9,145.5 L156.9,168.5 L153.1,175.9 L144.7,186.2 L134.3,207.1 L156.3,216.2 L159.4,224.8 L178.3,256.4 L184.5,274.5 L203.4,285.2 L225.3,314.8 L277.2,359.9 L266.2,387.9 L266.2,405.5 L259.9,416.6 L250.5,424.0 L231.6,431.8 L219.1,437.1 L187.7,433.0 L146.9,441.2 L109.2,448.6 L42.8,459.1 L59.0,453.6 L93.5,449.5 L77.8,413.3 L71.5,412.1 L62.1,393.2 L59.0,379.6 L74.7,362.0 L74.7,346.8 L77.8,325.0 L71.5,322.1 L126.8,320.9 L121.7,295.4 L112.3,281.9 L111.4,270.4 L65.2,266.3 L62.1,256.4 L59.0,244.1 L51.4,229.3 L46.4,219.5 L46.4,203.0 L40.1,198.9 L43.3,184.6 L40.1,174.3 L37.0,162.0 L38.5,151.3 L41.7,143.1 L49.5,133.2 L59.0,122.9 L65.2,112.7 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.2"/>
+                  <!-- Skye -->
+                  <path d="M27.6,153.7 L27.6,162.4 L37.0,166.1 L43.3,170.2 L46.4,166.1 L43.3,157.9 L33.8,153.7 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="0.8"/>
+                  <!-- Lewis/Harris -->
+                  <path d="M11.9,125.0 L15.0,137.3 L27.6,141.4 L33.8,137.3 L30.7,125.0 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="0.8"/>
+                  <!-- Mull -->
+                  <path d="M40.1,194.8 L34.8,200.0 L37.0,206.0 L46.4,203.0 L46.4,196.0 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="0.7"/>
+                  <!-- Dots injected by renderMap() -->
                   <g id="map-dots"></g>
                 </svg>
               </div>
@@ -1172,15 +1176,15 @@ function updateListView() {
 }
 
 // ── MAP ──
-// Project lat/lng to match the Scotland outline SVG path (viewBox 0 0 300 440)
-// Calibrated so Ben Nevis (56.797,-5.004) → ~(102,162), Cape Wrath (58.6,-5.0) → ~(100,80)
+// Must match the SVG path projection exactly:
+// LAT_MIN=49.8, LAT_MAX=61.0, LNG_MIN=-6.6, LNG_MAX=2.0
+// SVG 300x480, padding 15x10
 function projectToSVG(lat, lng) {
-  // Scotland mainland bounds (approx)
-  const latMin = 54.6, latMax = 60.9;
-  const lngMin = -7.6, lngMax = -0.9;
-  // Map to SVG: x from 70→240 (west→east), y from 10→390 (north→south)
-  const x = ((lng - lngMin) / (lngMax - lngMin)) * 170 + 70;
-  const y = ((latMax - lat) / (latMax - latMin)) * 380 + 10;
+  const LAT_MIN = 49.8, LAT_MAX = 61.0;
+  const LNG_MIN = -6.6, LNG_MAX = 2.0;
+  const W = 300, H = 480, PX = 15, PY = 10;
+  const x = ((lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * (W - PX*2) + PX;
+  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * (H - PY*2) + PY;
   return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
 }
 
@@ -1188,26 +1192,52 @@ function renderMap() {
   const dots = document.getElementById('map-dots');
   if (!dots || !HILLS.length) return;
 
-  const munros = getListHills('M');
-  const bagged = munros.filter(h => h.bagged);
-  const unbagged = munros.filter(h => !h.bagged);
+  // Show all lists on the map — colour coded
+  const listColors = {
+    M: 'var(--forest)',      // Munros — dark green
+    C: '#5b8fa8',            // Corbetts — water blue
+    G: '#8b6914',            // Grahams — earth brown
+    W: '#a05c34',            // Wainwrights — rust
+    Ma: '#7a6090',           // Marilyns — muted purple
+    D: '#4a7c59',            // Donalds — moss
+  };
+
+  // Priority order for rendering (bagged on top, rarer lists on top of common)
+  const listOrder = ['Ma', 'W', 'D', 'G', 'C', 'M'];
+  const allRelevant = HILLS.filter(h => h.lists.some(l => listColors[l]));
+
+  const unbagged = allRelevant.filter(h => !h.bagged);
+  const bagged = allRelevant.filter(h => h.bagged);
+
+  // Get primary list for colour
+  function primaryList(h) {
+    for (const l of listOrder) {
+      if (h.lists.includes(l)) return l;
+    }
+    return h.lists[0];
+  }
 
   dots.innerHTML = [
+    // Unbagged — small dim dots
     ...unbagged.map(h => {
       const { x, y } = projectToSVG(h.lat, h.lng);
-      return `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.7" style="cursor:pointer" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m</title></circle>`;
+      return `<circle cx="${x}" cy="${y}" r="2" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.5" style="cursor:pointer" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m</title></circle>`;
     }),
+    // Bagged — larger coloured dots
     ...bagged.map(h => {
       const { x, y } = projectToSVG(h.lat, h.lng);
-      return `<circle cx="${x}" cy="${y}" r="4" fill="var(--forest)" style="cursor:pointer;filter:drop-shadow(0 0 3px rgba(45,90,61,0.5))" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m · ${h.date}</title></circle>`;
+      const col = listColors[primaryList(h)] || 'var(--forest)';
+      return `<circle cx="${x}" cy="${y}" r="4" fill="${col}" style="cursor:pointer;filter:drop-shadow(0 0 2px rgba(0,0,0,0.2))" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m · ${h.date || ''}</title></circle>`;
     }),
   ].join('');
 
   const legend = document.getElementById('map-legend');
   if (legend) {
+    const baggedCount = bagged.length;
+    const total = allRelevant.length;
     legend.innerHTML = `
-      <span><span class="legend-swatch b"></span>Bagged (${bagged.length})</span>
-      <span><span class="legend-swatch u"></span>Remaining (${unbagged.length})</span>`;
+      <span><span class="legend-swatch b"></span>Bagged (${baggedCount})</span>
+      <span><span class="legend-swatch u"></span>Remaining (${total - baggedCount})</span>`;
   }
 }
 
