@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Summit — Track Every British Hill</title>
+<title>Summit — Track Every Scottish Hill</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -308,15 +310,15 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 
 .dash-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
 
-/* Scotland Map */
-.scotland-map-wrap{padding:1.2rem;display:flex;justify-content:center;background:var(--paper-mid)}
-.scotland-map{width:100%;max-width:340px}
-.mountain-dot{cursor:pointer;transition:all 0.2s}
-.mountain-dot.bagged circle{fill:var(--forest)}
-.mountain-dot.bagged:hover circle{r:7;fill:var(--moss)}
-.mountain-dot.bagged text{fill:var(--forest);font-size:7px;font-family:sans-serif}
-.mountain-dot.unbagged circle{fill:var(--contour-lt);stroke:var(--contour);stroke-width:1}
-.mountain-dot.unbagged:hover circle{fill:var(--contour);stroke:var(--earth)}
+/* Leaflet popup theme overrides */
+.leaflet-popup-content-wrapper{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;box-shadow:var(--shadow-md);
+  font-family:'DM Sans',sans-serif;
+}
+.leaflet-popup-content{font-size:0.82rem;color:var(--text);line-height:1.5;margin:0.7rem 0.9rem}
+.leaflet-popup-tip-container{display:none}
+.leaflet-container{font-family:'DM Sans',sans-serif;border-radius:0 0 6px 6px}
 .map-legend{display:flex;gap:1.2rem;padding:0 1.2rem 1rem;font-size:0.72rem;color:var(--muted)}
 .legend-swatch{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:0.35rem;vertical-align:middle}
 .legend-swatch.b{background:var(--forest)}
@@ -784,28 +786,15 @@ textarea.form-input{resize:vertical;min-height:80px}
 
           <div class="dash-grid">
             <!-- Map -->
-            <div class="card">
+            <div class="card" style="overflow:hidden">
               <div class="card-header">
-                <span class="card-title">Great Britain — My Hills</span>
+                <span class="card-title">My Hills — Interactive Map</span>
                 <button class="card-link" onclick="showPage('list')">View full list →</button>
               </div>
-              <div class="scotland-map-wrap">
-                <svg id="scotland-map-svg" class="scotland-map" viewBox="0 0 300 480" xmlns="http://www.w3.org/2000/svg">
-                  <!-- Great Britain mainland — projected from real lat/lng coordinates -->
-                  <path d="M65.2,107.5 L80.9,111.7 L125.9,106.8 L128.0,112.7 L102.9,145.5 L156.9,168.5 L153.1,175.9 L144.7,186.2 L134.3,207.1 L156.3,216.2 L159.4,224.8 L178.3,256.4 L184.5,274.5 L203.4,285.2 L225.3,314.8 L277.2,359.9 L266.2,387.9 L266.2,405.5 L259.9,416.6 L250.5,424.0 L231.6,431.8 L219.1,437.1 L187.7,433.0 L146.9,441.2 L109.2,448.6 L42.8,459.1 L59.0,453.6 L93.5,449.5 L77.8,413.3 L71.5,412.1 L62.1,393.2 L59.0,379.6 L74.7,362.0 L74.7,346.8 L77.8,325.0 L71.5,322.1 L126.8,320.9 L121.7,295.4 L112.3,281.9 L111.4,270.4 L65.2,266.3 L62.1,256.4 L59.0,244.1 L51.4,229.3 L46.4,219.5 L46.4,203.0 L40.1,198.9 L43.3,184.6 L40.1,174.3 L37.0,162.0 L38.5,151.3 L41.7,143.1 L49.5,133.2 L59.0,122.9 L65.2,112.7 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.2"/>
-                  <!-- Skye -->
-                  <path d="M27.6,153.7 L27.6,162.4 L37.0,166.1 L43.3,170.2 L46.4,166.1 L43.3,157.9 L33.8,153.7 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="0.8"/>
-                  <!-- Lewis/Harris -->
-                  <path d="M11.9,125.0 L15.0,137.3 L27.6,141.4 L33.8,137.3 L30.7,125.0 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="0.8"/>
-                  <!-- Mull -->
-                  <path d="M40.1,194.8 L34.8,200.0 L37.0,206.0 L46.4,203.0 L46.4,196.0 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="0.7"/>
-                  <!-- Dots injected by renderMap() -->
-                  <g id="map-dots"></g>
-                </svg>
-              </div>
+              <div id="summit-map" style="height:420px;width:100%;"></div>
               <div class="map-legend" id="map-legend">
                 <span><span class="legend-swatch b"></span>Bagged (0)</span>
-                <span><span class="legend-swatch u"></span>Remaining (282)</span>
+                <span><span class="legend-swatch u"></span>Remaining</span>
               </div>
             </div>
 
@@ -1175,70 +1164,121 @@ function updateListView() {
   filterHills();
 }
 
-// ── MAP ──
-// Must match the SVG path projection exactly:
-// LAT_MIN=49.8, LAT_MAX=61.0, LNG_MIN=-6.6, LNG_MAX=2.0
-// SVG 300x480, padding 15x10
-function projectToSVG(lat, lng) {
-  const LAT_MIN = 49.8, LAT_MAX = 61.0;
-  const LNG_MIN = -6.6, LNG_MAX = 2.0;
-  const W = 300, H = 480, PX = 15, PY = 10;
-  const x = ((lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * (W - PX*2) + PX;
-  const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * (H - PY*2) + PY;
-  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
-}
+// ── LEAFLET MAP ──
+let leafletMap = null;
+let mapMarkerLayer = null;
 
 function renderMap() {
-  const dots = document.getElementById('map-dots');
-  if (!dots || !HILLS.length) return;
+  if (!HILLS.length) return;
 
-  // Show all lists on the map — colour coded
-  const listColors = {
-    M: 'var(--forest)',      // Munros — dark green
-    C: '#5b8fa8',            // Corbetts — water blue
-    G: '#8b6914',            // Grahams — earth brown
-    W: '#a05c34',            // Wainwrights — rust
-    Ma: '#7a6090',           // Marilyns — muted purple
-    D: '#4a7c59',            // Donalds — moss
+  const mapEl = document.getElementById('summit-map');
+  if (!mapEl) return;
+
+  // Initialise map only once
+  if (!leafletMap) {
+    leafletMap = L.map('summit-map', {
+      center: [57.0, -4.5],   // Central Scotland
+      zoom: 6,
+      zoomControl: true,
+    });
+
+    // OpenTopoMap — free OS-style tiles with contour lines
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17,
+      attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> · © <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    }).addTo(leafletMap);
+
+    mapMarkerLayer = L.layerGroup().addTo(leafletMap);
+  }
+
+  // Clear existing markers
+  mapMarkerLayer.clearLayers();
+
+  // Custom circle marker styles
+  const baggedStyle = {
+    radius: 7,
+    fillColor: '#2d5a3d',
+    color: '#1e3d29',
+    weight: 1.5,
+    opacity: 1,
+    fillOpacity: 0.9,
+  };
+  const unbaggedStyle = {
+    radius: 4,
+    fillColor: '#d4bfa0',
+    color: '#b8996a',
+    weight: 1,
+    opacity: 0.7,
+    fillOpacity: 0.5,
   };
 
-  // Priority order for rendering (bagged on top, rarer lists on top of common)
-  const listOrder = ['Ma', 'W', 'D', 'G', 'C', 'M'];
-  const allRelevant = HILLS.filter(h => h.lists.some(l => listColors[l]));
+  // List colour overrides for bagged markers
+  const listColors = {
+    M:  '#2d5a3d',   // Munros — forest green
+    C:  '#3a6e8a',   // Corbetts — blue
+    G:  '#7a5510',   // Grahams — brown
+    W:  '#8b3a1a',   // Wainwrights — rust
+    Ma: '#5a4070',   // Marilyns — purple
+    D:  '#3d6644',   // Donalds — moss
+  };
 
-  const unbagged = allRelevant.filter(h => !h.bagged);
-  const bagged = allRelevant.filter(h => h.bagged);
-
-  // Get primary list for colour
   function primaryList(h) {
-    for (const l of listOrder) {
-      if (h.lists.includes(l)) return l;
-    }
+    const order = ['M','C','G','D','W','Ma'];
+    for (const l of order) if (h.lists.includes(l)) return l;
     return h.lists[0];
   }
 
-  dots.innerHTML = [
-    // Unbagged — small dim dots
-    ...unbagged.map(h => {
-      const { x, y } = projectToSVG(h.lat, h.lng);
-      return `<circle cx="${x}" cy="${y}" r="2" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.5" style="cursor:pointer" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m</title></circle>`;
-    }),
-    // Bagged — larger coloured dots
-    ...bagged.map(h => {
-      const { x, y } = projectToSVG(h.lat, h.lng);
-      const col = listColors[primaryList(h)] || 'var(--forest)';
-      return `<circle cx="${x}" cy="${y}" r="4" fill="${col}" style="cursor:pointer;filter:drop-shadow(0 0 2px rgba(0,0,0,0.2))" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m · ${h.date || ''}</title></circle>`;
-    }),
-  ].join('');
+  // Show Munros + any other bagged hills
+  // For unbagged, show Munros only to keep the map readable at zoom 6
+  const munros = getListHills('M');
+  const baggedAll = HILLS.filter(h => h.bagged);
+  const unbaggedMunros = munros.filter(h => !h.bagged);
 
+  // Render unbagged Munros first (bottom layer)
+  unbaggedMunros.forEach(h => {
+    L.circleMarker([h.lat, h.lng], unbaggedStyle)
+      .bindPopup(`<strong>${h.name}</strong><br>${h.height}m · ${h.region}<br><em>Not yet bagged</em>`)
+      .on('click', () => openHill(h.id))
+      .addTo(mapMarkerLayer);
+  });
+
+  // Render bagged hills on top (coloured by list)
+  baggedAll.forEach(h => {
+    const col = listColors[primaryList(h)] || '#2d5a3d';
+    const style = { ...baggedStyle, fillColor: col, color: col };
+    const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    L.circleMarker([h.lat, h.lng], style)
+      .bindPopup(`
+        <strong>${h.name}</strong><br>
+        ${h.height}m · ${h.region}<br>
+        <span style="color:#2d5a3d;font-weight:500">✓ Bagged ${h.date || ''}</span><br>
+        <small>${lists}</small>
+      `)
+      .on('click', () => openHill(h.id))
+      .addTo(mapMarkerLayer);
+  });
+
+  // Update legend
   const legend = document.getElementById('map-legend');
   if (legend) {
-    const baggedCount = bagged.length;
-    const total = allRelevant.length;
     legend.innerHTML = `
-      <span><span class="legend-swatch b"></span>Bagged (${baggedCount})</span>
-      <span><span class="legend-swatch u"></span>Remaining (${total - baggedCount})</span>`;
+      <span><span class="legend-swatch b"></span>Bagged (${baggedAll.length})</span>
+      <span><span class="legend-swatch u"></span>Munros remaining (${unbaggedMunros.length})</span>`;
   }
+
+  // If user has bagged hills, fit map to show them all
+  if (baggedAll.length > 0) {
+    const lats = baggedAll.map(h => h.lat);
+    const lngs = baggedAll.map(h => h.lng);
+    const bounds = L.latLngBounds(
+      [Math.min(...lats) - 0.3, Math.min(...lngs) - 0.3],
+      [Math.max(...lats) + 0.3, Math.max(...lngs) + 0.3]
+    );
+    leafletMap.fitBounds(bounds, { padding: [20, 20], maxZoom: 9 });
+  }
+
+  // Force Leaflet to recalculate size after CSS layout settles
+  setTimeout(() => leafletMap.invalidateSize(), 200);
 }
 
 function renderTable(data) {
