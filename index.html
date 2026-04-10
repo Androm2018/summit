@@ -729,11 +729,13 @@ textarea.form-input{resize:vertical;min-height:80px}
       <nav class="sidebar-nav">
         <div class="nav-section-label">My Hills</div>
         <button class="nav-item active" onclick="showPage('dashboard')"><span class="nav-item-icon">⊞</span>Dashboard</button>
-        <button class="nav-item" onclick="showPage('list')"><span class="nav-item-icon">≡</span>All Munros<span class="nav-count">47/282</span></button>
+        <button class="nav-item" data-list="M" onclick="switchList('M')"><span class="nav-item-icon">≡</span>All Hills<span class="nav-count">0/282</span></button>
         <div class="nav-section-label">Lists</div>
-        <button class="nav-item" onclick="showPage('list')"><span class="nav-item-icon">▲</span>Munros<span class="nav-count">47/282</span></button>
-        <button class="nav-item"><span class="nav-item-icon">△</span>Corbetts<span class="nav-count">12/222</span></button>
-        <button class="nav-item"><span class="nav-item-icon">◇</span>Grahams<span class="nav-count">3/221</span></button>
+        <button class="nav-item" data-list="M" onclick="switchList('M')"><span class="nav-item-icon">▲</span>Munros<span class="nav-count">0/282</span></button>
+        <button class="nav-item" data-list="C" onclick="switchList('C')"><span class="nav-item-icon">△</span>Corbetts<span class="nav-count">0/222</span></button>
+        <button class="nav-item" data-list="G" onclick="switchList('G')"><span class="nav-item-icon">◇</span>Grahams<span class="nav-count">0/231</span></button>
+        <button class="nav-item" data-list="W" onclick="switchList('W')"><span class="nav-item-icon">◻</span>Wainwrights<span class="nav-count">0/214</span></button>
+        <button class="nav-item" data-list="Ma" onclick="switchList('Ma')"><span class="nav-item-icon">○</span>Marilyns<span class="nav-count">0/2009</span></button>
         <div class="nav-section-label">Account</div>
         <button class="nav-item" onclick="showPage('profile')"><span class="nav-item-icon">○</span>Profile</button>
         <button class="nav-item"><span class="nav-item-icon">⚙</span>Settings</button>
@@ -1079,328 +1081,288 @@ textarea.form-input{resize:vertical;min-height:80px}
 </div>
 
 <script>
-const MUNROS=[
-  {id:'ben-nevis',name:'Ben Nevis',gaelic:'Beinn Nibheis',height:1345,region:'Northwest Highlands',lat:56.7969,lng:-5.0036,bagged:false,date:null,source:null,desc:'The highest mountain in the British Isles at 1,345 metres, near Fort William. The summit plateau contains ruins of an observatory staffed continuously 1883–1904.'},
-  {id:'ben-macdui',name:'Ben Macdui',gaelic:'Beinn MacDuibh',height:1309,region:'Cairngorms',lat:57.0703,lng:-3.6690,bagged:false,date:null,source:null,desc:'Second highest in the UK, deep in the Cairngorm massif. Legendary haunt of the Am Fear Liath Mòr — the Big Grey Man.'},
-  {id:'braeriach',name:'Braeriach',gaelic:'Bràigh Riabhach',height:1296,region:'Cairngorms',lat:57.0787,lng:-3.7285,bagged:false,date:null,source:null,desc:'Third highest in the UK. The Grey Brae — part of the vast Cairngorm plateau above the Lairig Ghru.'},
-  {id:'cairn-toul',name:'Cairn Toul',gaelic:'Càrn an t-Sabhail',height:1291,region:'Cairngorms',lat:57.0543,lng:-3.7134,bagged:false,date:null,desc:'The Cairn of the Barn. Fourth highest in the UK, overlooking the spectacular Garbh Choire Mòr.'},
-  {id:'sgor-lochain',name:'Sgor an Lochain Uaine',gaelic:'Sgòr an Lochan Uaine',height:1258,region:'Cairngorms',lat:57.0612,lng:-3.7244,bagged:false,date:null,desc:'The Angel\'s Peak. One of the most dramatic summits in the Cairngorms.'},
-  {id:'cairn-gorm',name:'Cairn Gorm',gaelic:'Càrn Gorm',height:1245,region:'Cairngorms',lat:57.1168,lng:-3.6433,bagged:false,date:null,source:null,desc:'The Blue Cairn. Gives its name to the entire massif. Accessible by funicular railway.'},
-  {id:'aonach-mor',name:'Aonach Mòr',gaelic:'Aonach Mòr',height:1221,region:'Northwest Highlands',lat:56.8264,lng:-4.9630,bagged:false,date:null,desc:'The Great Ridge. Home to Nevis Range ski area. Connected to Aonach Beag by a high plateau.'},
-  {id:'ben-lawers',name:'Ben Lawers',gaelic:'Beinn Labhair',height:1214,region:'Southern Highlands',lat:56.5463,lng:-4.2228,bagged:false,date:null,desc:'Highest in the Southern Highlands, internationally renowned for its arctic-alpine flora.'},
-  {id:'an-teallach',name:'An Teallach',gaelic:'An Teallach',height:1062,region:'Northwest Highlands',lat:57.7994,lng:-5.2507,bagged:false,date:null,desc:'The Forge. One of Scotland\'s finest ridges — the traverse of Corrag Bhuidhe and Sgurr Fiona is among the most exhilarating walks in the country.'},
-  {id:'liathach',name:'Liathach',gaelic:'Liathach',height:1055,region:'Torridon',lat:57.5605,lng:-5.4248,bagged:false,date:null,desc:'The Grey One. A fearsome Torridonian sandstone ridge rising 900m directly from the glen.'},
-  {id:'buachaille',name:'Buachaille Etive Mòr',gaelic:'Buachaille Eite Mòr',height:1022,region:'Glencoe & Glen Etive',lat:56.6607,lng:-4.8980,bagged:false,date:null,desc:'The Great Herdsman of Etive. Perhaps the most photographed mountain in Scotland.'},
-  {id:'beinn-eighe',name:'Beinn Eighe',gaelic:'Beinn Eighe',height:1010,region:'Torridon',lat:57.5875,lng:-5.3479,bagged:false,date:null,desc:'Britain\'s first National Nature Reserve, designated 1951. The quartzite cap gives it an eternally snow-capped appearance.'},
-  {id:'schiehallion',name:'Schiehallion',gaelic:'Sìdhean Chailleann',height:1083,region:'Southern Highlands',lat:56.6591,lng:-4.0952,bagged:false,date:null,desc:'The Fairy Hill of the Caledonians. Used in Maskelyne\'s 1774 Schiehallion Experiment to estimate the mass of the Earth.'},
-  {id:'ben-lomond',name:'Ben Lomond',gaelic:'Beinn Laomainn',height:974,region:'Southern Highlands',lat:56.1874,lng:-4.6341,bagged:false,date:null,desc:'The most southerly and most climbed Munro after Ben Nevis. Overlooking Loch Lomond.'},
-  {id:'ben-hope',name:'Ben Hope',gaelic:'Beinn Hòb',height:927,region:'Northwest Highlands',lat:58.4046,lng:-4.6088,bagged:false,date:null,desc:'The most northerly Munro. Isolated and majestic above the Kyle of Tongue.'},
-  {id:'lochnagar',name:'Lochnagar',gaelic:'Loch na Gaire',height:1155,region:'Cairngorms',lat:56.9598,lng:-3.2390,bagged:false,date:null,desc:'Immortalised by Byron in "Dark Lochnagar". Overlooks the Balmoral estate.'},
-  {id:'stob-ghabhar',name:'Stob Ghabhar',gaelic:'Stob Ghabhar',height:1090,region:'Southern Highlands',lat:56.5277,lng:-4.8752,bagged:false,date:null,desc:'Part of the Black Mount, a remote and beautiful range above Loch Tulla.'},
-  {id:'bidean-nam-bian',name:'Bidean nam Bian',gaelic:'Bidean nam Bian',height:1150,region:'Glencoe & Glen Etive',lat:56.6453,lng:-5.0158,bagged:false,date:null,desc:'The highest peak in Argyll. Hidden behind the Three Sisters of Glencoe.'},
-  {id:'ben-more-assynt',name:'Ben More Assynt',gaelic:'Beinn Mhòr Asainte',height:998,region:'Northwest Highlands',lat:58.1390,lng:-4.8545,bagged:false,date:null,desc:'Remote summit requiring a long approach across boggy moorland.'},
-  {id:'beinn-a-chleibh',name:'Beinn a\' Chleibh',gaelic:'Beinn a\' Chleibh',height:916,region:'Central Highlands',lat:56.3814,lng:-4.8901,bagged:false,date:null,desc:'A quieter Munro on the southern flanks of Ben Lui.'},
-];
+// ── STATE ──
+let HILLS = [];           // loaded from hills.json — all 2,548 hills
+let currentFilter = 'all';
+let currentList = 'M';    // active list: M, C, G, D, W, Ma, MT
+let currentHill = null;
+let currentHills = [];    // hills shown in current list view
 
-let currentFilter='all', currentHill=null;
+const LIST_META = {
+  M:  { name:'Munros',      total:282,  desc:'Scotland\'s 3000ft peaks' },
+  C:  { name:'Corbetts',    total:222,  desc:'2500–3000ft Scottish hills' },
+  G:  { name:'Grahams',     total:231,  desc:'2000–2500ft Scottish hills' },
+  D:  { name:'Donalds',     total:89,   desc:'Southern Upland 2000ft hills' },
+  W:  { name:'Wainwrights', total:214,  desc:'Lake District fells' },
+  Ma: { name:'Marilyns',    total:2009, desc:'UK prominent summits' },
+  MT: { name:'Munro Tops',  total:226,  desc:'Subsidiary Munro tops' },
+};
 
-function enterApp(){
+// ── CORE NAVIGATION ──
+function enterApp() {
   document.getElementById('landing').classList.remove('active');
   document.getElementById('app').classList.add('active');
-  renderTable(MUNROS);
-  animateRing();
+  updateListView();
+  updateDashboard();
 }
 
-function showPage(p){
-  document.querySelectorAll('.app-page').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-  const pg=document.getElementById('page-'+p);
-  if(pg) pg.classList.add('active');
-  const map={dashboard:'Dashboard',list:'All Munros',profile:'Profile'};
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    if(map[p]&&n.textContent.trim().startsWith(map[p].charAt(0))||n.textContent.includes(map[p])) n.classList.add('active');
+function showPage(p) {
+  document.querySelectorAll('.app-page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  const pg = document.getElementById('page-' + p);
+  if (pg) pg.classList.add('active');
+}
+
+function switchList(listCode) {
+  currentList = listCode;
+  currentFilter = 'all';
+  updateListView();
+  showPage('list');
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.list === listCode);
   });
 }
 
-function openHill(id){
-  const h=MUNROS.find(m=>m.id===id)||MUNROS[0];
-  currentHill=h;
-  document.getElementById('detail-title').textContent=h.name;
-  document.getElementById('detail-crumb').textContent='Munros · '+h.region;
-  document.getElementById('detail-name').textContent=h.name;
-  document.getElementById('detail-gaelic').textContent=h.gaelic+(h.desc?' ':'');
-  document.getElementById('detail-height').textContent=h.height.toLocaleString()+'m';
-  document.getElementById('detail-region').textContent=h.region.replace('Northwest','NW').replace('Southern','S.').replace('Central','Central');
-  document.getElementById('detail-desc').textContent=h.desc||'';
-  document.getElementById('log-hill').value=h.name;
+// ── DATA ──
+function getListHills(listCode) {
+  return HILLS.filter(h => h.lists.includes(listCode));
+}
+
+function getBaggedCount(listCode) {
+  return getListHills(listCode).filter(h => h.bagged).length;
+}
+
+// ── DASHBOARD ──
+function updateDashboard() {
+  const munros = getListHills('M');
+  const bagged = munros.filter(h => h.bagged);
+  const total = munros.length;
+  const pct = total > 0 ? bagged.length / total : 0;
+
+  // Stats cards
+  const statEls = document.querySelectorAll('.stat-value');
+  if (statEls[0]) statEls[0].textContent = bagged.length;
+
+  const statSubs = document.querySelectorAll('.stat-sub');
+  if (statSubs[0]) statSubs[0].textContent = `of ${total} · ${Math.round(pct * 1000) / 10}%`;
+
+  // Progress ring
+  const ring = document.getElementById('progress-ring');
+  if (ring) {
+    const r = 56, c = 2 * Math.PI * r;
+    ring.setAttribute('stroke-dasharray', c);
+    ring.setAttribute('stroke-dashoffset', c);
+    setTimeout(() => ring.setAttribute('stroke-dashoffset', c * (1 - pct)), 300);
+  }
+  const progNum = document.querySelector('.progress-num');
+  if (progNum) progNum.textContent = bagged.length;
+  const progDen = document.querySelector('.progress-den');
+  if (progDen) progDen.textContent = `of ${total}`;
+
+  // Sidebar list counts
+  document.querySelectorAll('.nav-item[data-list]').forEach(n => {
+    const code = n.dataset.list;
+    const countEl = n.querySelector('.nav-count');
+    if (countEl) {
+      const b = getBaggedCount(code);
+      const t = LIST_META[code]?.total || '?';
+      countEl.textContent = `${b}/${t}`;
+    }
+  });
+
+  // Mini pills
+  const pills = document.querySelector('.list-pills');
+  if (pills) {
+    pills.innerHTML = Object.entries(LIST_META)
+      .filter(([code]) => code !== 'M')
+      .map(([code, meta]) => {
+        const b = getBaggedCount(code);
+        return `<div class="list-pill-sm">${meta.name} <strong>${b}/${meta.total}</strong></div>`;
+      }).join('');
+  }
+
+  // Footer
+  const footerSub = document.querySelector('.footer-sub');
+  if (footerSub) footerSub.textContent = `${bagged.length} Munros · ${Math.round(pct * 1000) / 10}%`;
+
+  // Highest summit
+  const highestBagged = bagged.sort((a, b) => b.height - a.height)[0];
+  if (highestBagged && statEls[3]) {
+    statEls[3].textContent = highestBagged.name;
+    if (statSubs[3]) statSubs[3].textContent = `${highestBagged.height}m · ${highestBagged.date || ''}`;
+  }
+
+  // Total ascents (unique bagged across all lists)
+  const allBagged = HILLS.filter(h => h.bagged);
+  if (statEls[1]) statEls[1].textContent = allBagged.length;
+  if (statSubs[1]) statSubs[1].textContent = `across all lists`;
+}
+
+// ── LIST VIEW ──
+function updateListView() {
+  currentHills = getListHills(currentList);
+  const meta = LIST_META[currentList];
+
+  // Update page header
+  const title = document.querySelector('#page-list .page-title');
+  if (title) title.textContent = meta?.name || currentList;
+
+  filterHills();
+}
+
+function renderTable(data) {
+  document.getElementById('munro-tbody').innerHTML = data.map(h => `
+    <tr onclick="openHill(${h.id})">
+      <td><div class="mname">${h.name}</div><div class="mgaelic">${h.lists.join(', ')}</div></td>
+      <td class="mheight">${h.height}m</td>
+      <td class="mregion">${h.region}</td>
+      <td class="mdate">${h.date || '—'}</td>
+      <td>${h.bagged
+        ? `<span class="badge-yes">✓ ${h.source === 'strava' ? '⚡ ' : ''}Bagged</span>`
+        : '<span class="badge-no">○ Remaining</span>'
+      }</td>
+    </tr>`).join('');
+
+  const sub = document.querySelector('#page-list .page-sub');
+  const bagged = data.filter(h => h.bagged).length;
+  if (sub) sub.textContent = `${data.length} hills · ${bagged} bagged · ${data.length - bagged} remaining`;
+}
+
+function filterHills() {
+  const q = (document.getElementById('munro-search')?.value || '').toLowerCase();
+  const r = document.getElementById('region-filter')?.value || '';
+  const filtered = currentHills.filter(h => {
+    const mq = !q || h.name.toLowerCase().includes(q) || h.region.toLowerCase().includes(q);
+    const mr = !r || h.region === r;
+    const mf = currentFilter === 'all' ||
+               (currentFilter === 'bagged' && h.bagged) ||
+               (currentFilter === 'remaining' && !h.bagged);
+    return mq && mr && mf;
+  });
+  renderTable(filtered);
+}
+
+// alias for HTML onclick
+function filterMunros() { filterHills(); }
+
+function setFilter(f) {
+  currentFilter = f;
+  ['all','bagged','remaining'].forEach(x =>
+    document.getElementById('btn-' + x)?.classList.toggle('active', x === f)
+  );
+  filterHills();
+}
+
+// ── HILL DETAIL ──
+function openHill(id) {
+  const h = HILLS.find(x => x.id === id);
+  if (!h) return;
+  currentHill = h;
+  const listNames = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+  document.getElementById('detail-title').textContent = h.name;
+  document.getElementById('detail-crumb').textContent = `${listNames} · ${h.region}`;
+  document.getElementById('detail-name').textContent = h.name;
+  document.getElementById('detail-gaelic').textContent = h.region;
+  document.getElementById('detail-height').textContent = h.height + 'm';
+  document.getElementById('detail-region').textContent = h.region;
+  document.getElementById('detail-desc').textContent =
+    `${h.name} stands at ${h.height}m in ${h.region}. Listed as: ${listNames}.`;
+  document.getElementById('log-hill').value = h.name;
   showPage('hill');
 }
 
-function renderTable(data){
-  document.getElementById('munro-tbody').innerHTML=data.map(m=>`
-    <tr onclick="openHill('${m.id}')">
-      <td><div class="mname">${m.name}</div><div class="mgaelic">${m.gaelic}</div></td>
-      <td class="mheight">${m.height.toLocaleString()}m</td>
-      <td class="mregion">${m.region}</td>
-      <td class="mdate">${m.date||'—'}</td>
-      <td>${m.bagged
-        ?`<span class="badge-yes">✓ ${m.source==='strava'?'⚡ ':''}Bagged</span>`
-        :'<span class="badge-no">○ Remaining</span>'}</td>
-    </tr>`).join('');
-}
-
-function filterMunros(){
-  const q=document.getElementById('munro-search').value.toLowerCase();
-  const r=document.getElementById('region-filter').value;
-  renderTable(MUNROS.filter(m=>{
-    const mq=!q||m.name.toLowerCase().includes(q)||m.gaelic.toLowerCase().includes(q)||m.region.toLowerCase().includes(q);
-    const mr=!r||m.region===r;
-    const mf=currentFilter==='all'||(currentFilter==='bagged'&&m.bagged)||(currentFilter==='remaining'&&!m.bagged);
-    return mq&&mr&&mf;
-  }));
-}
-
-function setFilter(f){
-  currentFilter=f;
-  ['all','bagged','remaining'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===f));
-  filterMunros();
-}
-
-function animateRing(){
-  const bagged = MUNROS.filter(m => m.bagged);
-  const total = MUNROS.length;
-  const pct = bagged.length / total;
-
-  // Update progress ring
-  const ring = document.getElementById('progress-ring');
-  if(ring){
-    const r=56, c=2*Math.PI*r;
-    ring.setAttribute('stroke-dasharray', c);
-    ring.setAttribute('stroke-dashoffset', c);
-    setTimeout(() => ring.setAttribute('stroke-dashoffset', c*(1-pct)), 300);
-  }
-
-  // Update stat cards
-  const statEls = document.querySelectorAll('.stat-value');
-  if(statEls[0]) statEls[0].textContent = bagged.length;
-
-  // Update progress center number
-  const progNum = document.querySelector('.progress-num');
-  if(progNum) progNum.textContent = bagged.length;
-
-  // Update sidebar count
-  const navCount = document.querySelector('.nav-count');
-  if(navCount) navCount.textContent = `${bagged.length}/${total}`;
-
-  // Update footer
-  const footerSub = document.querySelector('.footer-sub');
-  if(footerSub) footerSub.textContent = `${bagged.length} Munros · ${Math.round(pct*100*10)/10}%`;
-
-  // Update page subtitle
-  const listSub = document.querySelector('#page-list .page-sub');
-  if(listSub) listSub.textContent = `${total} summits · ${bagged.length} bagged · ${total-bagged.length} remaining`;
-}
-}
-
-function openLogModal(){
+// ── MODAL ──
+function openLogModal() {
   document.getElementById('log-modal').classList.add('open');
-  document.getElementById('log-date').value=new Date().toISOString().split('T')[0];
-  if(currentHill){
-    document.getElementById('log-hill').value=currentHill.name;
-    document.getElementById('modal-hill-sub').textContent=currentHill.name+' · '+currentHill.height+'m';
+  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  if (currentHill) {
+    document.getElementById('log-hill').value = currentHill.name;
+    document.getElementById('modal-hill-sub').textContent =
+      currentHill.name + ' · ' + currentHill.height + 'm';
   }
 }
-function closeModal(){document.getElementById('log-modal').classList.remove('open')}
-document.getElementById('log-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+function closeModal() { document.getElementById('log-modal').classList.remove('open'); }
+document.getElementById('log-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
 
-function saveAscent(){
-  const h=document.getElementById('log-hill').value;
-  if(!h){document.getElementById('log-hill').style.borderColor='var(--earth)';return}
+function saveAscent() {
+  const h = document.getElementById('log-hill').value;
+  if (!h) { document.getElementById('log-hill').style.borderColor = 'var(--earth)'; return; }
+  // Mark hill as bagged if we can find it
+  const hill = HILLS.find(x => x.name.toLowerCase() === h.toLowerCase());
+  if (hill) {
+    hill.bagged = true;
+    hill.date = document.getElementById('log-date').value;
+    hill.source = 'manual';
+  }
   closeModal();
-  const t=document.createElement('div');
-  t.style.cssText=`position:fixed;bottom:1.5rem;right:1.5rem;background:var(--forest);color:white;padding:0.7rem 1.2rem;border-radius:4px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:var(--shadow-md);animation:fadeUp 0.3s forwards`;
-  t.textContent='✓ Ascent of '+h+' saved';
+  updateDashboard();
+  filterHills();
+  toast('✓ Ascent of ' + h + ' saved');
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--forest);color:white;padding:0.7rem 1.2rem;border-radius:4px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:var(--shadow-md);animation:fadeUp 0.3s forwards`;
+  t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2800);
+  setTimeout(() => t.remove(), 2800);
 }
 
-function exportCSV(){
-  const rows=MUNROS.filter(m=>m.bagged).map(m=>`"${m.name}","${m.gaelic}",${m.height},"${m.region}","${m.date||''}","${m.source||'manual'}"`);
-  const blob=new Blob(['Name,Gaelic,Height (m),Region,Date,Source\n'+rows.join('\n')],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='summit-munros.csv';a.click();
+// ── EXPORT ──
+function exportCSV() {
+  const bagged = HILLS.filter(h => h.bagged);
+  const rows = bagged.map(h =>
+    `"${h.name}",${h.height},"${h.region}","${h.lists.join(',')}","${h.date || ''}","${h.source || 'manual'}"`
+  );
+  const blob = new Blob(
+    ['Name,Height (m),Region,Lists,Date,Source\n' + rows.join('\n')],
+    { type: 'text/csv' }
+  );
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'summit-hills.csv';
+  a.click();
+  toast(`Exported ${bagged.length} ascents`);
 }
 
-renderTable(MUNROS);
-
-// ── STRAVA INTEGRATION ──
+// ── STRAVA ──
 const WORKER = 'https://summit-api.andro-mathewson95.workers.dev';
-
-// Session stored in localStorage
 const SESSION_KEY = 'summit_session';
 
-function getSession() {
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); }
-  catch { return null; }
-}
+function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
+function saveSession(d) { localStorage.setItem(SESSION_KEY, JSON.stringify(d)); }
 
-function saveSession(data) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(data));
-}
-
-function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
-}
-
-// Send user to Strava to authorise
 function connectStrava() {
   window.location.href = `${WORKER}/auth/strava/connect`;
 }
 
-// On page load — check if Strava just redirected back with tokens
 function handleAuthCallback() {
   const hash = window.location.hash.slice(1);
-  if (!hash) return false;
-
-  const params = new URLSearchParams(hash);
-  if (params.get('auth') !== 'success') return false;
-
-  // Save session
+  if (!hash) return null;
+  const p = new URLSearchParams(hash);
+  if (p.get('auth') !== 'success') return null;
   const session = {
-    athlete_id:    params.get('athlete_id'),
-    name:          decodeURIComponent(params.get('name') || 'Hillwalker'),
-    access_token:  params.get('access_token'),
-    refresh_token: params.get('refresh_token'),
-    expires_at:    parseInt(params.get('expires_at')),
+    athlete_id:   p.get('athlete_id'),
+    name:         decodeURIComponent(p.get('name') || 'Hillwalker'),
+    access_token: p.get('access_token'),
+    refresh_token:p.get('refresh_token'),
+    expires_at:   parseInt(p.get('expires_at')),
   };
   saveSession(session);
-
-  // Clean the URL so tokens don't stay in browser history
   history.replaceState(null, '', window.location.pathname);
-
   return session;
 }
 
-// Update dashboard with real athlete name
 function applySession(session) {
   if (!session) return;
-
-  // Update name throughout the UI
-  const firstName = session.name.split(' ')[0];
-  const greetingEl = document.querySelector('#page-dashboard .page-title');
-  if (greetingEl) greetingEl.textContent = `Good morning, ${firstName}`;
-
-  const footerName = document.querySelector('.footer-name');
-  if (footerName) footerName.textContent = session.name;
-
-  const profileName = document.querySelector('.profile-name-lg');
-  if (profileName) profileName.textContent = session.name;
-}
-
-// Fetch Strava activities and detect summits
-async function syncStrava(session) {
-  if (!session?.access_token) return;
-
-  updateSyncStatus('Fetching your Strava activities…');
-
-  try {
-    let page = 1;
-    let allActivities = [];
-
-    // Fetch all hiking/walking activities (paginated)
-    while (true) {
-      const res = await fetch(
-        `${WORKER}/api/activities?page=${page}&per_page=100`,
-        { headers: { Authorization: `Bearer ${session.access_token}` } }
-      );
-      const activities = await res.json();
-      if (!activities.length) break;
-
-      // Filter to walking/hiking activities only
-      const hillActivities = activities.filter(a =>
-        ['Hike','Walk','TrailRun','Run'].includes(a.type) ||
-        ['Hike','Walk','TrailRun'].includes(a.sport_type)
-      );
-      allActivities = allActivities.concat(hillActivities);
-      if (activities.length < 100) break;
-      page++;
-    }
-
-    updateSyncStatus(`Found ${allActivities.length} walks/hikes — checking for summits…`);
-
-    // Detect summits in each activity
-    let detected = 0;
-    for (const activity of allActivities) {
-      const summits = await detectSummitsInActivity(activity, session.access_token);
-      if (summits.length > 0) {
-        detected += summits.length;
-        markSummitsBagged(summits, activity);
-      }
-    }
-
-    updateSyncStatus(`Sync complete · ${detected} summits detected from Strava`);
-    renderTable(MUNROS);
-    animateRing();
-
-  } catch (err) {
-    console.error('Sync error:', err);
-    updateSyncStatus('Sync failed — check console');
-  }
-}
-
-// Fetch GPS stream for one activity and check against Munro coordinates
-async function detectSummitsInActivity(activity, accessToken) {
-  try {
-    const res = await fetch(
-      `${WORKER}/api/activity/${activity.id}/streams`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-    const streams = await res.json();
-    if (!streams.latlng?.data) return [];
-
-    const gpsPoints = streams.latlng.data; // array of [lat, lng]
-    const detected = [];
-
-    for (const munro of MUNROS) {
-      if (munro.bagged) continue; // already marked
-      if (!munro.lat || !munro.lng) continue; // no coords yet
-
-      // Check if any GPS point passes within 150m of this summit
-      for (const [lat, lng] of gpsPoints) {
-        const dist = haversineMetres(lat, lng, munro.lat, munro.lng);
-        if (dist <= 150) {
-          detected.push({ munro, activity });
-          break;
-        }
-      }
-    }
-    return detected;
-  } catch {
-    return [];
-  }
-}
-
-// Mark detected summits as bagged
-function markSummitsBagged(summits, activity) {
-  const date = new Date(activity.start_date_local);
-  const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
-  for (const { munro } of summits) {
-    munro.bagged = true;
-    munro.date = dateStr;
-    munro.source = 'strava';
-    munro.strava_id = activity.id;
-  }
-}
-
-// Haversine formula — distance between two lat/lng points in metres
-function haversineMetres(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) ** 2 +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-            Math.sin(dLng/2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const first = session.name.split(' ')[0];
+  const g = document.querySelector('#page-dashboard .page-title');
+  if (g) g.textContent = `Good morning, ${first}`;
+  document.querySelectorAll('.footer-name').forEach(el => el.textContent = session.name);
+  document.querySelectorAll('.profile-name-lg').forEach(el => el.textContent = session.name);
 }
 
 function updateSyncStatus(msg) {
@@ -1408,24 +1370,107 @@ function updateSyncStatus(msg) {
   if (el) el.innerHTML = `<span class="sync-dot"></span>${msg}`;
 }
 
-// ── INITIALISE ──
-(function init() {
-  // Check if returning from Strava OAuth
-  const newSession = handleAuthCallback();
-  const session = newSession || getSession();
+function haversineMetres(lat1, lng1, lat2, lng2) {
+  const R = 6371000, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function detectSummitsInActivity(activity, token) {
+  try {
+    const res = await fetch(`${WORKER}/api/activity/${activity.id}/streams`,
+      { headers: { Authorization: `Bearer ${token}` } });
+    const streams = await res.json();
+    if (!streams.latlng?.data) return [];
+    const pts = streams.latlng.data;
+    const found = [];
+    for (const hill of HILLS) {
+      if (hill.bagged) continue;
+      for (const [lat, lng] of pts) {
+        if (haversineMetres(lat, lng, hill.lat, hill.lng) <= 150) {
+          found.push({ hill, activity });
+          break;
+        }
+      }
+    }
+    return found;
+  } catch { return []; }
+}
+
+async function syncStrava(session) {
+  if (!session?.access_token) return;
+  updateSyncStatus('Fetching your Strava activities…');
+  try {
+    let page = 1, all = [];
+    while (true) {
+      const res = await fetch(`${WORKER}/api/activities?page=${page}&per_page=100`,
+        { headers: { Authorization: `Bearer ${session.access_token}` } });
+      const acts = await res.json();
+      if (!Array.isArray(acts) || !acts.length) break;
+      const hills = acts.filter(a =>
+        ['Hike','Walk','TrailRun','Run'].includes(a.type) ||
+        ['Hike','Walk','TrailRun'].includes(a.sport_type)
+      );
+      all = all.concat(hills);
+      if (acts.length < 100) break;
+      page++;
+    }
+    updateSyncStatus(`Found ${all.length} walks/hikes — scanning for summits…`);
+    let detected = 0;
+    for (const act of all) {
+      const summits = await detectSummitsInActivity(act, session.access_token);
+      for (const { hill, activity } of summits) {
+        const d = new Date(activity.start_date_local);
+        hill.bagged = true;
+        hill.date = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        hill.source = 'strava';
+        detected++;
+      }
+      if (detected > 0) {
+        updateSyncStatus(`Found ${detected} so far — still scanning…`);
+      }
+    }
+    updateSyncStatus(`Sync complete · ${detected} hills detected from your Strava history`);
+    updateDashboard();
+    filterHills();
+  } catch (err) {
+    console.error(err);
+    updateSyncStatus('Sync failed — try again');
+  }
+}
+
+// ── INIT ──
+async function init() {
+  // Load hills.json first
+  try {
+    updateSyncStatus('Loading hill database…');
+    const res = await fetch('/hills.json');
+    HILLS = await res.json();
+    // Add bagged/date/source fields
+    HILLS.forEach(h => { h.bagged = false; h.date = null; h.source = null; });
+  } catch (e) {
+    console.error('Failed to load hills.json', e);
+    updateSyncStatus('Failed to load hill database');
+    return;
+  }
+
+  // Check for OAuth callback or existing session
+  const fresh = handleAuthCallback();
+  const session = fresh || getSession();
 
   if (session) {
-    // User is logged in — go straight to app
     applySession(session);
     enterApp();
-
-    // If this is a fresh login, kick off Strava sync
-    if (newSession) {
-      setTimeout(() => syncStrava(session), 500);
+    if (fresh) {
+      setTimeout(() => syncStrava(session), 600);
+    } else {
+      updateSyncStatus('Connected to Strava · click to re-sync');
     }
   }
-  // Otherwise stay on landing page
-})();
+  // else stay on landing page
+}
+
+init();
 </script>
 </body>
 </html>
