@@ -1182,10 +1182,10 @@ function renderMap() {
       zoomControl: true,
     });
 
-    // OpenTopoMap — free OS-style tiles with contour lines
-    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      maxZoom: 17,
-      attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> · © <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    // ESRI World Topo Map — beautiful terrain, hill shading, free, no API key
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: '© <a href="https://www.esri.com">Esri</a>, USGS, NOAA',
     }).addTo(leafletMap);
 
     mapMarkerLayer = L.layerGroup().addTo(leafletMap);
@@ -1196,7 +1196,7 @@ function renderMap() {
 
   // Custom circle marker styles
   const baggedStyle = {
-    radius: 7,
+    radius: 5,
     fillColor: '#2d5a3d',
     color: '#1e3d29',
     weight: 1.5,
@@ -1204,12 +1204,12 @@ function renderMap() {
     fillOpacity: 0.9,
   };
   const unbaggedStyle = {
-    radius: 4,
+    radius: 3,
     fillColor: '#d4bfa0',
     color: '#b8996a',
     weight: 1,
-    opacity: 0.7,
-    fillOpacity: 0.5,
+    opacity: 0.6,
+    fillOpacity: 0.4,
   };
 
   // List colour overrides for bagged markers
