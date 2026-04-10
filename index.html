@@ -1328,10 +1328,11 @@ function exportCSV() {
   toast(`Exported ${bagged.length} ascents`);
 }
 
-// ── STRAVA ──
+// ── CONSTANTS ──
 const WORKER = 'https://summit-api.andro-mathewson95.workers.dev';
 const SESSION_KEY = 'summit_session';
 
+// ── SESSION ──
 function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
 function saveSession(d) { localStorage.setItem(SESSION_KEY, JSON.stringify(d)); }
 
@@ -1346,6 +1347,7 @@ function handleAuthCallback() {
   if (p.get('auth') !== 'success') return null;
   const session = {
     athlete_id:   p.get('athlete_id'),
+    user_id:      p.get('user_id'),
     name:         decodeURIComponent(p.get('name') || 'Hillwalker'),
     access_token: p.get('access_token'),
     refresh_token:p.get('refresh_token'),
@@ -1359,8 +1361,10 @@ function handleAuthCallback() {
 function applySession(session) {
   if (!session) return;
   const first = session.name.split(' ')[0];
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const g = document.querySelector('#page-dashboard .page-title');
-  if (g) g.textContent = `Good morning, ${first}`;
+  if (g) g.textContent = `${greeting}, ${first}`;
   document.querySelectorAll('.footer-name').forEach(el => el.textContent = session.name);
   document.querySelectorAll('.profile-name-lg').forEach(el => el.textContent = session.name);
 }
@@ -1370,6 +1374,92 @@ function updateSyncStatus(msg) {
   if (el) el.innerHTML = `<span class="sync-dot"></span>${msg}`;
 }
 
+// ── TOKEN REFRESH ──
+async function getValidToken(session) {
+  const now = Math.floor(Date.now() / 1000);
+  // Refresh if token expires within 5 minutes
+  if (session.expires_at - now < 300) {
+    try {
+      const res = await fetch(`${WORKER}/auth/strava/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refresh_token: session.refresh_token,
+          athlete_id: session.athlete_id,
+        }),
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        session.access_token = data.access_token;
+        session.refresh_token = data.refresh_token;
+        session.expires_at = data.expires_at;
+        saveSession(session);
+        return data.access_token;
+      }
+    } catch (e) { console.warn('Token refresh failed', e); }
+  }
+  return session.access_token;
+}
+
+// ── SUPABASE PERSISTENCE ──
+
+// Load saved ascents from Supabase and apply to HILLS
+async function loadAscents(session) {
+  if (!session?.user_id) return 0;
+  try {
+    const res = await fetch(
+      `${WORKER}/api/ascents?user_id=${session.user_id}`,
+      { headers: { Authorization: `Bearer ${session.access_token}` } }
+    );
+    const ascents = await res.json();
+    if (!Array.isArray(ascents)) return 0;
+
+    let count = 0;
+    for (const a of ascents) {
+      const hill = HILLS.find(h => h.id === a.hill_id);
+      if (hill) {
+        hill.bagged = true;
+        hill.date = a.date;
+        hill.source = a.source;
+        hill.companions = a.companions;
+        hill.conditions = a.conditions;
+        hill.notes = a.notes;
+        count++;
+      }
+    }
+    return count;
+  } catch (e) {
+    console.error('Failed to load ascents', e);
+    return 0;
+  }
+}
+
+// Save a batch of newly detected ascents to Supabase
+async function saveAscents(session, detectedHills) {
+  if (!session?.user_id || !detectedHills.length) return;
+  try {
+    const ascents = detectedHills.map(({ hill, activity }) => ({
+      hill_id: hill.id,
+      hill_name: hill.name,
+      hill_lists: hill.lists,
+      height: hill.height,
+      region: hill.region,
+      date: hill.date,
+      source: 'strava',
+      strava_activity_id: String(activity.id),
+    }));
+    await fetch(`${WORKER}/api/ascents`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ user_id: session.user_id, ascents }),
+    });
+  } catch (e) { console.error('Failed to save ascents', e); }
+}
+
+// ── SUMMIT DETECTION ──
 function haversineMetres(lat1, lng1, lat2, lng2) {
   const R = 6371000, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
@@ -1400,74 +1490,129 @@ async function detectSummitsInActivity(activity, token) {
 async function syncStrava(session) {
   if (!session?.access_token) return;
   updateSyncStatus('Fetching your Strava activities…');
+
   try {
+    const token = await getValidToken(session);
     let page = 1, all = [];
+
     while (true) {
       const res = await fetch(`${WORKER}/api/activities?page=${page}&per_page=100`,
-        { headers: { Authorization: `Bearer ${session.access_token}` } });
+        { headers: { Authorization: `Bearer ${token}` } });
       const acts = await res.json();
       if (!Array.isArray(acts) || !acts.length) break;
-      const hills = acts.filter(a =>
+      const hillActs = acts.filter(a =>
         ['Hike','Walk','TrailRun','Run'].includes(a.type) ||
         ['Hike','Walk','TrailRun'].includes(a.sport_type)
       );
-      all = all.concat(hills);
+      all = all.concat(hillActs);
       if (acts.length < 100) break;
       page++;
     }
+
     updateSyncStatus(`Found ${all.length} walks/hikes — scanning for summits…`);
+
     let detected = 0;
+    const newlyDetected = [];
+
     for (const act of all) {
-      const summits = await detectSummitsInActivity(act, session.access_token);
+      const summits = await detectSummitsInActivity(act, token);
       for (const { hill, activity } of summits) {
         const d = new Date(activity.start_date_local);
         hill.bagged = true;
         hill.date = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
         hill.source = 'strava';
+        newlyDetected.push({ hill, activity });
         detected++;
       }
-      if (detected > 0) {
-        updateSyncStatus(`Found ${detected} so far — still scanning…`);
-      }
+      if (detected > 0) updateSyncStatus(`Found ${detected} summits so far…`);
     }
-    updateSyncStatus(`Sync complete · ${detected} hills detected from your Strava history`);
+
+    // Save to Supabase so they persist across sessions
+    if (newlyDetected.length > 0) {
+      updateSyncStatus(`Saving ${detected} summits to your account…`);
+      await saveAscents(session, newlyDetected);
+    }
+
+    updateSyncStatus(`Sync complete · ${detected} summits detected · refreshing…`);
     updateDashboard();
     filterHills();
+    updateRecentAscents();
+
   } catch (err) {
     console.error(err);
     updateSyncStatus('Sync failed — try again');
   }
 }
 
+// ── RECENT ASCENTS FEED ──
+function updateRecentAscents() {
+  const feed = document.querySelector('#page-dashboard .activity-list');
+  if (!feed) return;
+
+  const recent = HILLS
+    .filter(h => h.bagged && h.date)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+
+  if (!recent.length) return;
+
+  feed.innerHTML = recent.map(h => `
+    <div class="activity-row">
+      <div class="activity-dot ${h.source === 'strava' ? 'ad-strava' : 'ad-manual'}">
+        ${h.source === 'strava' ? '⚡' : '✎'}
+      </div>
+      <div class="activity-main">
+        <div class="activity-name">
+          ${h.name}
+          ${h.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
+        </div>
+        <div class="activity-meta">${h.date}${h.companions ? ' · with ' + h.companions : ''}</div>
+      </div>
+      <div class="activity-ht">${h.height}m</div>
+    </div>`).join('');
+}
+
 // ── INIT ──
 async function init() {
-  // Load hills.json first
+  // 1. Load hill database
   try {
     updateSyncStatus('Loading hill database…');
     const res = await fetch('/hills.json');
     HILLS = await res.json();
-    // Add bagged/date/source fields
-    HILLS.forEach(h => { h.bagged = false; h.date = null; h.source = null; });
+    HILLS.forEach(h => {
+      h.bagged = false; h.date = null; h.source = null;
+      h.companions = null; h.conditions = null; h.notes = null;
+    });
   } catch (e) {
     console.error('Failed to load hills.json', e);
     updateSyncStatus('Failed to load hill database');
     return;
   }
 
-  // Check for OAuth callback or existing session
+  // 2. Check auth
   const fresh = handleAuthCallback();
   const session = fresh || getSession();
 
-  if (session) {
-    applySession(session);
-    enterApp();
-    if (fresh) {
-      setTimeout(() => syncStrava(session), 600);
-    } else {
-      updateSyncStatus('Connected to Strava · click to re-sync');
-    }
+  if (!session) return; // stay on landing page
+
+  applySession(session);
+  enterApp();
+
+  // 3. Load saved ascents from Supabase
+  updateSyncStatus('Loading your summits…');
+  const loaded = await loadAscents(session);
+
+  if (loaded > 0) {
+    updateSyncStatus(`${loaded} summits loaded · Strava sync available`);
+    updateDashboard();
+    filterHills();
+    updateRecentAscents();
+  } else if (fresh) {
+    // First login — run full Strava sync
+    setTimeout(() => syncStrava(session), 400);
+  } else {
+    updateSyncStatus('No summits found — run a Strava sync');
   }
-  // else stay on landing page
 }
 
 init();
