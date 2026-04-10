@@ -587,7 +587,7 @@ textarea.form-input{resize:vertical;min-height:80px}
       </svg>
       <span class="logo-type">Summit</span>
     </a>
-    <button class="nav-cta" onclick="enterApp()">Get Started</button>
+    <button class="nav-cta" onclick="connectStrava()">Get Started</button>
   </nav>
 
   <section class="hero">
@@ -597,7 +597,7 @@ textarea.form-input{resize:vertical;min-height:80px}
         <h1 class="hero-h1">Every summit.<br><em>Finally logged.</em></h1>
         <p class="hero-sub">Connect Strava and Summit automatically detects every Munro, Corbett and Graham you've ever climbed — from your full GPS history. No manual entry.</p>
         <div class="hero-actions">
-          <button class="strava-btn" onclick="enterApp()">
+          <button class="strava-btn" onclick="connectStrava()">
             <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
             Connect with Strava — it's free
           </button>
@@ -1080,26 +1080,26 @@ textarea.form-input{resize:vertical;min-height:80px}
 
 <script>
 const MUNROS=[
-  {id:'ben-nevis',name:'Ben Nevis',gaelic:'Beinn Nibheis',height:1345,region:'Northwest Highlands',bagged:true,date:'14 Aug 2023',source:'strava',desc:'The highest mountain in the British Isles at 1,345 metres, near Fort William. The summit plateau contains ruins of an observatory staffed continuously 1883–1904.'},
-  {id:'ben-macdui',name:'Ben Macdui',gaelic:'Beinn MacDuibh',height:1309,region:'Cairngorms',bagged:true,date:'3 Apr 2026',source:'strava',desc:'Second highest in the UK, deep in the Cairngorm massif. Legendary haunt of the Am Fear Liath Mòr — the Big Grey Man.'},
-  {id:'braeriach',name:'Braeriach',gaelic:'Bràigh Riabhach',height:1296,region:'Cairngorms',bagged:true,date:'3 Apr 2026',source:'strava',desc:'Third highest in the UK. The Grey Brae — part of the vast Cairngorm plateau above the Lairig Ghru.'},
-  {id:'cairn-toul',name:'Cairn Toul',gaelic:'Càrn an t-Sabhail',height:1291,region:'Cairngorms',bagged:false,date:null,desc:'The Cairn of the Barn. Fourth highest in the UK, overlooking the spectacular Garbh Choire Mòr.'},
-  {id:'sgor-lochain',name:'Sgor an Lochain Uaine',gaelic:'Sgòr an Lochan Uaine',height:1258,region:'Cairngorms',bagged:false,date:null,desc:'The Angel\'s Peak. One of the most dramatic summits in the Cairngorms.'},
-  {id:'cairn-gorm',name:'Cairn Gorm',gaelic:'Càrn Gorm',height:1245,region:'Cairngorms',bagged:true,date:'3 Apr 2026',source:'strava',desc:'The Blue Cairn. Gives its name to the entire massif. Accessible by funicular railway.'},
-  {id:'aonach-mor',name:'Aonach Mòr',gaelic:'Aonach Mòr',height:1221,region:'Northwest Highlands',bagged:true,date:'Sep 2022',source:'manual',desc:'The Great Ridge. Home to Nevis Range ski area. Connected to Aonach Beag by a high plateau.'},
-  {id:'ben-lawers',name:'Ben Lawers',gaelic:'Beinn Labhair',height:1214,region:'Southern Highlands',bagged:true,date:'Jun 2022',source:'strava',desc:'Highest in the Southern Highlands, internationally renowned for its arctic-alpine flora. Run by the National Trust for Scotland.'},
-  {id:'an-teallach',name:'An Teallach',gaelic:'An Teallach',height:1062,region:'Northwest Highlands',bagged:false,date:null,desc:'The Forge. One of Scotland\'s finest ridges — the traverse of Corrag Bhuidhe and Sgurr Fiona is among the most exhilarating walks in the country.'},
-  {id:'liathach',name:'Liathach',gaelic:'Liathach',height:1055,region:'Torridon',bagged:false,date:null,desc:'The Grey One. A fearsome Torridonian sandstone ridge rising 900m directly from the glen. The Am Fasarinen pinnacles require scrambling.'},
-  {id:'buachaille',name:'Buachaille Etive Mòr',gaelic:'Buachaille Eite Mòr',height:1022,region:'Glencoe & Glen Etive',bagged:true,date:'Oct 2021',source:'strava',desc:'The Great Herdsman of Etive. Perhaps the most photographed mountain in Scotland, guarding the entrance to Glencoe from the east.'},
-  {id:'beinn-eighe',name:'Beinn Eighe',gaelic:'Beinn Eighe',height:1010,region:'Torridon',bagged:true,date:'22 Mar 2026',source:'manual',desc:'Britain\'s first National Nature Reserve, designated 1951. The quartzite cap gives it an eternally snow-capped appearance.'},
-  {id:'schiehallion',name:'Schiehallion',gaelic:'Sìdhean Chailleann',height:1083,region:'Southern Highlands',bagged:true,date:'8 Mar 2026',source:'strava',desc:'The Fairy Hill of the Caledonians. Used in Maskelyne\'s 1774 Schiehallion Experiment to estimate the mass of the Earth.'},
-  {id:'ben-lomond',name:'Ben Lomond',gaelic:'Beinn Laomainn',height:974,region:'Southern Highlands',bagged:true,date:'May 2019',source:'manual',desc:'The most southerly and most climbed Munro after Ben Nevis. Overlooking Loch Lomond, clearly visible from central Scotland.'},
-  {id:'ben-hope',name:'Ben Hope',gaelic:'Beinn Hòb',height:927,region:'Northwest Highlands',bagged:false,date:null,desc:'The most northerly Munro. Isolated and majestic above the Kyle of Tongue. Often the first or last on a Munroist\'s list.'},
-  {id:'lochnagar',name:'Lochnagar',gaelic:'Loch na Gaire',height:1155,region:'Cairngorms',bagged:false,date:null,desc:'Immortalised by Byron in "Dark Lochnagar". Overlooks the Balmoral estate. The approach from Glen Muick is straightforward.'},
-  {id:'stob-ghabhar',name:'Stob Ghabhar',gaelic:'Stob Ghabhar',height:1090,region:'Southern Highlands',bagged:true,date:'Jul 2023',source:'strava',desc:'Part of the Black Mount, a remote and beautiful range above Loch Tulla.'},
-  {id:'bidean-nam-bian',name:'Bidean nam Bian',gaelic:'Bidean nam Bian',height:1150,region:'Glencoe & Glen Etive',bagged:true,date:'Apr 2022',source:'strava',desc:'The highest peak in Argyll. Hidden behind the Three Sisters of Glencoe, it rewards with superb views toward Rannoch Moor.'},
-  {id:'ben-more-assynt',name:'Ben More Assynt',gaelic:'Beinn Mhòr Asainte',height:998,region:'Northwest Highlands',bagged:false,date:null,desc:'Remote summit requiring a long approach across boggy moorland. The traverse over Conival is one of the finest in Assynt.'},
-  {id:'beinn-a-chleibh',name:'Beinn a\' Chleibh',gaelic:'Beinn a\' Chleibh',height:916,region:'Central Highlands',bagged:false,date:null,desc:'A quieter Munro on the southern flanks of Ben Lui. Often combined with its higher neighbour.'},
+  {id:'ben-nevis',name:'Ben Nevis',gaelic:'Beinn Nibheis',height:1345,region:'Northwest Highlands',lat:56.7969,lng:-5.0036,bagged:false,date:null,source:null,desc:'The highest mountain in the British Isles at 1,345 metres, near Fort William. The summit plateau contains ruins of an observatory staffed continuously 1883–1904.'},
+  {id:'ben-macdui',name:'Ben Macdui',gaelic:'Beinn MacDuibh',height:1309,region:'Cairngorms',lat:57.0703,lng:-3.6690,bagged:false,date:null,source:null,desc:'Second highest in the UK, deep in the Cairngorm massif. Legendary haunt of the Am Fear Liath Mòr — the Big Grey Man.'},
+  {id:'braeriach',name:'Braeriach',gaelic:'Bràigh Riabhach',height:1296,region:'Cairngorms',lat:57.0787,lng:-3.7285,bagged:false,date:null,source:null,desc:'Third highest in the UK. The Grey Brae — part of the vast Cairngorm plateau above the Lairig Ghru.'},
+  {id:'cairn-toul',name:'Cairn Toul',gaelic:'Càrn an t-Sabhail',height:1291,region:'Cairngorms',lat:57.0543,lng:-3.7134,bagged:false,date:null,desc:'The Cairn of the Barn. Fourth highest in the UK, overlooking the spectacular Garbh Choire Mòr.'},
+  {id:'sgor-lochain',name:'Sgor an Lochain Uaine',gaelic:'Sgòr an Lochan Uaine',height:1258,region:'Cairngorms',lat:57.0612,lng:-3.7244,bagged:false,date:null,desc:'The Angel\'s Peak. One of the most dramatic summits in the Cairngorms.'},
+  {id:'cairn-gorm',name:'Cairn Gorm',gaelic:'Càrn Gorm',height:1245,region:'Cairngorms',lat:57.1168,lng:-3.6433,bagged:false,date:null,source:null,desc:'The Blue Cairn. Gives its name to the entire massif. Accessible by funicular railway.'},
+  {id:'aonach-mor',name:'Aonach Mòr',gaelic:'Aonach Mòr',height:1221,region:'Northwest Highlands',lat:56.8264,lng:-4.9630,bagged:false,date:null,desc:'The Great Ridge. Home to Nevis Range ski area. Connected to Aonach Beag by a high plateau.'},
+  {id:'ben-lawers',name:'Ben Lawers',gaelic:'Beinn Labhair',height:1214,region:'Southern Highlands',lat:56.5463,lng:-4.2228,bagged:false,date:null,desc:'Highest in the Southern Highlands, internationally renowned for its arctic-alpine flora.'},
+  {id:'an-teallach',name:'An Teallach',gaelic:'An Teallach',height:1062,region:'Northwest Highlands',lat:57.7994,lng:-5.2507,bagged:false,date:null,desc:'The Forge. One of Scotland\'s finest ridges — the traverse of Corrag Bhuidhe and Sgurr Fiona is among the most exhilarating walks in the country.'},
+  {id:'liathach',name:'Liathach',gaelic:'Liathach',height:1055,region:'Torridon',lat:57.5605,lng:-5.4248,bagged:false,date:null,desc:'The Grey One. A fearsome Torridonian sandstone ridge rising 900m directly from the glen.'},
+  {id:'buachaille',name:'Buachaille Etive Mòr',gaelic:'Buachaille Eite Mòr',height:1022,region:'Glencoe & Glen Etive',lat:56.6607,lng:-4.8980,bagged:false,date:null,desc:'The Great Herdsman of Etive. Perhaps the most photographed mountain in Scotland.'},
+  {id:'beinn-eighe',name:'Beinn Eighe',gaelic:'Beinn Eighe',height:1010,region:'Torridon',lat:57.5875,lng:-5.3479,bagged:false,date:null,desc:'Britain\'s first National Nature Reserve, designated 1951. The quartzite cap gives it an eternally snow-capped appearance.'},
+  {id:'schiehallion',name:'Schiehallion',gaelic:'Sìdhean Chailleann',height:1083,region:'Southern Highlands',lat:56.6591,lng:-4.0952,bagged:false,date:null,desc:'The Fairy Hill of the Caledonians. Used in Maskelyne\'s 1774 Schiehallion Experiment to estimate the mass of the Earth.'},
+  {id:'ben-lomond',name:'Ben Lomond',gaelic:'Beinn Laomainn',height:974,region:'Southern Highlands',lat:56.1874,lng:-4.6341,bagged:false,date:null,desc:'The most southerly and most climbed Munro after Ben Nevis. Overlooking Loch Lomond.'},
+  {id:'ben-hope',name:'Ben Hope',gaelic:'Beinn Hòb',height:927,region:'Northwest Highlands',lat:58.4046,lng:-4.6088,bagged:false,date:null,desc:'The most northerly Munro. Isolated and majestic above the Kyle of Tongue.'},
+  {id:'lochnagar',name:'Lochnagar',gaelic:'Loch na Gaire',height:1155,region:'Cairngorms',lat:56.9598,lng:-3.2390,bagged:false,date:null,desc:'Immortalised by Byron in "Dark Lochnagar". Overlooks the Balmoral estate.'},
+  {id:'stob-ghabhar',name:'Stob Ghabhar',gaelic:'Stob Ghabhar',height:1090,region:'Southern Highlands',lat:56.5277,lng:-4.8752,bagged:false,date:null,desc:'Part of the Black Mount, a remote and beautiful range above Loch Tulla.'},
+  {id:'bidean-nam-bian',name:'Bidean nam Bian',gaelic:'Bidean nam Bian',height:1150,region:'Glencoe & Glen Etive',lat:56.6453,lng:-5.0158,bagged:false,date:null,desc:'The highest peak in Argyll. Hidden behind the Three Sisters of Glencoe.'},
+  {id:'ben-more-assynt',name:'Ben More Assynt',gaelic:'Beinn Mhòr Asainte',height:998,region:'Northwest Highlands',lat:58.1390,lng:-4.8545,bagged:false,date:null,desc:'Remote summit requiring a long approach across boggy moorland.'},
+  {id:'beinn-a-chleibh',name:'Beinn a\' Chleibh',gaelic:'Beinn a\' Chleibh',height:916,region:'Central Highlands',lat:56.3814,lng:-4.8901,bagged:false,date:null,desc:'A quieter Munro on the southern flanks of Ben Lui.'},
 ];
 
 let currentFilter='all', currentHill=null;
@@ -1204,6 +1204,201 @@ function exportCSV(){
 }
 
 renderTable(MUNROS);
+
+// ── STRAVA INTEGRATION ──
+const WORKER = 'https://summit-api.andro-mathewson95.workers.dev';
+
+// Session stored in localStorage
+const SESSION_KEY = 'summit_session';
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); }
+  catch { return null; }
+}
+
+function saveSession(data) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+// Send user to Strava to authorise
+function connectStrava() {
+  window.location.href = `${WORKER}/auth/strava/connect`;
+}
+
+// On page load — check if Strava just redirected back with tokens
+function handleAuthCallback() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return false;
+
+  const params = new URLSearchParams(hash);
+  if (params.get('auth') !== 'success') return false;
+
+  // Save session
+  const session = {
+    athlete_id:    params.get('athlete_id'),
+    name:          decodeURIComponent(params.get('name') || 'Hillwalker'),
+    access_token:  params.get('access_token'),
+    refresh_token: params.get('refresh_token'),
+    expires_at:    parseInt(params.get('expires_at')),
+  };
+  saveSession(session);
+
+  // Clean the URL so tokens don't stay in browser history
+  history.replaceState(null, '', window.location.pathname);
+
+  return session;
+}
+
+// Update dashboard with real athlete name
+function applySession(session) {
+  if (!session) return;
+
+  // Update name throughout the UI
+  const firstName = session.name.split(' ')[0];
+  const greetingEl = document.querySelector('#page-dashboard .page-title');
+  if (greetingEl) greetingEl.textContent = `Good morning, ${firstName}`;
+
+  const footerName = document.querySelector('.footer-name');
+  if (footerName) footerName.textContent = session.name;
+
+  const profileName = document.querySelector('.profile-name-lg');
+  if (profileName) profileName.textContent = session.name;
+}
+
+// Fetch Strava activities and detect summits
+async function syncStrava(session) {
+  if (!session?.access_token) return;
+
+  updateSyncStatus('Fetching your Strava activities…');
+
+  try {
+    let page = 1;
+    let allActivities = [];
+
+    // Fetch all hiking/walking activities (paginated)
+    while (true) {
+      const res = await fetch(
+        `${WORKER}/api/activities?page=${page}&per_page=100`,
+        { headers: { Authorization: `Bearer ${session.access_token}` } }
+      );
+      const activities = await res.json();
+      if (!activities.length) break;
+
+      // Filter to walking/hiking activities only
+      const hillActivities = activities.filter(a =>
+        ['Hike','Walk','TrailRun','Run'].includes(a.type) ||
+        ['Hike','Walk','TrailRun'].includes(a.sport_type)
+      );
+      allActivities = allActivities.concat(hillActivities);
+      if (activities.length < 100) break;
+      page++;
+    }
+
+    updateSyncStatus(`Found ${allActivities.length} walks/hikes — checking for summits…`);
+
+    // Detect summits in each activity
+    let detected = 0;
+    for (const activity of allActivities) {
+      const summits = await detectSummitsInActivity(activity, session.access_token);
+      if (summits.length > 0) {
+        detected += summits.length;
+        markSummitsBagged(summits, activity);
+      }
+    }
+
+    updateSyncStatus(`Sync complete · ${detected} summits detected from Strava`);
+    renderTable(MUNROS);
+    animateRing();
+
+  } catch (err) {
+    console.error('Sync error:', err);
+    updateSyncStatus('Sync failed — check console');
+  }
+}
+
+// Fetch GPS stream for one activity and check against Munro coordinates
+async function detectSummitsInActivity(activity, accessToken) {
+  try {
+    const res = await fetch(
+      `${WORKER}/api/activity/${activity.id}/streams`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const streams = await res.json();
+    if (!streams.latlng?.data) return [];
+
+    const gpsPoints = streams.latlng.data; // array of [lat, lng]
+    const detected = [];
+
+    for (const munro of MUNROS) {
+      if (munro.bagged) continue; // already marked
+      if (!munro.lat || !munro.lng) continue; // no coords yet
+
+      // Check if any GPS point passes within 150m of this summit
+      for (const [lat, lng] of gpsPoints) {
+        const dist = haversineMetres(lat, lng, munro.lat, munro.lng);
+        if (dist <= 150) {
+          detected.push({ munro, activity });
+          break;
+        }
+      }
+    }
+    return detected;
+  } catch {
+    return [];
+  }
+}
+
+// Mark detected summits as bagged
+function markSummitsBagged(summits, activity) {
+  const date = new Date(activity.start_date_local);
+  const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  for (const { munro } of summits) {
+    munro.bagged = true;
+    munro.date = dateStr;
+    munro.source = 'strava';
+    munro.strava_id = activity.id;
+  }
+}
+
+// Haversine formula — distance between two lat/lng points in metres
+function haversineMetres(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+            Math.sin(dLng/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function updateSyncStatus(msg) {
+  const el = document.querySelector('#page-dashboard .page-sub');
+  if (el) el.innerHTML = `<span class="sync-dot"></span>${msg}`;
+}
+
+// ── INITIALISE ──
+(function init() {
+  // Check if returning from Strava OAuth
+  const newSession = handleAuthCallback();
+  const session = newSession || getSession();
+
+  if (session) {
+    // User is logged in — go straight to app
+    applySession(session);
+    enterApp();
+
+    // If this is a fresh login, kick off Strava sync
+    if (newSession) {
+      setTimeout(() => syncStrava(session), 500);
+    }
+  }
+  // Otherwise stay on landing page
+})();
 </script>
 </body>
 </html>
