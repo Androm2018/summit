@@ -1172,12 +1172,15 @@ function updateListView() {
 }
 
 // ── MAP ──
-// Project lat/lng onto the SVG viewBox (300x440) — Scotland bounds
+// Project lat/lng to match the Scotland outline SVG path (viewBox 0 0 300 440)
+// Calibrated so Ben Nevis (56.797,-5.004) → ~(102,162), Cape Wrath (58.6,-5.0) → ~(100,80)
 function projectToSVG(lat, lng) {
+  // Scotland mainland bounds (approx)
   const latMin = 54.6, latMax = 60.9;
-  const lngMin = -7.6, lngMax = -0.7;
-  const x = ((lng - lngMin) / (lngMax - lngMin)) * 240 + 30;
-  const y = ((latMax - lat) / (latMax - latMin)) * 400 + 20;
+  const lngMin = -7.6, lngMax = -0.9;
+  // Map to SVG: x from 70→240 (west→east), y from 10→390 (north→south)
+  const x = ((lng - lngMin) / (lngMax - lngMin)) * 170 + 70;
+  const y = ((latMax - lat) / (latMax - latMin)) * 380 + 10;
   return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
 }
 
@@ -1185,28 +1188,26 @@ function renderMap() {
   const dots = document.getElementById('map-dots');
   if (!dots || !HILLS.length) return;
 
-  // Show Munros only on the map (282 dots is manageable, 2500 would be chaos)
   const munros = getListHills('M');
   const bagged = munros.filter(h => h.bagged);
-  const unbaggedSample = munros.filter(h => !h.bagged);
+  const unbagged = munros.filter(h => !h.bagged);
 
   dots.innerHTML = [
-    ...unbaggedSample.map(h => {
+    ...unbagged.map(h => {
       const { x, y } = projectToSVG(h.lat, h.lng);
-      return `<circle cx="${x}" cy="${y}" r="3" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8" style="cursor:pointer" onclick="openHill(${h.id})" title="${h.name} · ${h.height}m"/>`;
+      return `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.7" style="cursor:pointer" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m</title></circle>`;
     }),
     ...bagged.map(h => {
       const { x, y } = projectToSVG(h.lat, h.lng);
-      return `<circle cx="${x}" cy="${y}" r="4.5" fill="var(--forest)" style="cursor:pointer;filter:drop-shadow(0 0 3px rgba(45,90,61,0.5))" onclick="openHill(${h.id})" title="${h.name} · ${h.height}m"/>`;
+      return `<circle cx="${x}" cy="${y}" r="4" fill="var(--forest)" style="cursor:pointer;filter:drop-shadow(0 0 3px rgba(45,90,61,0.5))" onclick="openHill(${h.id})"><title>${h.name} · ${h.height}m · ${h.date}</title></circle>`;
     }),
   ].join('');
 
-  // Update legend
   const legend = document.getElementById('map-legend');
   if (legend) {
     legend.innerHTML = `
       <span><span class="legend-swatch b"></span>Bagged (${bagged.length})</span>
-      <span><span class="legend-swatch u"></span>Remaining (${munros.length - bagged.length})</span>`;
+      <span><span class="legend-swatch u"></span>Remaining (${unbagged.length})</span>`;
   }
 }
 
@@ -1637,25 +1638,43 @@ async function init() {
 
   if (!session) return; // stay on landing page
 
+  // 3. If session is missing user_id (old session), force re-auth to get it
+  if (!session.user_id) {
+    updateSyncStatus('Session expired — reconnecting…');
+    setTimeout(() => connectStrava(), 1500);
+    applySession(session);
+    enterApp();
+    return;
+  }
+
   applySession(session);
   enterApp();
 
-  // 3. Load saved ascents from Supabase
+  // 4. Load saved ascents from Supabase FIRST, then update UI
   updateSyncStatus('Loading your summits…');
   const loaded = await loadAscents(session);
 
+  // Always update UI after load attempt
+  updateDashboard();
+  filterHills();
+  updateRecentAscents();
+  renderMap();
+
   if (loaded > 0) {
-    updateSyncStatus(`${loaded} summits loaded · Strava sync available`);
-    updateDashboard();
-    filterHills();
-    updateRecentAscents();
-    renderMap();
+    updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync()" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
   } else if (fresh) {
-    // First login — run full Strava sync
+    // Brand new login — run full sync
     setTimeout(() => syncStrava(session), 400);
   } else {
-    updateSyncStatus('No summits found — run a Strava sync');
+    updateSyncStatus(`No summits found · <a href="#" onclick="resync()" style="color:var(--forest);text-decoration:underline">Run Strava sync</a>`);
   }
+}
+
+// Re-sync button
+function resync() {
+  const session = getSession();
+  if (session) syncStrava(session);
+  return false;
 }
 
 init();
