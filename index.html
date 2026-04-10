@@ -741,8 +741,8 @@ textarea.form-input{resize:vertical;min-height:80px}
         <button class="nav-item"><span class="nav-item-icon">⚙</span>Settings</button>
       </nav>
       <div class="sidebar-footer">
-        <div class="avatar-sm">JM</div>
-        <div><div class="footer-name">Jamie MacLeod</div><div class="footer-sub">47 Munros · 16.6%</div></div>
+        <div class="avatar-sm" id="sidebar-avatar">—</div>
+        <div><div class="footer-name">—</div><div class="footer-sub">Loading…</div></div>
       </div>
     </aside>
 
@@ -790,39 +790,18 @@ textarea.form-input{resize:vertical;min-height:80px}
                 <button class="card-link" onclick="showPage('list')">View full list →</button>
               </div>
               <div class="scotland-map-wrap">
-                <svg class="scotland-map" viewBox="0 0 300 440" xmlns="http://www.w3.org/2000/svg">
+                <svg id="scotland-map-svg" class="scotland-map" viewBox="0 0 300 440" xmlns="http://www.w3.org/2000/svg">
                   <path d="M148,8 L165,20 L182,17 L198,28 L194,42 L207,55 L215,70 L210,84 L218,97 L223,115 L214,132 L227,146 L222,164 L230,178 L226,196 L217,210 L203,222 L190,230 L178,238 L163,242 L148,238 L133,230 L120,222 L108,210 L100,196 L96,182 L92,168 L88,154 L84,140 L81,126 L79,112 L84,98 L77,84 L72,70 L80,56 L90,42 L88,28 L103,20 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.5"/>
                   <path d="M42,148 L51,140 L57,148 L53,156 L45,159 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
                   <path d="M33,122 L47,113 L54,121 L50,133 L37,136 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
                   <path d="M24,94 L40,84 L47,93 L43,104 L28,107 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
                   <path d="M70,112 L82,103 L87,112 L80,121 L73,119 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
-                  <!-- Bagged - forest green -->
-                  <g class="mountain-dot bagged" onclick="openHill('ben-nevis')"><circle cx="102" cy="162" r="5"/><title>Ben Nevis · 1,345m</title></g>
-                  <g class="mountain-dot bagged" onclick="openHill('ben-macdui')"><circle cx="173" cy="140" r="5"/><title>Ben Macdui · 1,309m</title></g>
-                  <g class="mountain-dot bagged"><circle cx="179" cy="147" r="5"/><title>Cairn Gorm · 1,245m</title></g>
-                  <g class="mountain-dot bagged" onclick="openHill('ben-lawers')"><circle cx="140" cy="212" r="5"/><title>Ben Lawers · 1,214m</title></g>
-                  <g class="mountain-dot bagged" onclick="openHill('schiehallion')"><circle cx="147" cy="204" r="5"/><title>Schiehallion · 1,083m</title></g>
-                  <g class="mountain-dot bagged" onclick="openHill('ben-lomond')"><circle cx="130" cy="248" r="5"/><title>Ben Lomond · 974m</title></g>
-                  <g class="mountain-dot bagged" onclick="openHill('buachaille')"><circle cx="116" cy="185" r="5"/><title>Buachaille Etive Mòr · 1,022m</title></g>
-                  <g class="mountain-dot bagged" onclick="openHill('beinn-eighe')"><circle cx="91" cy="124" r="5"/><title>Beinn Eighe · 1,010m</title></g>
-                  <g class="mountain-dot bagged"><circle cx="120" cy="175" r="5"/><title>Aonach Mòr · 1,221m</title></g>
-                  <g class="mountain-dot bagged"><circle cx="163" cy="132" r="5"/><title>Braeriach · 1,296m</title></g>
-                  <g class="mountain-dot bagged"><circle cx="155" cy="222" r="5"/><title>Stob Ghabhar · 1,090m</title></g>
-                  <g class="mountain-dot bagged"><circle cx="109" cy="198" r="5"/><title>Bidean nam Bian · 1,150m</title></g>
-                  <!-- Unbagged - light contour -->
-                  <g class="mountain-dot unbagged"><circle cx="88" cy="108" r="4"/><title>An Teallach · 1,062m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="83" cy="118" r="4"/><title>Liathach · 1,055m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="140" cy="58" r="4"/><title>Ben Hope · 927m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="106" cy="80" r="4"/><title>Ben More Assynt · 998m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="197" cy="128" r="4"/><title>Lochnagar · 1,155m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="125" cy="235" r="4"/><title>Ben Cruachan · 1,126m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="155" cy="127" r="4"/><title>Cairn Toul · 1,291m</title></g>
-                  <g class="mountain-dot unbagged"><circle cx="162" cy="120" r="4"/><title>Sgor an Lochain Uaine · 1,258m</title></g>
+                  <g id="map-dots"></g>
                 </svg>
               </div>
-              <div class="map-legend">
-                <span><span class="legend-swatch b"></span>Bagged (47)</span>
-                <span><span class="legend-swatch u"></span>Remaining (235)</span>
+              <div class="map-legend" id="map-legend">
+                <span><span class="legend-swatch b"></span>Bagged (0)</span>
+                <span><span class="legend-swatch u"></span>Remaining (282)</span>
               </div>
             </div>
 
@@ -908,12 +887,6 @@ textarea.form-input{resize:vertical;min-height:80px}
             <input class="search-input" id="munro-search" type="text" placeholder="Search by name or Gaelic…" oninput="filterMunros()"/>
             <select class="filter-sel" id="region-filter" onchange="filterMunros()">
               <option value="">All Regions</option>
-              <option>Cairngorms</option>
-              <option>Northwest Highlands</option>
-              <option>Central Highlands</option>
-              <option>Southern Highlands</option>
-              <option>Glencoe & Glen Etive</option>
-              <option>Torridon</option>
             </select>
             <div class="filter-toggle">
               <button class="ftog-btn active" id="btn-all" onclick="setFilter('all')">All</button>
@@ -936,69 +909,47 @@ textarea.form-input{resize:vertical;min-height:80px}
       <div id="page-hill" class="app-page">
         <div class="page-header">
           <div>
-            <div class="page-title" id="detail-title">Ben Nevis</div>
-            <div class="page-sub" id="detail-crumb">Munros · Northwest Highlands</div>
+            <div class="page-title" id="detail-title">—</div>
+            <div class="page-sub" id="detail-crumb">—</div>
           </div>
           <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
         </div>
         <div class="content-area">
-          <button class="back-btn" onclick="showPage('list')">← All Munros</button>
+          <button class="back-btn" onclick="showPage('list')">← Back to list</button>
           <div class="hill-layout">
             <div>
               <div class="hill-banner">
-                <div class="hill-eyebrow">▲ Munro · No. 1 by height</div>
-                <h1 class="hill-name-lg" id="detail-name">Ben Nevis</h1>
-                <div class="hill-gaelic-lg" id="detail-gaelic">Beinn Nibheis — "Mountain of Heaven"</div>
-                <div class="hill-tags">
-                  <span class="hill-tag tag-bagged">✓ Bagged · 2 ascents</span>
-                  <span class="hill-tag tag-strava">⚡ Last via Strava</span>
-                </div>
+                <div class="hill-eyebrow" id="detail-eyebrow">▲ Hill</div>
+                <h1 class="hill-name-lg" id="detail-name">—</h1>
+                <div class="hill-gaelic-lg" id="detail-gaelic">—</div>
+                <div class="hill-tags" id="detail-tags"></div>
                 <div class="hill-stats">
-                  <div><div class="hstat-val" id="detail-height">1,345m</div><div class="hstat-key">Height</div></div>
-                  <div><div class="hstat-val">4,409ft</div><div class="hstat-key">Imperial</div></div>
-                  <div><div class="hstat-val" id="detail-region">NW Highlands</div><div class="hstat-key">Region</div></div>
-                  <div><div class="hstat-val">NN 166 712</div><div class="hstat-key">Grid Ref</div></div>
+                  <div><div class="hstat-val" id="detail-height">—</div><div class="hstat-key">Height</div></div>
+                  <div><div class="hstat-val" id="detail-feet">—</div><div class="hstat-key">Imperial</div></div>
+                  <div><div class="hstat-val" id="detail-region">—</div><div class="hstat-key">Region</div></div>
+                  <div><div class="hstat-val" id="detail-country">—</div><div class="hstat-key">Country</div></div>
                 </div>
               </div>
 
               <div class="info-card">
                 <div class="card-header"><span class="card-title">About this hill</span></div>
-                <div class="info-body"><p id="detail-desc">Ben Nevis is the highest mountain in the British Isles at 1,345 metres. Located near Fort William in the Lochaber area, it attracts around 125,000 ascents every year. The summit plateau — about 100 acres — contains the ruins of an observatory staffed from 1883 to 1904. The most popular route is the Mountain Track ascending from Glen Nevis.</p></div>
+                <div class="info-body"><p id="detail-desc">—</p></div>
               </div>
 
               <div class="info-card">
                 <div class="card-header"><span class="card-title">Conditions — community reports</span></div>
-                <div class="cond-item"><div class="cond-date">2 days ago · via Summit</div><div class="cond-text">Good visibility on summit. Path icy above 900m — crampons strongly recommended on the descent.</div></div>
-                <div class="cond-item"><div class="cond-date">5 days ago · via Summit</div><div class="cond-text">Clear skies, fantastic views to the Cairngorms. Snow cornices still present on the north face — give a wide berth.</div></div>
+                <div class="cond-item"><div class="cond-date">Community conditions coming soon</div><div class="cond-text">Be the first to report conditions on this hill after your next visit.</div></div>
               </div>
             </div>
 
             <div>
               <div class="card">
-                <div class="card-header"><span class="card-title">My Ascents (2)</span></div>
-                <div class="ascent-item">
-                  <div class="ascent-date">↑ 14 August 2023 <span class="strava-pill">⚡ Strava</span></div>
-                  <div class="ascent-companions">With: <span>Sarah K., David T.</span></div>
-                  <div class="ascent-notes">"Perfect summer day, views across to Glencoe. Sarah got her first Munro! Tourist track up, abseil path down — knees were screaming by the end."</div>
-                  <div class="ascent-source-tag">⚡ Auto-detected from Strava activity</div>
-                </div>
-                <div class="ascent-item">
-                  <div class="ascent-date">↑ 3 November 2019</div>
-                  <div class="ascent-companions">With: <span>Solo</span></div>
-                  <div class="ascent-notes">"First ever Munro. Claggy on the summit — couldn't see a thing. Still counts."</div>
-                  <div class="ascent-source-tag">✎ Manually logged</div>
+                <div class="card-header"><span class="card-title" id="detail-ascents-title">My Ascents</span></div>
+                <div id="detail-ascents-list">
+                  <div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged</div>
                 </div>
                 <div style="padding:0 1rem 1rem">
-                  <button class="log-full-btn" onclick="openLogModal()">+ Log Another Ascent</button>
-                </div>
-              </div>
-
-              <div class="info-card">
-                <div class="card-header"><span class="card-title">Gaelic Pronunciation</span></div>
-                <div class="info-body">
-                  <div class="pron-big">Beinn Nibheis</div>
-                  <div class="pron-ipa">/beɪn ˈniː.ɪʃ/ · Say: "Ben Nee-vish"</div>
-                  <div class="pron-note">From Old Gaelic — possibly Beinn Nèamhais ("Heaven's Mountain") or alternatively "Venomous Mountain", perhaps a reference to the frequently severe summit weather.</div>
+                  <button class="log-full-btn" onclick="openLogModal()">+ Log an Ascent</button>
                 </div>
               </div>
             </div>
@@ -1104,6 +1055,7 @@ function enterApp() {
   document.getElementById('app').classList.add('active');
   updateListView();
   updateDashboard();
+  renderMap();
 }
 
 function showPage(p) {
@@ -1208,7 +1160,54 @@ function updateListView() {
   const title = document.querySelector('#page-list .page-title');
   if (title) title.textContent = meta?.name || currentList;
 
+  // Populate region filter dynamically
+  const regions = [...new Set(currentHills.map(h => h.region).filter(Boolean))].sort();
+  const sel = document.getElementById('region-filter');
+  if (sel) {
+    sel.innerHTML = '<option value="">All Regions</option>' +
+      regions.map(r => `<option>${r}</option>`).join('');
+  }
+
   filterHills();
+}
+
+// ── MAP ──
+// Project lat/lng onto the SVG viewBox (300x440) — Scotland bounds
+function projectToSVG(lat, lng) {
+  const latMin = 54.6, latMax = 60.9;
+  const lngMin = -7.6, lngMax = -0.7;
+  const x = ((lng - lngMin) / (lngMax - lngMin)) * 240 + 30;
+  const y = ((latMax - lat) / (latMax - latMin)) * 400 + 20;
+  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+}
+
+function renderMap() {
+  const dots = document.getElementById('map-dots');
+  if (!dots || !HILLS.length) return;
+
+  // Show Munros only on the map (282 dots is manageable, 2500 would be chaos)
+  const munros = getListHills('M');
+  const bagged = munros.filter(h => h.bagged);
+  const unbaggedSample = munros.filter(h => !h.bagged);
+
+  dots.innerHTML = [
+    ...unbaggedSample.map(h => {
+      const { x, y } = projectToSVG(h.lat, h.lng);
+      return `<circle cx="${x}" cy="${y}" r="3" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8" style="cursor:pointer" onclick="openHill(${h.id})" title="${h.name} · ${h.height}m"/>`;
+    }),
+    ...bagged.map(h => {
+      const { x, y } = projectToSVG(h.lat, h.lng);
+      return `<circle cx="${x}" cy="${y}" r="4.5" fill="var(--forest)" style="cursor:pointer;filter:drop-shadow(0 0 3px rgba(45,90,61,0.5))" onclick="openHill(${h.id})" title="${h.name} · ${h.height}m"/>`;
+    }),
+  ].join('');
+
+  // Update legend
+  const legend = document.getElementById('map-legend');
+  if (legend) {
+    legend.innerHTML = `
+      <span><span class="legend-swatch b"></span>Bagged (${bagged.length})</span>
+      <span><span class="legend-swatch u"></span>Remaining (${munros.length - bagged.length})</span>`;
+  }
 }
 
 function renderTable(data) {
@@ -1259,15 +1258,52 @@ function openHill(id) {
   const h = HILLS.find(x => x.id === id);
   if (!h) return;
   currentHill = h;
+
   const listNames = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+  const feet = Math.round(h.height * 3.28084).toLocaleString();
+  const countryMap = { S: 'Scotland', E: 'England', W: 'Wales', I: 'Ireland', C: 'Channel Islands', M: 'Isle of Man' };
+  const country = countryMap[h.country] || h.country || '—';
+
   document.getElementById('detail-title').textContent = h.name;
   document.getElementById('detail-crumb').textContent = `${listNames} · ${h.region}`;
+  document.getElementById('detail-eyebrow').textContent = `▲ ${listNames}`;
   document.getElementById('detail-name').textContent = h.name;
   document.getElementById('detail-gaelic').textContent = h.region;
-  document.getElementById('detail-height').textContent = h.height + 'm';
+  document.getElementById('detail-height').textContent = `${h.height}m`;
+  document.getElementById('detail-feet').textContent = `${feet}ft`;
   document.getElementById('detail-region').textContent = h.region;
+  document.getElementById('detail-country').textContent = country;
   document.getElementById('detail-desc').textContent =
-    `${h.name} stands at ${h.height}m in ${h.region}. Listed as: ${listNames}.`;
+    `${h.name} stands at ${h.height}m (${feet}ft) in ${h.region}, ${country}. ` +
+    `It appears on the following lists: ${listNames}.`;
+
+  // Tags
+  const tagsEl = document.getElementById('detail-tags');
+  if (tagsEl) {
+    tagsEl.innerHTML = h.bagged
+      ? `<span class="hill-tag tag-bagged">✓ Bagged${h.date ? ' · ' + h.date : ''}</span>
+         ${h.source === 'strava' ? '<span class="hill-tag tag-strava">⚡ Via Strava</span>' : ''}`
+      : '<span class="hill-tag" style="background:var(--paper-mid);color:var(--muted);border:1px solid var(--border)">○ Not yet bagged</span>';
+  }
+
+  // Ascents panel
+  const ascentTitle = document.getElementById('detail-ascents-title');
+  const ascentList = document.getElementById('detail-ascents-list');
+  if (ascentTitle) ascentTitle.textContent = h.bagged ? 'My Ascents (1)' : 'My Ascents (0)';
+  if (ascentList) {
+    ascentList.innerHTML = h.bagged ? `
+      <div class="ascent-item">
+        <div class="ascent-date">↑ ${h.date || 'Date unknown'}
+          ${h.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
+        </div>
+        <div class="ascent-companions">With: <span>${h.companions || 'Solo'}</span></div>
+        ${h.notes ? `<div class="ascent-notes">"${h.notes}"</div>` : ''}
+        ${h.conditions ? `<div class="ascent-source-tag">Conditions: ${h.conditions}</div>` : ''}
+        <div class="ascent-source-tag">${h.source === 'strava' ? '⚡ Auto-detected from Strava' : '✎ Manually logged'}</div>
+      </div>` :
+      '<div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged — log an ascent below</div>';
+  }
+
   document.getElementById('log-hill').value = h.name;
   showPage('hill');
 }
@@ -1367,6 +1403,11 @@ function applySession(session) {
   if (g) g.textContent = `${greeting}, ${first}`;
   document.querySelectorAll('.footer-name').forEach(el => el.textContent = session.name);
   document.querySelectorAll('.profile-name-lg').forEach(el => el.textContent = session.name);
+  // Set avatar initials
+  const parts = session.name.split(' ');
+  const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+  const avatar = document.getElementById('sidebar-avatar');
+  if (avatar) avatar.textContent = initials.toUpperCase();
 }
 
 function updateSyncStatus(msg) {
@@ -1537,6 +1578,7 @@ async function syncStrava(session) {
     updateDashboard();
     filterHills();
     updateRecentAscents();
+    renderMap();
 
   } catch (err) {
     console.error(err);
@@ -1607,6 +1649,7 @@ async function init() {
     updateDashboard();
     filterHills();
     updateRecentAscents();
+    renderMap();
   } else if (fresh) {
     // First login — run full Strava sync
     setTimeout(() => syncStrava(session), 400);
