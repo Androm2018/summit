@@ -657,42 +657,36 @@ textarea.form-input{resize:vertical;min-height:80px}
       <div class="hero-visual">
         <div class="map-card">
           <div class="map-card-header">
-            <span class="map-card-title">Jamie's Progress</span>
-            <span class="map-card-badge">✓ 47 Munros</span>
+            <span class="map-card-title">Your Progress</span>
+            <span class="map-card-badge">✓ Synced from Strava</span>
           </div>
           <div class="stat-strip">
-            <div class="strip-item"><div class="strip-num" style="color:var(--forest)">47</div><div class="strip-label">Bagged</div></div>
-            <div class="strip-item"><div class="strip-num" style="color:var(--earth)">94km</div><div class="strip-label">Vertical</div></div>
-            <div class="strip-item"><div class="strip-num" style="color:var(--water)">61</div><div class="strip-label">Ascents</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--forest)">47</div><div class="strip-label">Munros</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--earth)">12</div><div class="strip-label">Corbetts</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--water)">23</div><div class="strip-label">Marilyns</div></div>
           </div>
-          <!-- Mini map preview -->
-          <div style="padding:1.2rem;background:var(--paper-mid)">
-            <svg width="100%" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
-              <path d="M148,8 L165,20 L182,17 L198,28 L194,42 L207,55 L215,70 L210,84 L218,97 L223,115 L214,132 L227,146 L222,164 L230,178 L226,196 L217,210 L203,222 L190,230 L178,238 L163,242 L148,238 L133,230 L120,222 L108,210 L100,196 L96,182 L92,168 L88,154 L84,140 L81,126 L79,112 L84,98 L77,84 L72,70 L80,56 L90,42 L88,28 L103,20 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1.2"/>
-              <path d="M42,148 L51,140 L57,148 L53,156 L45,159 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
-              <path d="M33,122 L47,113 L54,121 L50,133 L37,136 Z" fill="var(--paper-dark)" stroke="var(--border)" stroke-width="1"/>
-              <!-- Bagged -->
-              <circle cx="102" cy="162" r="5" fill="var(--forest)"/>
-              <circle cx="173" cy="140" r="5" fill="var(--forest)"/>
-              <circle cx="179" cy="147" r="5" fill="var(--forest)"/>
-              <circle cx="140" cy="212" r="5" fill="var(--forest)"/>
-              <circle cx="147" cy="204" r="5" fill="var(--forest)"/>
-              <circle cx="130" cy="182" r="5" fill="var(--forest)"/>
-              <circle cx="116" cy="185" r="5" fill="var(--forest)"/>
-              <circle cx="120" cy="195" r="5" fill="var(--forest)"/>
-              <circle cx="91" cy="124" r="5" fill="var(--forest)"/>
-              <circle cx="160" cy="196" r="5" fill="var(--forest)"/>
-              <!-- Unbagged -->
-              <circle cx="91" cy="108" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
-              <circle cx="86" cy="118" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
-              <circle cx="143" cy="58" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
-              <circle cx="108" cy="80" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
-              <circle cx="200" cy="132" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
-              <circle cx="208" cy="145" r="4" fill="var(--contour-lt)" stroke="var(--contour)" stroke-width="0.8"/>
-            </svg>
+          <div style="padding:1rem 1.2rem;background:var(--paper-mid);font-size:0.82rem;color:var(--text-mid)">
+            <div style="display:flex;flex-direction:column;gap:0.5rem">
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--forest);flex-shrink:0"></span>
+                <span><strong>Cruach Ardrain</strong> · 1,045m · 11 Oct 2025</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--forest);flex-shrink:0"></span>
+                <span><strong>Ben More</strong> · 1,174m · 11 Oct 2025</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--forest);flex-shrink:0"></span>
+                <span><strong>Ben Lawers</strong> · 1,214m · 31 Aug 2025</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem;color:var(--light-muted)">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--contour-lt);border:1px solid var(--contour);flex-shrink:0"></span>
+                <span>An Teallach · 1,062m · not yet bagged</span>
+              </div>
+            </div>
           </div>
           <div style="padding:0.8rem 1.2rem;border-top:1px solid var(--border-lt);font-size:0.72rem;color:var(--light-muted);display:flex;align-items:center;gap:0.4rem">
-            <span class="sync-dot"></span>Strava synced 2 minutes ago · 3 new summits detected
+            <span class="sync-dot"></span>Detected automatically from your Strava GPS tracks
           </div>
         </div>
       </div>
@@ -1772,27 +1766,53 @@ function updateSettingsPage() {
 }
 
 // ── DELETE ASCENT ──
+function getDeletedIds() {
+  try { return new Set(JSON.parse(localStorage.getItem('summit_deleted') || '[]')); }
+  catch { return new Set(); }
+}
+function addDeletedId(id) {
+  const ids = getDeletedIds();
+  ids.add(id);
+  localStorage.setItem('summit_deleted', JSON.stringify([...ids]));
+}
+
 async function deleteAscent(ascentId, hillId) {
   if (!confirm('Delete this ascent?')) return;
-  const session = getSession();
-  try {
-    const token = await getValidToken(session);
-    await fetch(`${WORKER}/api/ascents/${ascentId}`, {
-      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
-    });
-  } catch (e) { console.error('Delete failed', e); }
+
+  // Immediately cache the ID locally — survives refresh even if Supabase PATCH fails
+  addDeletedId(ascentId);
+
+  // Mark locally
   const idx = ASCENTS.findIndex(a => a.id === ascentId);
   if (idx > -1) ASCENTS[idx].deleted_at = new Date().toISOString();
+
+  // Try Supabase soft delete
+  const session = getSession();
+  if (session?.user_id) {
+    try {
+      const token = await getValidToken(session);
+      const res = await fetch(`${WORKER}/api/ascents/${ascentId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) console.warn('Soft delete failed on server — using local cache');
+    } catch (e) { console.warn('Delete request failed — using local cache', e); }
+  }
+
+  // Update hills based on remaining ascents
   const remaining = ASCENTS.filter(a => a.hill_id === hillId && !a.deleted_at);
   const hill = HILLS.find(h => h.id === hillId);
   if (hill) {
     if (remaining.length === 0) {
-      hill.bagged=false; hill.date=null; hill.source=null; hill.companions=null; hill.conditions=null; hill.notes=null;
+      hill.bagged=false; hill.date=null; hill.source=null;
+      hill.companions=null; hill.conditions=null; hill.notes=null;
     } else {
       const latest = remaining.sort((a,b) => b.date > a.date ? 1 : -1)[0];
-      hill.date=latest.date; hill.source=latest.source; hill.companions=latest.companions; hill.conditions=latest.conditions; hill.notes=latest.notes;
+      hill.date=latest.date; hill.source=latest.source;
+      hill.companions=latest.companions; hill.conditions=latest.conditions; hill.notes=latest.notes;
     }
   }
+
   updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
   if (currentHill?.id === hillId) openHill(hillId);
   toast('Ascent deleted');
@@ -1935,8 +1955,9 @@ async function loadAscents(session) {
     const ascents = await res.json();
     if (!Array.isArray(ascents)) return 0;
 
-    // Store full ascents array (for multiple ascents per hill, delete, export)
-    ASCENTS = ascents.filter(a => !a.deleted_at);
+    // Filter: remove server-deleted AND locally-cached deleted IDs
+    const deletedIds = getDeletedIds();
+    ASCENTS = ascents.filter(a => !a.deleted_at && !deletedIds.has(a.id));
 
     // Apply to HILLS — use most recent non-deleted ascent per hill
     const byHill = {};
@@ -2021,27 +2042,47 @@ async function detectSummitsInActivity(activity, token) {
 
 async function syncStrava(session) {
   if (!session?.access_token) return;
-  updateSyncStatus('Fetching your Strava activities…');
+
+  const settings = getSettings();
+  const SYNC_KEY = `summit_last_sync_${session.athlete_id}`;
+  const lastSync = localStorage.getItem(SYNC_KEY);
+  const isIncremental = !!lastSync;
+
+  updateSyncStatus(isIncremental
+    ? `Checking for new activities since ${new Date(parseInt(lastSync)*1000).toLocaleDateString('en-GB')}…`
+    : 'Fetching your full Strava history — this may take a minute…'
+  );
 
   try {
     const token = await getValidToken(session);
-    let page = 1, all = [];
+    const syncStarted = Math.floor(Date.now() / 1000);
+    const activityTypes = settings.includeRuns
+      ? ['Hike','Walk','TrailRun','Run']
+      : ['Hike','Walk','TrailRun'];
 
+    let page = 1, all = [];
     while (true) {
-      const res = await fetch(`${WORKER}/api/activities?page=${page}&per_page=100`,
-        { headers: { Authorization: `Bearer ${token}` } });
+      const afterParam = isIncremental ? `&after=${lastSync}` : '';
+      const res = await fetch(
+        `${WORKER}/api/activities?page=${page}&per_page=100${afterParam}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const acts = await res.json();
       if (!Array.isArray(acts) || !acts.length) break;
       const hillActs = acts.filter(a =>
-        ['Hike','Walk','TrailRun','Run'].includes(a.type) ||
-        ['Hike','Walk','TrailRun'].includes(a.sport_type)
+        activityTypes.includes(a.type) || activityTypes.includes(a.sport_type)
       );
       all = all.concat(hillActs);
-      if (acts.length < 100) break;
+      if (acts.length < 100 || isIncremental) break;
       page++;
     }
 
-    updateSyncStatus(`Found ${all.length} walks/hikes — scanning for summits…`);
+    if (all.length === 0 && isIncremental) {
+      updateSyncStatus(`Up to date · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`);
+      return;
+    }
+
+    updateSyncStatus(`Found ${all.length} ${isIncremental ? 'new ' : ''}walks — scanning for summits…`);
 
     let detected = 0;
     const newlyDetected = [];
@@ -2059,22 +2100,46 @@ async function syncStrava(session) {
       if (detected > 0) updateSyncStatus(`Found ${detected} summits so far…`);
     }
 
-    // Save to Supabase so they persist across sessions
     if (newlyDetected.length > 0) {
-      updateSyncStatus(`Saving ${detected} summits to your account…`);
+      updateSyncStatus(`Saving ${detected} summits…`);
       await saveAscents(session, newlyDetected);
+      for (const { hill, activity } of newlyDetected) {
+        ASCENTS.unshift({
+          id: 'strava-' + activity.id,
+          user_id: session.user_id,
+          hill_id: hill.id, hill_name: hill.name,
+          hill_lists: hill.lists, height: hill.height, region: hill.region,
+          date: hill.date, source: 'strava',
+          strava_activity_id: String(activity.id),
+          companions: null, conditions: null, notes: null, deleted_at: null,
+        });
+      }
     }
 
-    updateSyncStatus(`Sync complete · ${detected} summits detected · refreshing…`);
-    updateDashboard();
-    filterHills();
-    updateRecentAscents();
-    renderMap();
+    localStorage.setItem(SYNC_KEY, syncStarted.toString());
+
+    const msg = detected > 0
+      ? `✓ ${detected} new summit${detected > 1 ? 's' : ''} detected`
+      : 'Up to date — no new summits';
+    updateSyncStatus(`${msg} · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`);
+
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
 
   } catch (err) {
     console.error(err);
     updateSyncStatus('Sync failed — try again');
   }
+}
+
+// resync(true) = force full history, resync() = incremental
+function resync(full = false) {
+  const session = getSession();
+  if (!session) return;
+  if (full) {
+    localStorage.removeItem(`summit_last_sync_${session.athlete_id}`);
+    toast('Full scan started…');
+  }
+  syncStrava(session);
 }
 
 // ── RECENT ASCENTS FEED ──
