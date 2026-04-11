@@ -1150,14 +1150,14 @@ textarea.form-input{resize:vertical;min-height:80px}
             </div>
           </div>
 
-          <div class="dash-grid">
+          <div class="dash-grid" style="align-items:start">
             <!-- Map -->
             <div class="card" style="overflow:hidden">
               <div class="card-header">
                 <span class="card-title">My Hills — Interactive Map</span>
                 <button class="card-link" onclick="showPage('list')">View full list →</button>
               </div>
-              <div id="summit-map" style="height:min(420px,55vw);min-height:240px;width:100%;"></div>
+              <div id="summit-map" style="height:420px;width:100%;"></div>
               <div class="map-legend" id="map-legend">
                 <span><span class="legend-swatch b"></span>Bagged (0)</span>
                 <span><span class="legend-swatch u"></span>Remaining</span>
@@ -2954,15 +2954,19 @@ async function startCheckout() {
     });
 
     const data = await res.json();
+    console.log('Checkout response:', res.status, JSON.stringify(data));
 
     if (data.url) {
       window.location.href = data.url;
     } else {
-      throw new Error(data.error || 'No checkout URL returned');
+      const errMsg = data.error || JSON.stringify(data) || 'No checkout URL returned';
+      toast(`Checkout failed: ${errMsg}`);
+      console.error('Checkout failed:', errMsg);
+      if (btn) { btn.textContent = 'Continue to payment →'; btn.disabled = false; }
     }
   } catch (err) {
     console.error('Checkout error:', err);
-    toast('Could not start checkout — please try again');
+    toast(`Could not reach payment server — ${err.message}`);
     if (btn) { btn.textContent = 'Continue to payment →'; btn.disabled = false; }
   }
 }
