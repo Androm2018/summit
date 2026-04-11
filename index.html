@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Summit — Track Every Scottish Hill</title>
+<title>Summit — Track Every British Hill</title>
+<meta name="description" content="Automatically track your Munros, Corbetts, Wainwrights and Marilyns from Strava GPS. The hill bagging app built for British hillwalkers."/>
+<meta property="og:title" content="Summit — Track Every British Hill"/>
+<meta property="og:description" content="Connect Strava and Summit automatically detects every summit you've climbed. Free for Munros. Premium unlocks all 8 lists."/>
+<meta property="og:url" content="https://summitapp.uk"/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="https://summitapp.uk/summit-icon-512.png"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Summit — Track Every British Hill"/>
+<meta name="twitter:description" content="Auto-detect your Munros, Corbetts, Wainwrights and Marilyns from Strava. Free for Munros."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
@@ -419,6 +428,24 @@ body{overflow-x:hidden}
   vertical-align:middle;
 }
 
+/* Badges */
+.badge-row{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.6rem 0.5rem;border-radius:5px;
+  transition:background 0.15s;
+}
+.badge-row:hover{background:var(--paper-mid)}
+.badge-icon{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+}
+.badge-icon.earned{background:linear-gradient(135deg,#2d5a3d,#4a7c59);box-shadow:0 2px 6px rgba(45,90,61,0.3)}
+.badge-icon.locked{background:var(--paper-mid);border:1px solid var(--border);filter:grayscale(1);opacity:0.5}
+.badge-name{font-size:0.82rem;font-weight:500;color:var(--text);line-height:1.3}
+.badge-progress{font-size:0.72rem;color:var(--muted);margin-top:0.1rem}
+.badge-earned-date{font-size:0.68rem;color:var(--forest);margin-top:0.1rem;font-weight:500}
+
 /* Empty states */
 .empty-state{padding:2rem 1.5rem;text-align:center;color:var(--light-muted);font-size:0.85rem;line-height:1.7}
 .empty-state-icon{font-size:2rem;margin-bottom:0.75rem;display:block}
@@ -766,9 +793,11 @@ textarea.form-input{resize:vertical;min-height:80px}
         <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.8"/>
         <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5" opacity="1"/>
         <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
-        <!-- tick mark at top -->
-        <line x1="16" y1="4" x2="16" y2="8" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="13.5" y1="6" x2="18.5" y2="6" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Trig point pillar -->
+      <rect x="13.5" y="8" width="5" height="6" rx="0.5" fill="#2d5a3d" opacity="0.85"/>
+      <rect x="12.5" y="13.5" width="7" height="1.2" rx="0.2" fill="#2d5a3d"/>
+      <rect x="11.5" y="14.5" width="9" height="1.2" rx="0.2" fill="#1e3d29" opacity="0.7"/>
+      <circle cx="16" cy="8.5" r="0.9" fill="#7aab87"/>
       </svg>
       <span class="logo-type">Summit</span>
     </a>
@@ -1004,8 +1033,11 @@ textarea.form-input{resize:vertical;min-height:80px}
           <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
           <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5"/>
           <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
-          <line x1="16" y1="4" x2="16" y2="8" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="13.5" y1="6" x2="18.5" y2="6" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Trig point pillar -->
+      <rect x="13.5" y="8" width="5" height="6" rx="0.5" fill="#2d5a3d" opacity="0.85"/>
+      <rect x="12.5" y="13.5" width="7" height="1.2" rx="0.2" fill="#2d5a3d"/>
+      <rect x="11.5" y="14.5" width="9" height="1.2" rx="0.2" fill="#1e3d29" opacity="0.7"/>
+      <circle cx="16" cy="8.5" r="0.9" fill="#7aab87"/>
         </svg>
         <span class="sidebar-logo-type">Summit</span>
       </div>
@@ -1113,6 +1145,11 @@ textarea.form-input{resize:vertical;min-height:80px}
                     <div class="empty-state">Connect Strava to see your recent ascents here</div>
                   </div>
                 </div>
+              </div>
+              <!-- Badges -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Badges</span></div>
+                <div id="badges-list" style="padding:0.5rem 0.75rem 0.75rem;display:flex;flex-direction:column;gap:0.5rem"></div>
               </div>
             </div>
           </div>
@@ -1395,8 +1432,10 @@ textarea.form-input{resize:vertical;min-height:80px}
     <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
     <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5"/>
     <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
-    <line x1="16" y1="4" x2="16" y2="8" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="13.5" y1="6" x2="18.5" y2="6" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="13.5" y="8" width="5" height="6" rx="0.5" fill="#2d5a3d" opacity="0.85"/>
+    <rect x="12.5" y="13.5" width="7" height="1.2" rx="0.2" fill="#2d5a3d"/>
+    <rect x="11.5" y="14.5" width="9" height="1.2" rx="0.2" fill="#1e3d29" opacity="0.7"/>
+    <circle cx="16" cy="8.5" r="0.9" fill="#7aab87"/>
   </svg>
   <div style="text-align:center">
     <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:0.5rem" id="loading-title">Scanning your hill history…</div>
@@ -2281,7 +2320,7 @@ async function deleteAscent(ascentId, hillId) {
     }
   }
 
-  updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+  updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
   if (currentHill?.id === hillId) openHill(hillId);
   toast('Ascent deleted');
 }
@@ -2304,7 +2343,7 @@ async function confirmClearData() {
   } catch (e) { console.error('Clear failed', e); }
   ASCENTS = [];
   HILLS.forEach(h => { h.bagged=false; h.date=null; h.source=null; h.companions=null; h.conditions=null; h.notes=null; });
-  updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+  updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
   toast('All ascents cleared');
 }
 
@@ -2637,7 +2676,7 @@ async function confirmImport() {
     }
 
     closeImportModal();
-    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
     toast(`✓ ${toImport.length} ascents imported successfully`);
 
   } catch (err) {
@@ -3110,7 +3149,7 @@ async function syncStrava(session) {
       : ` · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`;
 
     updateSyncStatus(`${msg}${upgradeNudge}`);
-    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
 
   } catch (err) {
     console.error(err);
@@ -3158,7 +3197,125 @@ function updateRecentAscents() {
     </div>`).join('');
 }
 
-// ── LOADING OVERLAY ──
+// ── BADGES ──
+
+const BADGES = [
+  {
+    id:    'three_peaks_britain',
+    name:  'Three Peaks of Britain',
+    desc:  'Ben Nevis, Scafell Pike & Snowdon',
+    icon:  '🏔',
+    hills: [278, 2359, 1963], // Ben Nevis, Scafell Pike, Snowdon/Yr Wyddfa
+  },
+  {
+    id:    'yorkshire_three_peaks',
+    name:  'Yorkshire Three Peaks',
+    desc:  'Pen-y-ghent, Whernside & Ingleborough',
+    icon:  '🌿',
+    hills: [2783, 2779, 2780],
+  },
+  {
+    id:    'welsh_3000s',
+    name:  'Welsh 3000s',
+    desc:  'The seven peaks over 3,000ft in Wales',
+    icon:  '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+    hills: [1963, 1965, 1967, 1972, 1975, 1977, 2083],
+  },
+  {
+    id:    'munro_10',
+    name:  'Munro Apprentice',
+    desc:  'Bag your first 10 Munros',
+    icon:  '⛰',
+    type:  'count',
+    list:  'M',
+    target: 10,
+  },
+  {
+    id:    'munro_50',
+    name:  'Munro Veteran',
+    desc:  'Bag 50 Munros',
+    icon:  '🎖',
+    type:  'count',
+    list:  'M',
+    target: 50,
+  },
+  {
+    id:    'munro_100',
+    name:  'Centurion',
+    desc:  'Bag 100 Munros',
+    icon:  '💯',
+    type:  'count',
+    list:  'M',
+    target: 100,
+  },
+  {
+    id:    'munro_compleater',
+    name:  'Munro Compleater',
+    desc:  'Bag all 282 Munros',
+    icon:  '👑',
+    type:  'count',
+    list:  'M',
+    target: 282,
+  },
+];
+
+function checkBadges() {
+  return BADGES.map(badge => {
+    let earned = false;
+    let progress = 0;
+    let total = 0;
+
+    if (badge.hills) {
+      // Specific hill set — check all bagged
+      const baggedIds = new Set(HILLS.filter(h => h.bagged).map(h => h.id));
+      progress = badge.hills.filter(id => baggedIds.has(id)).length;
+      total    = badge.hills.length;
+      earned   = progress === total;
+    } else if (badge.type === 'count') {
+      total    = badge.target;
+      progress = getListHills(badge.list).filter(h => h.bagged).length;
+      earned   = progress >= total;
+    }
+
+    return { ...badge, earned, progress, total };
+  });
+}
+
+function updateBadges() {
+  const container = document.getElementById('badges-list');
+  if (!container) return;
+
+  const results = checkBadges();
+  const earned  = results.filter(b => b.earned);
+  const locked  = results.filter(b => !b.earned);
+
+  if (earned.length === 0 && locked.every(b => b.progress === 0)) {
+    container.innerHTML = `<div style="padding:0.75rem 0.25rem;font-size:0.8rem;color:var(--light-muted);text-align:center">Complete challenges to earn badges</div>`;
+    return;
+  }
+
+  container.innerHTML = [
+    ...earned.map(b => `
+      <div class="badge-row">
+        <div class="badge-icon earned">${b.icon}</div>
+        <div>
+          <div class="badge-name">${b.name}</div>
+          <div class="badge-earned-date">✓ Earned</div>
+        </div>
+      </div>`),
+    ...locked.filter(b => b.progress > 0).map(b => `
+      <div class="badge-row">
+        <div class="badge-icon locked">${b.icon}</div>
+        <div>
+          <div class="badge-name" style="color:var(--muted)">${b.name}</div>
+          <div class="badge-progress">${b.progress}/${b.total} · ${b.desc}</div>
+        </div>
+      </div>`),
+    locked.filter(b => b.progress === 0).length > 0
+      ? `<div style="font-size:0.72rem;color:var(--light-muted);padding:0.4rem 0.5rem">${locked.filter(b => b.progress === 0).length} more badges to discover</div>`
+      : '',
+  ].join('');
+}
 function showLoading(title, sub) {
   const o = document.getElementById('loading-overlay');
   if (!o) return;
@@ -3252,7 +3409,7 @@ async function init() {
 
     updateSyncStatus('Loading your summits…');
     const loaded = await loadAscents(session);
-    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
     if (loaded > 0) {
       updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
     } else {
@@ -3337,7 +3494,7 @@ async function syncStravaWithProgress(session) {
 
     localStorage.setItem(SYNC_KEY, syncStarted.toString());
     updateLoading(detected > 0 ? `Found ${detected} summit${detected!==1?'s':''}!` : 'Scan complete — no new summits found', 100);
-    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
 
     const msg = detected > 0
       ? `✓ ${detected} summits detected`
