@@ -371,6 +371,53 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .legend-swatch.b{background:var(--forest)}
 .legend-swatch.u{background:var(--contour-lt);border:1px solid var(--contour)}
 
+/* Premium plan cards */
+.plan-card{
+  border:2px solid var(--border);border-radius:8px;padding:1rem 0.75rem;
+  text-align:center;cursor:pointer;transition:all 0.15s;position:relative;
+  background:var(--canvas);
+}
+.plan-card:hover{border-color:var(--forest);transform:translateY(-1px)}
+.plan-card.selected{border-color:var(--forest);background:rgba(45,90,61,0.04)}
+.plan-card-featured{border-color:var(--forest);background:rgba(45,90,61,0.04)}
+.plan-card-featured.selected{border-color:var(--forest);background:rgba(45,90,61,0.08)}
+.plan-badge{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  background:var(--forest);color:white;
+  font-size:0.62rem;font-weight:600;letter-spacing:0.05em;
+  padding:0.15rem 0.6rem;border-radius:20px;white-space:nowrap;
+}
+.plan-name{font-size:0.78rem;font-weight:500;color:var(--muted);margin-bottom:0.3rem}
+.plan-price{font-family:'Libre Baskerville',serif;font-size:1.7rem;font-weight:700;color:var(--text);line-height:1}
+.plan-period{font-size:0.7rem;color:var(--light-muted);margin-top:0.2rem}
+.plan-note{font-size:0.7rem;color:var(--forest);margin-top:0.4rem;font-weight:500}
+
+/* Premium gate lock icon on nav items */
+.nav-premium-gate .nav-item-icon::after{
+  content:'🔒';font-size:0.55rem;vertical-align:super;margin-left:0.1rem;opacity:0.6;
+}
+.is-premium .nav-premium-gate .nav-item-icon::after{display:none}
+.is-premium .nav-premium-gate{cursor:pointer}
+
+/* Sidebar upgrade nudge */
+.sidebar-upgrade{
+  margin:0.75rem 0.5rem 0;
+  background:linear-gradient(135deg,rgba(45,90,61,0.08),rgba(45,90,61,0.04));
+  border:1px solid rgba(45,90,61,0.2);border-radius:6px;
+  padding:0.75rem 0.9rem;cursor:pointer;transition:all 0.15s;
+}
+.sidebar-upgrade:hover{background:rgba(45,90,61,0.12)}
+.sidebar-upgrade-title{font-size:0.78rem;font-weight:600;color:var(--forest);margin-bottom:0.2rem}
+.sidebar-upgrade-sub{font-size:0.7rem;color:var(--muted);line-height:1.4}
+
+/* Premium badge in sidebar footer */
+.premium-badge{
+  display:inline-block;background:var(--forest);color:white;
+  font-size:0.6rem;font-weight:700;letter-spacing:0.06em;
+  padding:0.1rem 0.45rem;border-radius:20px;margin-left:0.4rem;
+  vertical-align:middle;
+}
+
 /* Empty states */
 .empty-state{padding:2rem 1.5rem;text-align:center;color:var(--light-muted);font-size:0.85rem;line-height:1.7}
 .empty-state-icon{font-size:2rem;margin-bottom:0.75rem;display:block}
@@ -781,6 +828,120 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
     </div>
   </section>
+
+  <!-- PRICING SECTION -->
+  <section style="padding:5rem 5% 2rem;background:var(--canvas)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 class="section-h" style="text-align:center">Simple, honest pricing</h2>
+      <p style="text-align:center;color:var(--muted);font-size:1rem;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock every hill in Britain.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
+
+        <!-- Free -->
+        <div style="background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:2rem 1.5rem">
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem">Free</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:var(--text);margin-bottom:0.2rem">£0</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem">forever</div>
+          <div style="font-size:0.85rem;color:var(--muted);display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.8rem">
+            <div>✓ Munros (282 peaks)</div>
+            <div>✓ Strava auto-detection</div>
+            <div>✓ Manual ascent logging</div>
+            <div style="color:var(--light-muted)">– Last 50 activities only</div>
+            <div style="color:var(--light-muted)">– Other lists locked</div>
+          </div>
+          <button onclick="connectStrava()" class="btn-outline" style="width:100%">Get started free</button>
+        </div>
+
+        <!-- Annual (featured) -->
+        <div style="background:var(--forest);border:2px solid var(--forest);border-radius:10px;padding:2rem 1.5rem;position:relative">
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--earth);color:white;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;padding:0.2rem 0.8rem;border-radius:20px;white-space:nowrap;text-transform:uppercase">Most popular</div>
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:0.75rem">Annual</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:white;margin-bottom:0.2rem">£25</div>
+          <div style="font-size:0.82rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem">per year · save 31%</div>
+          <div style="font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.8rem">
+            <div>✓ All 8 hill lists</div>
+            <div>✓ Full Strava history</div>
+            <div>✓ Excel import</div>
+            <div>✓ Badges & awards</div>
+            <div>✓ Priority support</div>
+          </div>
+          <button onclick="connectStrava()" style="width:100%;background:white;color:var(--forest);border:none;padding:0.75rem;border-radius:5px;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Start free, upgrade in-app</button>
+        </div>
+
+        <!-- Monthly -->
+        <div style="background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:2rem 1.5rem">
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem">Monthly</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:var(--text);margin-bottom:0.2rem">£3</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem">per month · cancel anytime</div>
+          <div style="font-size:0.85rem;color:var(--muted);display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.8rem">
+            <div>✓ All 8 hill lists</div>
+            <div>✓ Full Strava history</div>
+            <div>✓ Excel import</div>
+            <div>✓ Badges & awards</div>
+            <div>✓ 14-day money-back guarantee</div>
+          </div>
+          <button onclick="connectStrava()" class="btn-outline" style="width:100%">Start free, upgrade in-app</button>
+        </div>
+      </div>
+
+      <!-- Lifetime note -->
+      <div style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:2rem">
+        Want to pay once? <a href="#" onclick="connectStrava();return false" style="color:var(--forest);font-weight:500">Lifetime access is £100</a> — one payment, forever.
+      </div>
+
+      <!-- Donation note -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;background:rgba(45,90,61,0.06);border:1px solid rgba(45,90,61,0.15);border-radius:8px;padding:1.2rem 2rem;max-width:560px;margin:0 auto 1rem">
+        <span style="font-size:1.5rem">🌿</span>
+        <div style="font-size:0.875rem;color:var(--text)">
+          <strong>We donate 10% of every subscription</strong> — 5% to
+          <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:var(--forest)">Scottish Wildlife Trust</a>
+          and 5% to
+          <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>.
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:0.75rem;color:var(--light-muted);margin-top:1.2rem">
+        Secure payments via Stripe · 14-day money-back guarantee ·
+        <a href="/terms.html" style="color:var(--light-muted)">Terms</a> ·
+        <a href="/privacy.html" style="color:var(--light-muted)">Privacy</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:var(--text);color:rgba(255,255,255,0.6);padding:3rem 5%;font-size:0.82rem">
+    <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:2rem">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:white;margin-bottom:0.5rem">Summit</div>
+        <div style="line-height:1.7;max-width:280px">Track every Munro, Corbett, Graham, Wainwright and Marilyn. Built for hillwalkers, by a hillwalker.</div>
+        <div style="margin-top:0.75rem;color:rgba(255,255,255,0.4)">© 2026 Summit. Made in Scotland.</div>
+      </div>
+      <div style="display:flex;gap:3rem;flex-wrap:wrap">
+        <div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Product</div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <a href="#" onclick="connectStrava();return false" style="color:rgba(255,255,255,0.6);text-decoration:none">Get started</a>
+            <a href="#pricing" style="color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a>
+          </div>
+        </div>
+        <div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Legal</div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <a href="/privacy.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Privacy Policy</a>
+            <a href="/terms.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Terms of Service</a>
+            <a href="mailto:hello@summitapp.uk" style="color:rgba(255,255,255,0.6);text-decoration:none">Contact</a>
+          </div>
+        </div>
+        <div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Giving back</div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Scottish Wildlife Trust</a>
+            <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Mountain Rescue Scotland</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
 </div>
 
 <!-- ════════════ APP ════════════ -->
@@ -805,17 +966,21 @@ textarea.form-input{resize:vertical;min-height:80px}
         <button class="nav-item" data-list="M" onclick="switchList('M')"><span class="nav-item-icon">≡</span>All Hills<span class="nav-count">0/282</span></button>
         <div class="nav-section-label">Lists</div>
         <button class="nav-item" data-list="M" onclick="switchList('M')"><span class="nav-item-icon">▲</span>Munros<span class="nav-count">0/282</span></button>
-        <button class="nav-item" data-list="C" onclick="switchList('C')"><span class="nav-item-icon">△</span>Corbetts<span class="nav-count">0/222</span></button>
-        <button class="nav-item" data-list="G" onclick="switchList('G')"><span class="nav-item-icon">◇</span>Grahams<span class="nav-count">0/231</span></button>
-        <button class="nav-item" data-list="W" onclick="switchList('W')"><span class="nav-item-icon">◻</span>Wainwrights<span class="nav-count">0/214</span></button>
-        <button class="nav-item" data-list="Ma" onclick="switchList('Ma')"><span class="nav-item-icon">○</span>Marilyns<span class="nav-count">0/2009</span></button>
+        <button class="nav-item nav-premium-gate" data-list="C" onclick="premiumGate('corbetts')"><span class="nav-item-icon">△</span>Corbetts<span class="nav-count">0/222</span></button>
+        <button class="nav-item nav-premium-gate" data-list="G" onclick="premiumGate('grahams')"><span class="nav-item-icon">◇</span>Grahams<span class="nav-count">0/231</span></button>
+        <button class="nav-item nav-premium-gate" data-list="W" onclick="premiumGate('wainwrights')"><span class="nav-item-icon">◻</span>Wainwrights<span class="nav-count">0/214</span></button>
+        <button class="nav-item nav-premium-gate" data-list="Ma" onclick="premiumGate('marilyns')"><span class="nav-item-icon">○</span>Marilyns<span class="nav-count">0/2009</span></button>
         <div class="nav-section-label">Account</div>
         <button class="nav-item" onclick="showPage('profile')"><span class="nav-item-icon">○</span>Profile</button>
         <button class="nav-item" onclick="showPage('settings')"><span class="nav-item-icon">⚙</span>Settings</button>
+        <div id="sidebar-upgrade-wrap"></div>
       </nav>
       <div class="sidebar-footer">
         <div class="avatar-sm" id="sidebar-avatar">—</div>
-        <div><div class="footer-name">—</div><div class="footer-sub">Loading…</div></div>
+        <div>
+          <div class="footer-name">—</div>
+          <div class="footer-sub">Loading…</div>
+        </div>
       </div>
     </aside>
 
@@ -1149,6 +1314,77 @@ textarea.form-input{resize:vertical;min-height:80px}
     <div id="loading-bar" style="height:100%;background:var(--forest);border-radius:2px;width:0%;transition:width 0.4s ease"></div>
   </div>
   <div style="font-size:0.78rem;color:var(--light-muted)" id="loading-detail">Loading hill database…</div>
+</div>
+
+<!-- PRICING MODAL -->
+<div class="modal-overlay" id="pricing-modal">
+  <div class="modal" style="max-width:520px">
+    <div style="text-align:center;padding:0.5rem 0 1.5rem">
+      <div style="font-size:1.8rem;margin-bottom:0.5rem">⛰</div>
+      <div class="modal-title" id="pricing-modal-title">Unlock all lists with Summit Premium</div>
+      <div class="modal-sub" id="pricing-modal-sub">Corbetts, Grahams, Wainwrights, Marilyns and more — plus full Strava history</div>
+    </div>
+
+    <!-- Plan cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;margin-bottom:1.2rem">
+      <div class="plan-card" id="plan-monthly" onclick="selectPlan('monthly')">
+        <div class="plan-name">Monthly</div>
+        <div class="plan-price">£3</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-note">Cancel anytime</div>
+      </div>
+      <div class="plan-card plan-card-featured" id="plan-annual" onclick="selectPlan('annual')">
+        <div class="plan-badge">Best value</div>
+        <div class="plan-name">Annual</div>
+        <div class="plan-price">£25</div>
+        <div class="plan-period">per year</div>
+        <div class="plan-note">Save 31%</div>
+      </div>
+      <div class="plan-card" id="plan-lifetime" onclick="selectPlan('lifetime')">
+        <div class="plan-name">Lifetime</div>
+        <div class="plan-price">£100</div>
+        <div class="plan-period">one-off</div>
+        <div class="plan-note">Pay once, forever</div>
+      </div>
+    </div>
+
+    <!-- What's included -->
+    <div style="background:var(--paper-mid);border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:0.82rem">
+      <div style="font-weight:500;color:var(--text);margin-bottom:0.6rem">Premium includes:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem 1rem;color:var(--muted)">
+        <div>✓ All 8 hill lists</div>
+        <div>✓ Full Strava history</div>
+        <div>✓ Excel import</div>
+        <div>✓ Badges & awards</div>
+        <div>✓ Unlimited notes</div>
+        <div>✓ Priority support</div>
+      </div>
+    </div>
+
+    <!-- Donation note -->
+    <div style="display:flex;align-items:center;gap:0.6rem;background:rgba(45,90,61,0.06);border:1px solid rgba(45,90,61,0.15);border-radius:6px;padding:0.75rem 1rem;margin-bottom:1.2rem;font-size:0.78rem;color:var(--forest)">
+      <span style="font-size:1.1rem">🌿</span>
+      <span>5% of revenue goes to <strong>Scottish Wildlife Trust</strong> + 5% to <strong>Mountain Rescue Scotland</strong></span>
+    </div>
+
+    <!-- Promo code -->
+    <div style="margin-bottom:1.2rem">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.35rem">Have a promo code?</div>
+      <input class="form-input" id="promo-code-input" type="text" placeholder="Enter code (e.g. BETA3)" style="font-size:0.85rem;padding:0.5rem 0.75rem"/>
+    </div>
+
+    <div class="modal-actions" style="flex-direction:column;gap:0.6rem">
+      <button class="btn-forest" id="pricing-cta-btn" onclick="startCheckout()" style="width:100%;padding:0.85rem;font-size:0.95rem">
+        Continue to payment →
+      </button>
+      <div style="font-size:0.72rem;color:var(--light-muted);text-align:center;line-height:1.6">
+        Secure payment via Stripe · 14-day money-back guarantee<br>
+        <a href="/terms.html" target="_blank" style="color:var(--muted)">Terms</a> ·
+        <a href="/privacy.html" target="_blank" style="color:var(--muted)">Privacy Policy</a>
+      </div>
+      <button class="btn-modal-cancel" onclick="closePricingModal()" style="width:100%;text-align:center">Maybe later</button>
+    </div>
+  </div>
 </div>
 
 <!-- IMPORT PREVIEW MODAL -->
@@ -2282,8 +2518,15 @@ async function confirmImport() {
 }
 
 // ── CONSTANTS ──
-const WORKER = 'https://summit-api.andro-mathewson95.workers.dev';
+const WORKER      = 'https://summit-api.andro-mathewson95.workers.dev';
 const SESSION_KEY = 'summit_session';
+const STRIPE_PK   = 'pk_test_51TL396AD5U8JDQuPCRLm3dv4ws2Pg4qzFrOV8xT0jS4oiW9ljzA6C5R7zMcd0O0WVYjHdcwLFIz30gZOiBgTUAhQ0065hxipwQ';
+
+// Free tier limits
+const FREE_LISTS           = ['M'];          // Only Munros on free
+const FREE_ACTIVITY_LIMIT  = 50;             // Max activities scanned on free
+
+let selectedPlan = 'annual'; // default selected plan
 
 // ── SESSION ──
 function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
@@ -2299,12 +2542,14 @@ function handleAuthCallback() {
   const p = new URLSearchParams(hash);
   if (p.get('auth') !== 'success') return null;
   const session = {
-    athlete_id:   p.get('athlete_id'),
-    user_id:      p.get('user_id'),
-    name:         decodeURIComponent(p.get('name') || 'Hillwalker'),
-    access_token: p.get('access_token'),
-    refresh_token:p.get('refresh_token'),
-    expires_at:   parseInt(p.get('expires_at')),
+    athlete_id:    p.get('athlete_id'),
+    user_id:       p.get('user_id'),
+    name:          decodeURIComponent(p.get('name') || 'Hillwalker'),
+    access_token:  p.get('access_token'),
+    refresh_token: p.get('refresh_token'),
+    expires_at:    parseInt(p.get('expires_at')),
+    premium:       p.get('premium') === '1',
+    premium_type:  p.get('premium_type') || null,
   };
   saveSession(session);
   history.replaceState(null, '', window.location.pathname);
@@ -2320,11 +2565,168 @@ function applySession(session) {
   if (g) g.textContent = `${greeting}, ${first}`;
   document.querySelectorAll('.footer-name').forEach(el => el.textContent = session.name);
   document.querySelectorAll('.profile-name-lg').forEach(el => el.textContent = session.name);
-  // Set avatar initials
   const parts = session.name.split(' ');
   const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
   const avatar = document.getElementById('sidebar-avatar');
   if (avatar) avatar.textContent = initials.toUpperCase();
+
+  // Apply premium UI state
+  applyPremiumUI(session.premium);
+}
+
+// ── PREMIUM ──
+
+function isPremium() {
+  const session = getSession();
+  return session?.premium === true;
+}
+
+function applyPremiumUI(premium) {
+  // Toggle class on app root for CSS-based gating
+  const app = document.getElementById('app');
+  if (app) app.classList.toggle('is-premium', !!premium);
+
+  // Update nav premium gates — make them work properly if premium
+  document.querySelectorAll('.nav-premium-gate').forEach(btn => {
+    if (premium) {
+      const list = btn.dataset.list;
+      if (list) {
+        btn.onclick = () => switchList(list);
+      }
+    }
+  });
+
+  // Sidebar upgrade nudge
+  const wrap = document.getElementById('sidebar-upgrade-wrap');
+  if (wrap) {
+    if (premium) {
+      const session = getSession();
+      const typeLabel = session?.premium_type
+        ? ({ monthly:'Monthly', annual:'Annual', lifetime:'Lifetime', complimentary:'Complimentary' }[session.premium_type] || 'Premium')
+        : 'Premium';
+      wrap.innerHTML = `<div style="margin:0.75rem 0.5rem 0;padding:0.6rem 0.9rem;font-size:0.72rem;color:var(--forest);text-align:center">
+        ✓ <strong>Summit ${typeLabel}</strong><span class="premium-badge">PRO</span>
+      </div>`;
+    } else {
+      wrap.innerHTML = `<div class="sidebar-upgrade" onclick="openPricingModal('sidebar')">
+        <div class="sidebar-upgrade-title">⛰ Unlock all lists</div>
+        <div class="sidebar-upgrade-sub">Corbetts, Grahams, Wainwrights & more from £3/month</div>
+      </div>`;
+    }
+  }
+}
+
+// Called when free user clicks a premium nav item
+function premiumGate(listName) {
+  if (isPremium()) return; // shouldn't happen but safety check
+  openPricingModal(`You're trying to access ${listName}`);
+}
+
+// ── PRICING MODAL ──
+
+function openPricingModal(context) {
+  // Customise the subtitle based on context
+  const sub = document.getElementById('pricing-modal-sub');
+  if (sub) {
+    if (context && context !== 'sidebar' && !context.startsWith('You\'re')) {
+      sub.textContent = context;
+    } else if (context?.startsWith('You\'re trying')) {
+      sub.textContent = `${context} — upgrade to access Corbetts, Grahams, Wainwrights, Marilyns and more.`;
+    } else {
+      sub.textContent = 'Corbetts, Grahams, Wainwrights, Marilyns and more — plus full Strava history.';
+    }
+  }
+  selectPlan('annual'); // default to best value
+  document.getElementById('pricing-modal').classList.add('open');
+}
+
+function closePricingModal() {
+  document.getElementById('pricing-modal').classList.remove('open');
+}
+
+document.getElementById('pricing-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePricingModal();
+});
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  ['monthly','annual','lifetime'].forEach(p => {
+    const el = document.getElementById(`plan-${p}`);
+    if (el) el.classList.toggle('selected', p === plan);
+  });
+  const btn = document.getElementById('pricing-cta-btn');
+  const labels = { monthly: 'Subscribe for £3/month →', annual: 'Subscribe for £25/year →', lifetime: 'Buy lifetime access for £100 →' };
+  if (btn) btn.textContent = labels[plan] || 'Continue to payment →';
+}
+
+async function startCheckout() {
+  const session = getSession();
+  const btn = document.getElementById('pricing-cta-btn');
+  if (btn) { btn.textContent = 'Redirecting to Stripe…'; btn.disabled = true; }
+
+  const promoCode = document.getElementById('promo-code-input')?.value?.trim() || null;
+
+  try {
+    const res = await fetch(`${WORKER}/api/stripe/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan:        selectedPlan,
+        user_id:     session?.user_id     || null,
+        athlete_id:  session?.athlete_id  || null,
+        promo_code:  promoCode,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'No checkout URL returned');
+    }
+  } catch (err) {
+    console.error('Checkout error:', err);
+    toast('Could not start checkout — please try again');
+    if (btn) { btn.textContent = 'Continue to payment →'; btn.disabled = false; }
+  }
+}
+
+// Handle return from Stripe (?upgraded=true)
+async function handleUpgradeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('upgraded') !== 'true') return false;
+
+  // Clean URL
+  history.replaceState(null, '', window.location.pathname);
+
+  const plan = params.get('plan') || 'premium';
+
+  // Fetch fresh premium status from server
+  const session = getSession();
+  if (session?.user_id) {
+    try {
+      const res  = await fetch(`${WORKER}/api/stripe/status?user_id=${session.user_id}`);
+      const data = await res.json();
+      if (data.premium) {
+        session.premium      = true;
+        session.premium_type = data.premium_type;
+        saveSession(session);
+        applyPremiumUI(true);
+      }
+    } catch (e) {
+      // Webhook may not have fired yet — optimistically grant
+      session.premium      = true;
+      session.premium_type = plan;
+      saveSession(session);
+      applyPremiumUI(true);
+    }
+  }
+
+  // Show success toast
+  const planLabels = { monthly: 'Monthly', annual: 'Annual', lifetime: 'Lifetime' };
+  toast(`🎉 Welcome to Summit ${planLabels[plan] || 'Premium'}! All lists now unlocked.`);
+  return true;
 }
 
 function updateSyncStatus(msg) {
@@ -2482,11 +2884,13 @@ async function syncStrava(session) {
   try {
     const token = await getValidToken(session);
     const syncStarted = Math.floor(Date.now() / 1000);
+    const premium  = isPremium();
+    const maxActs  = premium ? Infinity : FREE_ACTIVITY_LIMIT;
     const activityTypes = settings.includeRuns
       ? ['Hike','Walk','TrailRun','Run']
       : ['Hike','Walk','TrailRun'];
 
-    let page = 1, all = [];
+    let page = 1, all = [], hitLimit = false;
     while (true) {
       const afterParam = isIncremental ? `&after=${lastSync}` : '';
       const res = await fetch(
@@ -2499,6 +2903,7 @@ async function syncStrava(session) {
         activityTypes.includes(a.type) || activityTypes.includes(a.sport_type)
       );
       all = all.concat(hillActs);
+      if (all.length >= maxActs) { all = all.slice(0, maxActs); hitLimit = true; break; }
       if (acts.length < 100 || isIncremental) break;
       page++;
     }
@@ -2547,8 +2952,12 @@ async function syncStrava(session) {
     const msg = detected > 0
       ? `✓ ${detected} new summit${detected > 1 ? 's' : ''} detected`
       : 'Up to date — no new summits';
-    updateSyncStatus(`${msg} · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`);
 
+    const upgradeNudge = hitLimit
+      ? ` · <a href="#" onclick="openPricingModal('full history');return false" style="color:var(--earth);font-weight:500;text-decoration:underline">⬆ Unlock full history</a>`
+      : ` · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`;
+
+    updateSyncStatus(`${msg}${upgradeNudge}`);
     updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
 
   } catch (err) {
@@ -2650,6 +3059,9 @@ async function init() {
     return;
   }
 
+  // Handle ?upgraded=true return from Stripe (check before auth callback)
+  const wasUpgrade = window.location.search.includes('upgraded=true');
+
   const fresh   = handleAuthCallback();
   const session = fresh || getSession();
   if (!session) return;
@@ -2659,7 +3071,9 @@ async function init() {
       const res = await fetch(`${WORKER}/api/user?athlete_id=${session.athlete_id}`);
       if (res.ok) {
         const data = await res.json();
-        session.user_id = data.user_id;
+        session.user_id      = data.user_id;
+        session.premium      = data.premium || false;
+        session.premium_type = data.premium_type || null;
         saveSession(session);
       } else {
         applySession(session); enterApp(); showReconnectBanner(); return;
@@ -2672,14 +3086,18 @@ async function init() {
   applySession(session);
 
   if (fresh) {
-    // ── FIRST-RUN: show loading overlay during full sync ──
     showLoading('Scanning your hill history…', 'Checking your Strava activities against 2,548 hills');
     enterApp();
     await syncStravaWithProgress(session);
     hideLoading();
   } else {
-    // ── RETURNING USER: load from Supabase ──
     enterApp();
+
+    // Handle upgrade return
+    if (wasUpgrade) {
+      await handleUpgradeReturn();
+    }
+
     updateSyncStatus('Loading your summits…');
     const loaded = await loadAscents(session);
     updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
@@ -2701,6 +3119,8 @@ async function syncStravaWithProgress(session) {
   try {
     const token = await getValidToken(session);
     const syncStarted = Math.floor(Date.now() / 1000);
+    const premium  = isPremium();
+    const maxActs  = premium ? Infinity : FREE_ACTIVITY_LIMIT;
     let page = 1, all = [];
 
     updateLoading('Fetching your activities from Strava…', 15);
@@ -2715,10 +3135,18 @@ async function syncStravaWithProgress(session) {
       all = all.concat(hillActs);
       updateLoading(`Found ${all.length} walks & hikes…`, 15 + Math.min(page * 4, 25));
       if (acts.length < 100) break;
+      if (all.length >= maxActs) {
+        all = all.slice(0, maxActs);
+        break;
+      }
       page++;
     }
 
-    updateLoading(`Scanning ${all.length} activities for summits…`, 42);
+    if (!premium && all.length >= FREE_ACTIVITY_LIMIT) {
+      updateLoading(`Scanning last ${FREE_ACTIVITY_LIMIT} activities (upgrade for full history)…`, 42);
+    } else {
+      updateLoading(`Scanning ${all.length} activities for summits…`, 42);
+    }
     let detected = 0;
     const newlyDetected = [];
 
