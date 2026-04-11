@@ -684,13 +684,53 @@ textarea.form-input{resize:vertical;min-height:80px}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  .app-layout{grid-template-columns:1fr}
+  /* Landing */
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .lists-grid{grid-template-columns:1fr 1fr}
+  .hero{min-height:auto;padding:5rem 5% 3rem}
+
+  /* App layout — sidebar hidden, bottom nav shown */
+  .app-layout{grid-template-columns:1fr;padding-bottom:60px}
   .sidebar{display:none}
+  .main-content{min-height:calc(100vh - 60px)}
+
+  /* Bottom navigation bar */
+  .mobile-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--canvas);border-top:1px solid var(--border);
+    z-index:200;height:60px;
+    box-shadow:0 -2px 12px rgba(26,25,22,0.08);
+  }
+  .mobile-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:0.2rem;
+    font-size:0.6rem;color:var(--muted);
+    background:none;border:none;cursor:pointer;
+    font-family:'DM Sans',sans-serif;padding:0.3rem 0;
+    transition:color 0.15s;
+  }
+  .mobile-nav-item.active{color:var(--forest)}
+  .mobile-nav-item svg,.mobile-nav-icon{font-size:1.2rem;line-height:1}
+
+  /* Page adjustments */
   .dash-grid,.hill-layout,.profile-grid{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr 1fr}
+  .page-header{padding:1rem 1rem 0.75rem;flex-wrap:wrap;gap:0.5rem}
+  .content-area{padding:1rem}
+  .card{border-radius:6px}
+
+  /* Pricing page on mobile */
+  .pricing-grid-mobile{grid-template-columns:1fr !important}
+}
+
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr}
   .feat-grid{grid-template-columns:1fr}
-  .lists-grid{grid-template-columns:1fr 1fr}
-  .hero-inner{grid-template-columns:1fr}
+  .hero h1{font-size:2rem}
+  .plan-card{padding:0.9rem 0.6rem}
 }
 </style>
 </head>
@@ -1282,6 +1322,31 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
 
     </main>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="mobile-nav" id="mobile-nav" style="display:none">
+      <button class="mobile-nav-item active" id="mob-dashboard" onclick="mobileNav('dashboard')">
+        <span class="mobile-nav-icon">⊞</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-list" onclick="mobileNav('list')">
+        <span class="mobile-nav-icon">▲</span>
+        <span>My Hills</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-log" onclick="openLogModal()">
+        <span style="width:36px;height:36px;background:var(--forest);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;margin-bottom:0.1rem">+</span>
+        <span>Log</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-profile" onclick="mobileNav('profile')">
+        <span class="mobile-nav-icon">○</span>
+        <span>Profile</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-settings" onclick="mobileNav('settings')">
+        <span class="mobile-nav-icon">⚙</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+
   </div>
 </div>
 
@@ -1316,7 +1381,7 @@ textarea.form-input{resize:vertical;min-height:80px}
     </div>
 
     <!-- Plan cards -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;margin-bottom:1.2rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;margin-bottom:1.2rem" class="pricing-grid-mobile">
       <div class="plan-card" id="plan-monthly" onclick="selectPlan('monthly')">
         <div class="plan-name">Monthly</div>
         <div class="plan-price">£3</div>
@@ -1464,9 +1529,27 @@ const LIST_META = {
 };
 
 // ── CORE NAVIGATION ──
+// ── MOBILE NAV ──
+function mobileNav(page) {
+  showPage(page);
+  // Update active state on mobile nav
+  ['dashboard','list','profile','settings'].forEach(p => {
+    const btn = document.getElementById(`mob-${p}`);
+    if (btn) btn.classList.toggle('active', p === page);
+  });
+  // Also sync switchList for hills
+  if (page === 'list') switchList(currentList);
+}
+
+function showMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  if (nav && window.innerWidth <= 900) nav.style.display = 'flex';
+}
+
 function enterApp() {
   document.getElementById('landing').classList.remove('active');
   document.getElementById('app').classList.add('active');
+  showMobileNav();
   updateListView();
   updateDashboard();
   renderMap();
@@ -2682,38 +2765,55 @@ async function startCheckout() {
   }
 }
 
-// Handle return from Stripe (?upgraded=true)
+// Handle return from Stripe (?upgraded=true or ?upgraded=false)
 async function handleUpgradeReturn() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('upgraded') !== 'true') return false;
+  const upgraded = params.get('upgraded');
 
-  // Clean URL
+  if (!upgraded) return false;
+
+  // Clean URL immediately
   history.replaceState(null, '', window.location.pathname);
 
-  const plan = params.get('plan') || 'premium';
+  // ── Payment cancelled ──
+  if (upgraded === 'false') {
+    updateSyncStatus(`Upgrade cancelled · <a href="#" onclick="openPricingModal();return false" style="color:var(--forest);text-decoration:underline">View plans</a>`);
+    toast('No problem — you can upgrade any time from the sidebar');
+    return false;
+  }
 
-  // Fetch fresh premium status from server
+  const plan = params.get('plan') || 'premium';
   const session = getSession();
-  if (session?.user_id) {
+  if (!session?.user_id) return false;
+
+  // Poll premium status — webhook may take a moment to fire
+  // Retry up to 6 times with 1.5s between attempts (~9s total window)
+  let granted = false;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 1500));
     try {
       const res  = await fetch(`${WORKER}/api/stripe/status?user_id=${session.user_id}`);
       const data = await res.json();
       if (data.premium) {
         session.premium      = true;
-        session.premium_type = data.premium_type;
+        session.premium_type = data.premium_type || plan;
         saveSession(session);
         applyPremiumUI(true);
+        granted = true;
+        break;
       }
-    } catch (e) {
-      // Webhook may not have fired yet — optimistically grant
-      session.premium      = true;
-      session.premium_type = plan;
-      saveSession(session);
-      applyPremiumUI(true);
-    }
+    } catch (e) { /* network error — keep retrying */ }
   }
 
-  // Show success toast
+  // If still not confirmed after retries, grant optimistically
+  // (Stripe payment succeeded, webhook will eventually fire)
+  if (!granted) {
+    session.premium      = true;
+    session.premium_type = plan;
+    saveSession(session);
+    applyPremiumUI(true);
+  }
+
   const planLabels = { monthly: 'Monthly', annual: 'Annual', lifetime: 'Lifetime' };
   toast(`🎉 Welcome to Summit ${planLabels[plan] || 'Premium'}! All lists now unlocked.`);
   return true;
@@ -2908,8 +3008,13 @@ async function syncStrava(session) {
     let detected = 0;
     const newlyDetected = [];
 
+    let actIdx = 0;
     for (const act of all) {
-      const summits = await detectSummitsInActivity(act, token);
+      const currentToken = (actIdx > 0 && actIdx % 50 === 0)
+        ? await getValidToken(session)
+        : token;
+      const summits = await detectSummitsInActivity(act, currentToken);
+      actIdx++;
       for (const { hill, activity } of summits) {
         const d = new Date(activity.start_date_local);
         hill.bagged = true;
@@ -3141,7 +3246,11 @@ async function syncStravaWithProgress(session) {
     const newlyDetected = [];
 
     for (let i = 0; i < all.length; i++) {
-      const summits = await detectSummitsInActivity(all[i], token);
+      // Re-validate token every 50 activities in case it expires mid-scan
+      const currentToken = (i > 0 && i % 50 === 0)
+        ? await getValidToken(session)
+        : token;
+      const summits = await detectSummitsInActivity(all[i], currentToken);
       for (const { hill, activity } of summits) {
         const d = new Date(activity.start_date_local);
         hill.bagged = true;
