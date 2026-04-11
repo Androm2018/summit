@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Privacy Policy — Summit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f4eddf;--canvas:#faf6ee;--forest:#2d5a3d;--text:#1a1916;
+  --muted:#7a7060;--border:#d6cbb8;--shadow:0 1px 4px rgba(26,25,22,0.08);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.7}
+nav{background:var(--canvas);border-bottom:1px solid var(--border);padding:1rem 5%;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;color:var(--forest);text-decoration:none;display:flex;align-items:center;gap:0.5rem}
+.back{font-size:0.85rem;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--forest)}
+main{max-width:740px;margin:0 auto;padding:3rem 5% 5rem}
+h1{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--text);margin-bottom:0.5rem}
+.updated{font-size:0.82rem;color:var(--muted);margin-bottom:2.5rem}
+h2{font-family:'Libre Baskerville',serif;font-size:1.15rem;font-weight:700;color:var(--text);margin:2rem 0 0.6rem}
+p{font-size:0.925rem;color:var(--muted);margin-bottom:0.9rem;line-height:1.75}
+ul{font-size:0.925rem;color:var(--muted);padding-left:1.5rem;margin-bottom:0.9rem;line-height:1.75}
+li{margin-bottom:0.3rem}
+a{color:var(--forest)}
+.box{background:var(--canvas);border:1px solid var(--border);border-radius:6px;padding:1.2rem 1.5rem;margin:1.5rem 0;font-size:0.875rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+      <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
+      <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
+      <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
+    </svg>
+    Summit
+  </a>
+  <a href="/" class="back">← Back to Summit</a>
+</nav>
+
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: April 2026</p>
+
+  <p>Summit ("we", "us", "our") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights. We've written it in plain English — if anything is unclear, email us at <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>.</p>
+
+  <div class="box">
+    <strong>The short version:</strong> We collect only what we need to run the app. We never sell your data. We use Strava to detect your summits, Supabase to store your logbook, and Stripe to handle payments. None of your financial data touches our servers.
+  </div>
+
+  <h2>1. Who we are</h2>
+  <p>Summit is operated as an independent product based in Scotland, UK. For data protection purposes, we are the data controller for the personal data you provide. Contact: <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>.</p>
+
+  <h2>2. Data we collect</h2>
+  <p><strong>From Strava (when you connect your account):</strong></p>
+  <ul>
+    <li>Your name and Strava athlete ID</li>
+    <li>GPS coordinates from your hiking and walking activities — used solely to detect which hill summits you've visited</li>
+    <li>Activity dates, types, and names</li>
+    <li>OAuth access and refresh tokens (stored securely, used to fetch your activities)</li>
+  </ul>
+  <p><strong>From you directly:</strong></p>
+  <ul>
+    <li>Ascent logs you create — dates, companions, conditions, personal notes</li>
+    <li>Settings and preferences</li>
+  </ul>
+  <p><strong>From Stripe (payments):</strong></p>
+  <ul>
+    <li>We receive a Stripe Customer ID and subscription status. We never see or store your payment card details — these are handled entirely by Stripe.</li>
+  </ul>
+  <p><strong>Automatically:</strong></p>
+  <ul>
+    <li>Standard server logs (IP addresses, request timestamps) — retained for up to 30 days for security purposes</li>
+  </ul>
+
+  <h2>3. How we use your data</h2>
+  <ul>
+    <li>To detect summits in your Strava GPS tracks and populate your hill logbook</li>
+    <li>To store and display your ascent history across sessions</li>
+    <li>To manage your subscription via Stripe</li>
+    <li>To send transactional emails (account confirmation, payment receipts) — we do not send marketing emails without your consent</li>
+    <li>To improve the app and fix bugs</li>
+  </ul>
+
+  <h2>4. Legal basis for processing (UK GDPR)</h2>
+  <ul>
+    <li><strong>Contract performance</strong> — processing your Strava data and ascent logs to deliver the service you signed up for</li>
+    <li><strong>Legitimate interests</strong> — server logs for security; improving the app</li>
+    <li><strong>Legal obligation</strong> — retaining transaction records as required by UK law</li>
+  </ul>
+
+  <h2>5. Data sharing</h2>
+  <p>We share data only with the following third-party services necessary to operate Summit:</p>
+  <ul>
+    <li><strong>Strava</strong> — to authenticate you and fetch your activity data. <a href="https://www.strava.com/legal/privacy" target="_blank">Strava Privacy Policy</a></li>
+    <li><strong>Supabase</strong> — our database provider, hosted in the EU. <a href="https://supabase.com/privacy" target="_blank">Supabase Privacy Policy</a></li>
+    <li><strong>Stripe</strong> — payment processing. <a href="https://stripe.com/gb/privacy" target="_blank">Stripe Privacy Policy</a></li>
+    <li><strong>Cloudflare</strong> — infrastructure and DDoS protection. <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare Privacy Policy</a></li>
+  </ul>
+  <p>We do not sell, rent, or trade your personal data to any third party for marketing purposes.</p>
+
+  <h2>6. Data retention</h2>
+  <ul>
+    <li>Your account and ascent data: retained for as long as your account is active</li>
+    <li>If you delete your account: all personal data deleted within 30 days</li>
+    <li>Payment records: retained for 7 years as required by UK tax law</li>
+    <li>Server logs: deleted after 30 days</li>
+  </ul>
+
+  <h2>7. Your rights</h2>
+  <p>Under UK GDPR you have the right to:</p>
+  <ul>
+    <li><strong>Access</strong> — request a copy of your personal data</li>
+    <li><strong>Rectification</strong> — correct inaccurate data</li>
+    <li><strong>Erasure</strong> — request deletion of your data ("right to be forgotten")</li>
+    <li><strong>Portability</strong> — export your ascent data (available via CSV export in the app)</li>
+    <li><strong>Objection</strong> — object to certain types of processing</li>
+    <li><strong>Withdraw consent</strong> — disconnect Strava at any time in the app settings</li>
+  </ul>
+  <p>To exercise any of these rights, email <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>. We will respond within 30 days.</p>
+  <p>You also have the right to lodge a complaint with the <a href="https://ico.org.uk" target="_blank">Information Commissioner's Office (ICO)</a>.</p>
+
+  <h2>8. Cookies</h2>
+  <p>Summit does not use tracking cookies or advertising cookies. We use localStorage (browser storage) to keep you logged in and store your app settings. This data never leaves your device.</p>
+
+  <h2>9. Security</h2>
+  <p>Your data is transmitted over HTTPS at all times. Strava tokens are stored encrypted. Payment card data never touches our servers. We regularly review our security practices.</p>
+
+  <h2>10. Children</h2>
+  <p>Summit is not directed at children under 13. We do not knowingly collect data from children under 13. If you believe a child has provided us with personal data, please contact us immediately.</p>
+
+  <h2>11. Changes to this policy</h2>
+  <p>We may update this policy from time to time. We'll notify you of significant changes by email or via the app. Continued use after changes constitutes acceptance.</p>
+
+  <h2>12. Contact</h2>
+  <p>Questions about this policy? Email us at <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>. We aim to respond within 2 working days.</p>
+</main>
+</body>
+</html>
