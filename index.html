@@ -310,7 +310,53 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 
 .dash-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
 
-/* Leaflet popup theme overrides */
+/* Toggle switch */
+.toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--border);border-radius:11px;cursor:pointer;transition:background 0.2s}
+.toggle input:checked+.toggle-track{background:var(--forest)}
+.toggle-track::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.toggle input:checked+.toggle-track::after{transform:translateX(18px)}
+
+/* Autocomplete suggestions */
+#hill-suggestions .suggestion{
+  padding:0.6rem 0.9rem;font-size:0.85rem;cursor:pointer;
+  border-bottom:1px solid var(--border-lt);
+  display:flex;align-items:center;justify-content:space-between;
+}
+#hill-suggestions .suggestion:last-child{border-bottom:none}
+#hill-suggestions .suggestion:hover{background:var(--paper-mid)}
+#hill-suggestions .suggestion-height{font-size:0.75rem;color:var(--earth)}
+#hill-suggestions .suggestion-lists{font-size:0.7rem;color:var(--light-muted)}
+
+/* Profile stats list */
+.profile-stat-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.8rem 1.2rem;border-bottom:1px solid var(--border-lt);
+}
+.profile-stat-row:last-child{border-bottom:none}
+.profile-stat-label{font-size:0.85rem;color:var(--text)}
+.profile-stat-val{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--forest)}
+
+/* Ascent entry with delete */
+.ascent-item{padding:1rem;border-bottom:1px solid var(--border-lt);position:relative}
+.ascent-item:last-child{border-bottom:none}
+.ascent-delete{
+  position:absolute;top:0.8rem;right:0.8rem;
+  background:none;border:none;color:var(--light-muted);
+  font-size:0.85rem;cursor:pointer;padding:0.2rem 0.4rem;
+  border-radius:3px;transition:all 0.15s;
+}
+.ascent-delete:hover{color:var(--path);background:rgba(196,74,10,0.08)}
+
+/* Settings list toggle rows */
+.settings-list-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.9rem 1.2rem;border-bottom:1px solid var(--border-lt);
+}
+.settings-list-row:last-child{border-bottom:none}
+.settings-list-name{font-size:0.875rem;font-weight:500;color:var(--text)}
+.settings-list-meta{font-size:0.75rem;color:var(--light-muted);margin-top:0.15rem}
 .leaflet-popup-content-wrapper{
   background:var(--canvas);border:1px solid var(--border);
   border-radius:6px;box-shadow:var(--shadow-md);
@@ -740,7 +786,7 @@ textarea.form-input{resize:vertical;min-height:80px}
         <button class="nav-item" data-list="Ma" onclick="switchList('Ma')"><span class="nav-item-icon">○</span>Marilyns<span class="nav-count">0/2009</span></button>
         <div class="nav-section-label">Account</div>
         <button class="nav-item" onclick="showPage('profile')"><span class="nav-item-icon">○</span>Profile</button>
-        <button class="nav-item"><span class="nav-item-icon">⚙</span>Settings</button>
+        <button class="nav-item" onclick="showPage('settings')"><span class="nav-item-icon">⚙</span>Settings</button>
       </nav>
       <div class="sidebar-footer">
         <div class="avatar-sm" id="sidebar-avatar">—</div>
@@ -952,52 +998,117 @@ textarea.form-input{resize:vertical;min-height:80px}
 
       <!-- PROFILE -->
       <div id="page-profile" class="app-page">
-        <div class="page-header"><div><div class="page-title">Profile</div><div class="page-sub">Account, Strava & export</div></div></div>
+        <div class="page-header">
+          <div><div class="page-title">Profile</div><div class="page-sub">Your stats, data & account</div></div>
+        </div>
         <div class="content-area">
           <div class="profile-grid">
+
+            <!-- Identity card -->
             <div class="profile-top">
-              <div class="avatar-lg">JM</div>
-              <div>
-                <div class="profile-name-lg">Jamie MacLeod</div>
-                <div class="profile-loc">Hillwalker · Dumfries, Scotland</div>
-                <div class="strava-connected">⚡ Strava connected · Synced 2 min ago · 47 summits detected</div>
-                <div class="achievements">
-                  <div class="achiev">🏔 47 Munros</div>
-                  <div class="achiev">△ 12 Corbetts</div>
-                  <div class="achiev">⛰ Ben Nevis ×2</div>
-                  <div class="achiev">❄ 3 Winter summits</div>
-                </div>
+              <div class="avatar-lg" id="profile-avatar-lg">—</div>
+              <div style="flex:1">
+                <div class="profile-name-lg" id="profile-name-lg">—</div>
+                <div class="profile-loc">Hillwalker</div>
+                <div class="strava-connected" id="profile-strava-status">⚡ Strava connected</div>
+                <div class="achievements" id="profile-achievements"></div>
               </div>
             </div>
+
+            <!-- Stats card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">My Stats</span></div>
+              <div class="card-body" style="padding:0">
+                <div id="profile-stats-list"></div>
+              </div>
+            </div>
+
+            <!-- Export card -->
             <div class="card">
               <div class="card-header"><span class="card-title">Export Data</span></div>
               <div class="export-list">
                 <div class="export-row" onclick="exportCSV()">
                   <span class="export-icon">⬇</span>
-                  <div><div class="export-title">Download CSV</div><div class="export-sub">All ascents with dates, notes, companions</div></div>
+                  <div><div class="export-title">Download CSV</div><div class="export-sub">All ascents · dates, notes, companions</div></div>
                 </div>
-                <div class="export-row">
+                <div class="export-row" onclick="exportHillBagging()">
                   <span class="export-icon">⬇</span>
                   <div><div class="export-title">Export for hill-bagging.co.uk</div><div class="export-sub">Compatible import format</div></div>
                 </div>
-                <div class="export-row">
-                  <span class="export-icon">⬇</span>
-                  <div><div class="export-title">Export for Hill Lists app</div><div class="export-sub">Graham Haley import format</div></div>
-                </div>
               </div>
             </div>
+
+            <!-- Strava card -->
             <div class="card">
               <div class="card-header"><span class="card-title">Strava Connection</span></div>
               <div class="card-body">
                 <div style="background:rgba(252,76,2,0.06);border:1px solid rgba(252,76,2,0.15);border-radius:4px;padding:1rem;margin-bottom:1rem;display:flex;gap:0.9rem;align-items:center">
                   <span style="font-size:1.3rem">⚡</span>
-                  <div><div style="font-size:0.875rem;font-weight:500">Connected as Jamie MacLeod</div><div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem">47 summits auto-detected from 312 activities</div></div>
+                  <div>
+                    <div style="font-size:0.875rem;font-weight:500" id="strava-conn-name">Connected</div>
+                    <div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem" id="strava-conn-sub">Summits detected from your activities</div>
+                  </div>
                 </div>
-                <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Summit scans GPS tracks and detects summits within 100m of known hill coordinates. New activities are checked within minutes of upload to Strava.</p>
-                <button class="btn-outline" style="width:100%">Re-scan full history</button>
+                <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Summit scans your GPS tracks and detects summits within 100m of known hill coordinates.</p>
+                <button class="btn-outline" style="width:100%;margin-bottom:0.6rem" onclick="resync()">↻ Re-sync Strava history</button>
+                <button class="btn-outline" style="width:100%;color:var(--path)" onclick="disconnectStrava()">Disconnect Strava</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="app-page">
+        <div class="page-header">
+          <div><div class="page-title">Settings</div><div class="page-sub">Customise your Summit experience</div></div>
+        </div>
+        <div class="content-area" style="max-width:600px">
+
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="card-header"><span class="card-title">Lists I'm Tracking</span></div>
+            <div class="card-body" style="padding:0">
+              <div id="settings-lists"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="card-header"><span class="card-title">Summit Detection</span></div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                <div>
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text)">Detection radius</div>
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">GPS points within this distance of a summit count as bagged</div>
+                </div>
+                <select class="filter-sel" id="settings-radius" onchange="saveSettings()">
+                  <option value="100">100m (strict)</option>
+                  <option value="150" selected>150m (default)</option>
+                  <option value="200">200m (relaxed)</option>
+                  <option value="300">300m (loose)</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text)">Include Runs in sync</div>
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">Also scan Strava activities logged as "Run"</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="settings-include-runs" onchange="saveSettings()" checked/>
+                  <span class="toggle-track"></span>
+                </label>
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Danger Zone</span></div>
+            <div class="card-body">
+              <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Permanently delete all your logged ascents. This cannot be undone.</p>
+              <button class="btn-outline" style="color:var(--path);border-color:rgba(196,74,10,0.3)" onclick="confirmClearData()">Clear all my data</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -1010,27 +1121,63 @@ textarea.form-input{resize:vertical;min-height:80px}
   <div class="modal">
     <div class="modal-title">Log an Ascent</div>
     <div class="modal-sub" id="modal-hill-sub">Recording a summit in your logbook</div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Mountain</label><input class="form-input" id="log-hill" type="text" placeholder="e.g. Ben Nevis"/></div>
-      <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="log-date" type="date"/></div>
+    <div class="form-group" style="position:relative">
+      <label class="form-label">Mountain</label>
+      <input class="form-input" id="log-hill" type="text" placeholder="Start typing a hill name…" autocomplete="off" oninput="hillAutocomplete(this.value)"/>
+      <div id="hill-suggestions" style="position:absolute;top:100%;left:0;right:0;background:var(--canvas);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;z-index:100;display:none"></div>
     </div>
-    <div class="form-group"><label class="form-label">Who were you with?</label><input class="form-input" id="log-companions" type="text" placeholder="Names, or leave blank for solo"/></div>
-    <div class="form-group"><label class="form-label">Conditions</label><input class="form-input" id="log-conditions" type="text" placeholder="e.g. Clear, snow above 900m, strong wind"/></div>
-    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="log-notes" placeholder="Your memories — visibility, route, how it felt…"></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" id="log-date" type="date"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Who were you with?</label>
+      <input class="form-input" id="log-companions" type="text" placeholder="Names, or leave blank for solo"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Conditions</label>
+      <input class="form-input" id="log-conditions" type="text" placeholder="e.g. Clear, snow above 900m, strong wind"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="log-notes" placeholder="Your memories — visibility, route, how it felt…"></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-modal-primary" onclick="saveAscent()">Save Ascent</button>
+      <button class="btn-modal-primary" id="save-ascent-btn" onclick="saveAscent()">Save Ascent</button>
     </div>
   </div>
 </div>
 
 <script>
 // ── STATE ──
-let HILLS = [];           // loaded from hills.json — all 2,548 hills
+let HILLS = [];
+let ASCENTS = [];          // full ascents array from Supabase (all entries per hill)
 let currentFilter = 'all';
-let currentList = 'M';    // active list: M, C, G, D, W, Ma, MT
+let currentList = 'M';
 let currentHill = null;
-let currentHills = [];    // hills shown in current list view
+let currentHills = [];
+
+const SETTINGS_KEY = 'summit_settings';
+
+const DEFAULT_SETTINGS = {
+  trackedLists:   ['M','C','G','D','W','Ma','MT'],
+  detectionRadius: 150,
+  includeRuns:    true,
+};
+
+function getSettings() {
+  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY)) }; }
+  catch { return { ...DEFAULT_SETTINGS }; }
+}
+function saveSettings() {
+  const s = getSettings();
+  s.detectionRadius = parseInt(document.getElementById('settings-radius')?.value || 150);
+  s.includeRuns     = document.getElementById('settings-include-runs')?.checked ?? true;
+  s.trackedLists    = [...document.querySelectorAll('.settings-list-toggle:checked')].map(el => el.dataset.list);
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  toast('Settings saved');
+}
 
 const LIST_META = {
   M:  { name:'Munros',      total:282,  desc:'Scotland\'s 3000ft peaks' },
@@ -1056,6 +1203,8 @@ function showPage(p) {
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   const pg = document.getElementById('page-' + p);
   if (pg) pg.classList.add('active');
+  if (p === 'profile') updateProfilePage();
+  if (p === 'settings') updateSettingsPage();
 }
 
 function switchList(listCode) {
@@ -1357,25 +1506,29 @@ function openHill(id) {
       : '<span class="hill-tag" style="background:var(--paper-mid);color:var(--muted);border:1px solid var(--border)">○ Not yet bagged</span>';
   }
 
-  // Ascents panel
+  // Ascents panel — show ALL ascents for this hill
+  const hillAscents = ASCENTS.filter(a => a.hill_id === h.id && !a.deleted_at)
+    .sort((a, b) => b.date > a.date ? 1 : -1);
+
   const ascentTitle = document.getElementById('detail-ascents-title');
   const ascentList  = document.getElementById('detail-ascents-list');
-  if (ascentTitle) ascentTitle.textContent = h.bagged ? 'My Ascents (1)' : 'My Ascents (0)';
+  if (ascentTitle) ascentTitle.textContent = `My Ascents (${hillAscents.length})`;
   if (ascentList) {
-    if (h.bagged) {
-      const dateDisplay = h.date || 'Date unknown';
-      const sourceIcon  = h.source === 'strava' ? '⚡ Auto-detected from Strava' : '✎ Manually logged';
-      ascentList.innerHTML = `
-        <div class="ascent-item">
+    if (hillAscents.length > 0) {
+      ascentList.innerHTML = hillAscents.map(a => {
+        const sourceIcon = a.source === 'strava' ? '⚡ Auto-detected from Strava' : '✎ Manually logged';
+        return `<div class="ascent-item">
+          <button class="ascent-delete" onclick="deleteAscent('${a.id}', ${h.id})" title="Delete this ascent">✕</button>
           <div class="ascent-date">
-            ↑ ${dateDisplay}
-            ${h.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
+            ↑ ${a.date || 'Date unknown'}
+            ${a.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
           </div>
-          <div class="ascent-companions">With: <span>${h.companions || 'Solo'}</span></div>
-          ${h.conditions ? `<div class="ascent-notes" style="font-style:normal;color:var(--text-mid)">Conditions: ${h.conditions}</div>` : ''}
-          ${h.notes      ? `<div class="ascent-notes">"${h.notes}"</div>` : ''}
+          <div class="ascent-companions">With: <span>${a.companions || 'Solo'}</span></div>
+          ${a.conditions ? `<div class="ascent-notes" style="font-style:normal;color:var(--text-mid)">Conditions: ${a.conditions}</div>` : ''}
+          ${a.notes      ? `<div class="ascent-notes">"${a.notes}"</div>` : ''}
           <div class="ascent-source-tag">${sourceIcon}</div>
         </div>`;
+      }).join('');
     } else {
       ascentList.innerHTML = '<div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged — log an ascent below</div>';
     }
@@ -1385,17 +1538,59 @@ function openHill(id) {
   showPage('hill');
 }
 
-// ── MODAL ──
-function openLogModal() {
-  document.getElementById('log-modal').classList.add('open');
-  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
-  if (currentHill) {
-    document.getElementById('log-hill').value = currentHill.name;
-    document.getElementById('modal-hill-sub').textContent =
-      currentHill.name + ' · ' + currentHill.height + 'm';
+// ── AUTOCOMPLETE ──
+function hillAutocomplete(val) {
+  const box = document.getElementById('hill-suggestions');
+  if (!val || val.length < 2) { box.style.display = 'none'; return; }
+  const q = val.toLowerCase();
+  const matches = HILLS.filter(h => h.name.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  box.innerHTML = matches.map(h => {
+    const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    return `<div class="suggestion" onclick="selectHill('${h.name.replace(/'/g,"\\'")}')">
+      <div><div>${h.name}</div><div class="suggestion-lists">${lists}</div></div>
+      <div class="suggestion-height">${h.height}m</div>
+    </div>`;
+  }).join('');
+  box.style.display = 'block';
+}
+
+function selectHill(name) {
+  document.getElementById('log-hill').value = name;
+  document.getElementById('hill-suggestions').style.display = 'none';
+  const hill = HILLS.find(h => h.name === name);
+  if (hill) {
+    const lists = hill.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    document.getElementById('modal-hill-sub').textContent = `${hill.height}m · ${hill.region} · ${lists}`;
   }
 }
-function closeModal() { document.getElementById('log-modal').classList.remove('open'); }
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#log-hill') && !e.target.closest('#hill-suggestions')) {
+    const box = document.getElementById('hill-suggestions');
+    if (box) box.style.display = 'none';
+  }
+});
+
+// ── MODAL ──
+function openLogModal(hillName) {
+  document.getElementById('log-modal').classList.add('open');
+  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('log-companions').value = '';
+  document.getElementById('log-conditions').value = '';
+  document.getElementById('log-notes').value = '';
+  const box = document.getElementById('hill-suggestions');
+  if (box) box.style.display = 'none';
+  const name = hillName || currentHill?.name || '';
+  document.getElementById('log-hill').value = name;
+  if (name) selectHill(name);
+  else document.getElementById('modal-hill-sub').textContent = 'Start typing to search all 2,548 hills';
+}
+function closeModal() {
+  document.getElementById('log-modal').classList.remove('open');
+  const box = document.getElementById('hill-suggestions');
+  if (box) box.style.display = 'none';
+}
 document.getElementById('log-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
@@ -1427,13 +1622,31 @@ async function saveAscent() {
 
   const session = getSession();
 
-  // Optimistically update the local state immediately
-  hill.bagged = true;
-  hill.date = date ? new Date(date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-  hill.source = 'manual';
+  // Optimistically update local state
+  hill.bagged     = true;
+  hill.date       = date ? new Date(date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  hill.source     = 'manual';
   hill.companions = companions || null;
   hill.conditions = conditions || null;
-  hill.notes = notes || null;
+  hill.notes      = notes || null;
+
+  // Add to ASCENTS array so hill detail shows it immediately
+  const optimisticAscent = {
+    id:           'pending-' + Date.now(),
+    user_id:      session?.user_id,
+    hill_id:      hill.id,
+    hill_name:    hill.name,
+    hill_lists:   hill.lists,
+    height:       hill.height,
+    region:       hill.region,
+    date:         date || new Date().toISOString().split('T')[0],
+    source:       'manual',
+    companions:   companions || null,
+    conditions:   conditions || null,
+    notes:        notes || null,
+    deleted_at:   null,
+  };
+  ASCENTS.unshift(optimisticAscent);
 
   closeModal();
   updateDashboard();
@@ -1492,21 +1705,136 @@ function toast(msg) {
   setTimeout(() => t.remove(), 2800);
 }
 
+// ── PROFILE PAGE ──
+function updateProfilePage() {
+  const session = getSession();
+  if (!session) return;
+  const parts = session.name.split(' ');
+  const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+  const avatarEl = document.getElementById('profile-avatar-lg');
+  if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+  const nameEl = document.getElementById('profile-name-lg');
+  if (nameEl) nameEl.textContent = session.name;
+  const stravaName = document.getElementById('strava-conn-name');
+  if (stravaName) stravaName.textContent = `Connected as ${session.name}`;
+  const baggedAll = HILLS.filter(h => h.bagged);
+  const stravaSub = document.getElementById('strava-conn-sub');
+  if (stravaSub) stravaSub.textContent = `${baggedAll.length} summits across all lists`;
+  const statsList = document.getElementById('profile-stats-list');
+  if (statsList) {
+    const highest = [...baggedAll].sort((a,b) => b.height - a.height)[0];
+    const totalElev = baggedAll.reduce((sum, h) => sum + h.height, 0);
+    const activeAscents = ASCENTS.filter(a => !a.deleted_at);
+    statsList.innerHTML = [
+      ['Munros', `${getBaggedCount('M')} / 282`],
+      ['Corbetts', `${getBaggedCount('C')} / 222`],
+      ['Grahams', `${getBaggedCount('G')} / 231`],
+      ['Wainwrights', `${getBaggedCount('W')} / 214`],
+      ['Marilyns', `${getBaggedCount('Ma')} / 2009`],
+      ['Total unique hills', baggedAll.length],
+      ['Total ascents logged', activeAscents.length],
+      ['Highest summit', highest ? `${highest.name} (${highest.height}m)` : '—'],
+      ['Total elevation', `${Math.round(totalElev / 1000)}km`],
+    ].map(([l,v]) => `<div class="profile-stat-row"><span class="profile-stat-label">${l}</span><span class="profile-stat-val">${v}</span></div>`).join('');
+  }
+  const ach = document.getElementById('profile-achievements');
+  if (ach) {
+    const m = getBaggedCount('M'), c = getBaggedCount('C'), w = getBaggedCount('W');
+    const items = [];
+    if (m >= 282) items.push('🏔 Munro Compleater!');
+    else if (m >= 100) items.push('💯 100 Munros');
+    else if (m >= 50) items.push('⛰ 50 Munros');
+    else if (m >= 1) items.push(`▲ ${m} Munros`);
+    if (c > 0) items.push(`△ ${c} Corbetts`);
+    if (w > 0) items.push(`◻ ${w} Wainwrights`);
+    ach.innerHTML = items.map(i => `<div class="achiev">${i}</div>`).join('');
+  }
+}
+
+// ── SETTINGS PAGE ──
+function updateSettingsPage() {
+  const settings = getSettings();
+  const radiusSel = document.getElementById('settings-radius');
+  if (radiusSel) radiusSel.value = settings.detectionRadius;
+  const runsToggle = document.getElementById('settings-include-runs');
+  if (runsToggle) runsToggle.checked = settings.includeRuns;
+  const listContainer = document.getElementById('settings-lists');
+  if (listContainer) {
+    listContainer.innerHTML = Object.entries(LIST_META).map(([code, meta]) => {
+      const tracked = settings.trackedLists.includes(code);
+      const bagged = getBaggedCount(code);
+      return `<div class="settings-list-row">
+        <div><div class="settings-list-name">${meta.name}</div><div class="settings-list-meta">${meta.desc} · ${bagged} bagged</div></div>
+        <label class="toggle"><input type="checkbox" class="settings-list-toggle" data-list="${code}" onchange="saveSettings()" ${tracked ? 'checked' : ''}/><span class="toggle-track"></span></label>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── DELETE ASCENT ──
+async function deleteAscent(ascentId, hillId) {
+  if (!confirm('Delete this ascent?')) return;
+  const session = getSession();
+  try {
+    const token = await getValidToken(session);
+    await fetch(`${WORKER}/api/ascents/${ascentId}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (e) { console.error('Delete failed', e); }
+  const idx = ASCENTS.findIndex(a => a.id === ascentId);
+  if (idx > -1) ASCENTS[idx].deleted_at = new Date().toISOString();
+  const remaining = ASCENTS.filter(a => a.hill_id === hillId && !a.deleted_at);
+  const hill = HILLS.find(h => h.id === hillId);
+  if (hill) {
+    if (remaining.length === 0) {
+      hill.bagged=false; hill.date=null; hill.source=null; hill.companions=null; hill.conditions=null; hill.notes=null;
+    } else {
+      const latest = remaining.sort((a,b) => b.date > a.date ? 1 : -1)[0];
+      hill.date=latest.date; hill.source=latest.source; hill.companions=latest.companions; hill.conditions=latest.conditions; hill.notes=latest.notes;
+    }
+  }
+  updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+  if (currentHill?.id === hillId) openHill(hillId);
+  toast('Ascent deleted');
+}
+
+function disconnectStrava() {
+  if (!confirm('Disconnect Strava? Your logged ascents will be kept.')) return;
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+async function confirmClearData() {
+  if (!confirm('Delete ALL ascents permanently? This cannot be undone.')) return;
+  const session = getSession();
+  if (!session?.user_id) return;
+  try {
+    const token = await getValidToken(session);
+    await fetch(`${WORKER}/api/ascents/all?user_id=${session.user_id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (e) { console.error('Clear failed', e); }
+  ASCENTS = [];
+  HILLS.forEach(h => { h.bagged=false; h.date=null; h.source=null; h.companions=null; h.conditions=null; h.notes=null; });
+  updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+  toast('All ascents cleared');
+}
+
 // ── EXPORT ──
 function exportCSV() {
-  const bagged = HILLS.filter(h => h.bagged);
-  const rows = bagged.map(h =>
-    `"${h.name}",${h.height},"${h.region}","${h.lists.join(',')}","${h.date || ''}","${h.source || 'manual'}"`
+  const rows = ASCENTS.filter(a => !a.deleted_at).map(a =>
+    `"${a.hill_name}",${a.height},"${a.region}","${(a.hill_lists||[]).join(',')}","${a.date||''}","${a.source||''}","${(a.companions||'').replace(/"/g,'""')}","${(a.notes||'').replace(/"/g,'""')}"`
   );
-  const blob = new Blob(
-    ['Name,Height (m),Region,Lists,Date,Source\n' + rows.join('\n')],
-    { type: 'text/csv' }
-  );
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'summit-hills.csv';
-  a.click();
-  toast(`Exported ${bagged.length} ascents`);
+  const blob = new Blob(['Name,Height (m),Region,Lists,Date,Source,Companions,Notes\n'+rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='summit-ascents.csv'; a.click();
+  toast(`Exported ${rows.length} ascents`);
+}
+
+function exportHillBagging() {
+  const rows = ASCENTS.filter(a => !a.deleted_at && a.date).map(a => `${a.hill_id},${a.date},${a.hill_name}`);
+  const blob = new Blob(['hill_id,date,name\n'+rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='summit-hill-bagging-export.csv'; a.click();
+  toast(`Exported ${rows.length} ascents`);
 }
 
 // ── CONSTANTS ──
@@ -1607,9 +1935,12 @@ async function loadAscents(session) {
     const ascents = await res.json();
     if (!Array.isArray(ascents)) return 0;
 
-    // Group by hill_id — keep most recent per hill but preserve all data
+    // Store full ascents array (for multiple ascents per hill, delete, export)
+    ASCENTS = ascents.filter(a => !a.deleted_at);
+
+    // Apply to HILLS — use most recent non-deleted ascent per hill
     const byHill = {};
-    for (const a of ascents) {
+    for (const a of ASCENTS) {
       if (!byHill[a.hill_id] || a.date > byHill[a.hill_id].date) {
         byHill[a.hill_id] = a;
       }
