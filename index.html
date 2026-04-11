@@ -1375,110 +1375,141 @@ function renderMap() {
   const mapEl = document.getElementById('summit-map');
   if (!mapEl) return;
 
-  // Initialise map only once
   if (!leafletMap) {
     leafletMap = L.map('summit-map', {
-      center: [57.0, -4.5],   // Central Scotland
+      center: [57.0, -4.5],
       zoom: 6,
       zoomControl: true,
     });
 
-    // ESRI World Topo Map — beautiful terrain, hill shading, free, no API key
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
       attribution: '© <a href="https://www.esri.com">Esri</a>, USGS, NOAA',
     }).addTo(leafletMap);
 
     mapMarkerLayer = L.layerGroup().addTo(leafletMap);
+
+    // Re-render markers when zoom changes (show more detail when zoomed in)
+    leafletMap.on('zoomend', () => refreshMapMarkers());
   }
 
-  // Clear existing markers
+  refreshMapMarkers();
+}
+
+function refreshMapMarkers() {
+  if (!leafletMap || !mapMarkerLayer) return;
   mapMarkerLayer.clearLayers();
 
-  // Custom circle marker styles
-  const baggedStyle = {
-    radius: 5,
-    fillColor: '#2d5a3d',
-    color: '#1e3d29',
-    weight: 1.5,
-    opacity: 1,
-    fillOpacity: 0.9,
-  };
-  const unbaggedStyle = {
-    radius: 3,
-    fillColor: '#d4bfa0',
-    color: '#b8996a',
-    weight: 1,
-    opacity: 0.6,
-    fillOpacity: 0.4,
-  };
+  const zoom = leafletMap.getZoom();
 
-  // List colour overrides for bagged markers
+  // List colours for bagged markers
   const listColors = {
-    M:  '#2d5a3d',   // Munros — forest green
-    C:  '#3a6e8a',   // Corbetts — blue
-    G:  '#7a5510',   // Grahams — brown
-    W:  '#8b3a1a',   // Wainwrights — rust
-    Ma: '#5a4070',   // Marilyns — purple
-    D:  '#3d6644',   // Donalds — moss
+    M:  '#2d5a3d',  // Munros — forest green
+    C:  '#3a6e8a',  // Corbetts — blue
+    G:  '#7a5510',  // Grahams — brown
+    W:  '#8b3a1a',  // Wainwrights — rust
+    Ma: '#5a4070',  // Marilyns — purple
+    D:  '#3d6644',  // Donalds — moss
+    MT: '#4a6e3d',  // Munro Tops — light green
   };
 
   function primaryList(h) {
-    const order = ['M','C','G','D','W','Ma'];
+    const order = ['M','C','G','D','W','Ma','MT'];
     for (const l of order) if (h.lists.includes(l)) return l;
     return h.lists[0];
   }
 
-  // Show Munros + any other bagged hills
-  // For unbagged, show Munros only to keep the map readable at zoom 6
-  const munros = getListHills('M');
-  const baggedAll = HILLS.filter(h => h.bagged);
-  const unbaggedMunros = munros.filter(h => !h.bagged);
+  const settings = getSettings();
+  const trackedLists = settings.trackedLists || ['M','C','G','D','W','Ma'];
 
-  // Render unbagged Munros first (bottom layer)
-  unbaggedMunros.forEach(h => {
-    L.circleMarker([h.lat, h.lng], unbaggedStyle)
-      .bindPopup(`<strong>${h.name}</strong><br>${h.height}m · ${h.region}<br><em>Not yet bagged</em>`)
-      .on('click', () => openHill(h.id))
-      .addTo(mapMarkerLayer);
+  // ── UNBAGGED HILLS ──
+  // Zoom-dependent: show more lists as user zooms in
+  // z<7: Munros only | z7-8: + Corbetts | z9+: all tracked lists
+  let unbaggedLists;
+  if (zoom < 7)      unbaggedLists = ['M'];
+  else if (zoom < 9) unbaggedLists = ['M','C','W'];
+  else               unbaggedLists = trackedLists;
+
+  const unbaggedSet = new Set();
+  const unbagged = HILLS.filter(h => {
+    if (h.bagged) return false;
+    if (!h.lists.some(l => unbaggedLists.includes(l))) return false;
+    if (unbaggedSet.has(h.id)) return false;
+    unbaggedSet.add(h.id);
+    return true;
   });
 
-  // Render bagged hills on top (coloured by list)
-  baggedAll.forEach(h => {
-    const col = listColors[primaryList(h)] || '#2d5a3d';
-    const style = { ...baggedStyle, fillColor: col, color: col };
+  // Dot size scales with zoom
+  const unbaggedRadius = zoom < 7 ? 2.5 : zoom < 9 ? 3 : 3.5;
+
+  unbagged.forEach(h => {
     const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
-    L.circleMarker([h.lat, h.lng], style)
-      .bindPopup(`
-        <strong>${h.name}</strong><br>
-        ${h.height}m · ${h.region}<br>
-        <span style="color:#2d5a3d;font-weight:500">✓ Bagged ${h.date || ''}</span><br>
-        <small>${lists}</small>
-      `)
-      .on('click', () => openHill(h.id))
-      .addTo(mapMarkerLayer);
+    L.circleMarker([h.lat, h.lng], {
+      radius: unbaggedRadius,
+      fillColor: '#d4bfa0',
+      color: '#b8996a',
+      weight: 0.8,
+      opacity: 0.7,
+      fillOpacity: 0.45,
+    })
+    .bindPopup(`<strong>${h.name}</strong><br>${h.height}m · ${h.region}<br><small style="color:#9e9486">${lists}</small><br><em style="color:#9e9486">Not yet bagged</em>`)
+    .on('click', () => openHill(h.id))
+    .addTo(mapMarkerLayer);
   });
 
-  // Update legend
+  // ── BAGGED HILLS ── (always show all, on top)
+  const baggedAll = HILLS.filter(h => h.bagged);
+  const baggedRadius = zoom < 7 ? 5 : zoom < 9 ? 6 : 7;
+
+  baggedAll.forEach(h => {
+    const col   = listColors[primaryList(h)] || '#2d5a3d';
+    const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    L.circleMarker([h.lat, h.lng], {
+      radius: baggedRadius,
+      fillColor: col,
+      color: col,
+      weight: 1.5,
+      opacity: 1,
+      fillOpacity: 0.9,
+    })
+    .bindPopup(`
+      <strong>${h.name}</strong><br>
+      ${h.height}m · ${h.region}<br>
+      <span style="color:#2d5a3d;font-weight:500">✓ Bagged${h.date ? ' · ' + h.date : ''}</span><br>
+      <small>${lists}</small>
+    `)
+    .on('click', () => openHill(h.id))
+    .addTo(mapMarkerLayer);
+  });
+
+  // ── LEGEND ──
   const legend = document.getElementById('map-legend');
   if (legend) {
+    const unbaggedLabel = zoom < 7
+      ? `Munros unbagged (${unbagged.length})`
+      : zoom < 9
+        ? `Munros & Corbetts unbagged (${unbagged.length})`
+        : `All tracked lists unbagged (${unbagged.length})`;
     legend.innerHTML = `
       <span><span class="legend-swatch b"></span>Bagged (${baggedAll.length})</span>
-      <span><span class="legend-swatch u"></span>Munros remaining (${unbaggedMunros.length})</span>`;
+      <span><span class="legend-swatch u"></span>${unbaggedLabel}</span>
+      <span style="color:var(--light-muted);font-size:0.68rem">Zoom in to see more</span>`;
   }
 
-  // If user has bagged hills, fit map to show them all
-  if (baggedAll.length > 0) {
+  // Fit map to bagged hills on first load
+  if (baggedAll.length > 0 && !leafletMap._hasFitted) {
+    leafletMap._hasFitted = true;
     const lats = baggedAll.map(h => h.lat);
     const lngs = baggedAll.map(h => h.lng);
-    const bounds = L.latLngBounds(
-      [Math.min(...lats) - 0.3, Math.min(...lngs) - 0.3],
-      [Math.max(...lats) + 0.3, Math.max(...lngs) + 0.3]
+    leafletMap.fitBounds(
+      L.latLngBounds(
+        [Math.min(...lats) - 0.3, Math.min(...lngs) - 0.3],
+        [Math.max(...lats) + 0.3, Math.max(...lngs) + 0.3]
+      ),
+      { padding: [20, 20], maxZoom: 9 }
     );
-    leafletMap.fitBounds(bounds, { padding: [20, 20], maxZoom: 9 });
   }
 
-  // Force Leaflet to recalculate size after CSS layout settles
   setTimeout(() => leafletMap.invalidateSize(), 200);
 }
 
