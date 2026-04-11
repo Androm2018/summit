@@ -3,111 +3,3559 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Terms of Service — Summit</title>
+<title>Summit — Track Every British Hill</title>
+<meta name="description" content="Automatically track your Munros, Corbetts, Wainwrights and Marilyns from Strava GPS. The hill bagging app built for British hillwalkers."/>
+<meta property="og:title" content="Summit — Track Every British Hill"/>
+<meta property="og:description" content="Connect Strava and Summit automatically detects every summit you've climbed. Free for Munros. Premium unlocks all 8 lists."/>
+<meta property="og:url" content="https://summitapp.uk"/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="https://summitapp.uk/summit-icon-512.png"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Summit — Track Every British Hill"/>
+<meta name="twitter:description" content="Auto-detect your Munros, Corbetts, Wainwrights and Marilyns from Strava. Free for Munros."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--paper:#f4eddf;--canvas:#faf6ee;--forest:#2d5a3d;--text:#1a1916;--muted:#7a7060;--border:#d6cbb8;}
-body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.7}
-nav{background:var(--canvas);border-bottom:1px solid var(--border);padding:1rem 5%;display:flex;align-items:center;justify-content:space-between}
-.logo{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;color:var(--forest);text-decoration:none;display:flex;align-items:center;gap:0.5rem}
-.back{font-size:0.85rem;color:var(--muted);text-decoration:none}
-.back:hover{color:var(--forest)}
-main{max-width:740px;margin:0 auto;padding:3rem 5% 5rem}
-h1{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;margin-bottom:0.5rem}
-.updated{font-size:0.82rem;color:var(--muted);margin-bottom:2.5rem}
-h2{font-family:'Libre Baskerville',serif;font-size:1.15rem;font-weight:700;margin:2rem 0 0.6rem}
-p{font-size:0.925rem;color:var(--muted);margin-bottom:0.9rem;line-height:1.75}
-ul{font-size:0.925rem;color:var(--muted);padding-left:1.5rem;margin-bottom:0.9rem;line-height:1.75}
-li{margin-bottom:0.3rem}
-a{color:var(--forest)}
-.box{background:var(--canvas);border:1px solid var(--border);border-radius:6px;padding:1.2rem 1.5rem;margin:1.5rem 0;font-size:0.875rem;color:var(--muted)}
-.warning{background:rgba(196,74,10,0.05);border:1px solid rgba(196,74,10,0.2);border-radius:6px;padding:1rem 1.5rem;margin:1.5rem 0;font-size:0.875rem;color:#7a3010}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* OS Maps palette */
+  --paper:      #f4eddf;
+  --paper-mid:  #ede4d2;
+  --paper-dark: #e2d8c4;
+  --canvas:     #faf6ee;
+  --forest:     #2d5a3d;
+  --forest-deep:#1e3d29;
+  --moss:       #4a7c59;
+  --sage:       #7aab87;
+  --sage-lt:    #a8c9b2;
+  --earth:      #8b6914;
+  --contour:    #b8996a;
+  --contour-lt: #d4bfa0;
+  --text:       #1a1916;
+  --text-mid:   #3d3830;
+  --muted:      #7a7060;
+  --light-muted:#9e9486;
+  --border:     #d6cbb8;
+  --border-lt:  #e4dcd0;
+  --water:      #5b8fa8;
+  --water-lt:   rgba(91,143,168,0.12);
+  --path:       #c44a0a;
+  --bagged-bg:  rgba(45,90,61,0.08);
+  --shadow-sm:  0 1px 4px rgba(26,25,22,0.08);
+  --shadow-md:  0 4px 16px rgba(26,25,22,0.1);
+  --shadow-lg:  0 8px 32px rgba(26,25,22,0.12);
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.6;overflow-x:hidden;min-height:100vh}
+button{cursor:pointer;font-family:'DM Sans',sans-serif}
+.view{display:none;min-height:100vh}
+.view.active{display:block}
+
+/* ── TOPO LOGO SVG ── */
+.logo-mark{display:inline-block;vertical-align:middle}
+
+/* ═══════════════ LANDING ═══════════════ */
+#landing{background:var(--canvas);overflow-x:hidden}
+body{overflow-x:hidden}
+
+/* Subtle topo-line background texture */
+#landing::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% 0%,rgba(45,90,61,0.04) 0%,transparent 60%),
+    repeating-linear-gradient(35deg,transparent,transparent 48px,rgba(184,153,106,0.06) 49px,transparent 50px),
+    repeating-linear-gradient(-35deg,transparent,transparent 48px,rgba(184,153,106,0.04) 49px,transparent 50px);
+}
+
+.landing-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 5%;
+  background:rgba(244,237,223,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  display:flex;align-items:center;gap:0.6rem;
+  text-decoration:none;
+}
+.logo-type{
+  font-family:'Libre Baskerville',serif;
+  font-size:1.25rem;font-weight:700;
+  color:var(--forest);letter-spacing:-0.01em;
+}
+.nav-cta{
+  background:var(--forest);color:var(--canvas);
+  border:none;padding:0.55rem 1.3rem;border-radius:4px;
+  font-size:0.875rem;font-weight:500;
+  transition:background 0.2s,transform 0.15s;
+}
+.nav-cta:hover{background:var(--forest-deep);transform:translateY(-1px)}
+
+/* Hero */
+.hero{
+  min-height:92vh;display:flex;align-items:center;
+  padding:6rem 5% 3.5rem;position:relative;z-index:1;
+}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  border:1px solid var(--contour);color:var(--earth);
+  font-size:0.75rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.3rem 0.85rem;border-radius:2px;
+  margin-bottom:1.4rem;
+  opacity:0;animation:fadeUp 0.5s 0.1s forwards;
+}
+.hero-h1{
+  font-family:'Libre Baskerville',serif;
+  font-size:clamp(2.8rem,5vw,4.2rem);
+  font-weight:700;line-height:1.1;
+  color:var(--text);letter-spacing:-0.03em;
+  margin-bottom:1.2rem;
+  opacity:0;animation:fadeUp 0.6s 0.2s forwards;
+}
+.hero-h1 em{color:var(--forest);font-style:italic}
+.hero-sub{
+  font-size:1.05rem;color:var(--muted);line-height:1.75;
+  max-width:480px;margin-bottom:2.5rem;font-weight:300;
+  opacity:0;animation:fadeUp 0.6s 0.3s forwards;
+}
+.hero-actions{
+  display:flex;flex-direction:column;align-items:flex-start;gap:0.9rem;
+  opacity:0;animation:fadeUp 0.6s 0.4s forwards;
+}
+.strava-btn{
+  display:inline-flex;align-items:center;gap:0.75rem;
+  background:#FC4C02;color:white;border:none;
+  padding:0.9rem 1.8rem;border-radius:5px;
+  font-size:0.95rem;font-weight:500;
+  box-shadow:0 4px 16px rgba(252,76,2,0.25);
+  transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+}
+.strava-btn:hover{background:#e04400;transform:translateY(-2px);box-shadow:0 8px 24px rgba(252,76,2,0.35)}
+.strava-btn svg{width:20px;height:20px;fill:white}
+.hero-note{font-size:0.78rem;color:var(--light-muted)}
+
+/* Hero visual — topo map card */
+.hero-visual{
+  opacity:0;animation:fadeIn 0.8s 0.5s forwards;
+  position:relative;
+}
+.map-card{
+  background:var(--canvas);
+  border:1px solid var(--border);
+  border-radius:8px;
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+  position:relative;
+}
+.map-card-header{
+  padding:0.9rem 1.2rem;
+  border-bottom:1px solid var(--border-lt);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--paper-mid);
+}
+.map-card-title{font-size:0.8rem;font-weight:500;color:var(--text-mid);letter-spacing:0.02em}
+.map-card-badge{
+  font-size:0.7rem;background:var(--bagged-bg);
+  border:1px solid rgba(45,90,61,0.2);color:var(--forest);
+  padding:0.2rem 0.6rem;border-radius:2px;font-weight:500;
+}
+.stat-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid var(--border-lt);
+}
+.strip-item{
+  padding:0.9rem 1rem;border-right:1px solid var(--border-lt);text-align:center;
+}
+.strip-item:last-child{border-right:none}
+.strip-num{font-family:'Libre Baskerville',serif;font-size:1.6rem;font-weight:700;color:var(--forest);line-height:1}
+.strip-label{font-size:0.68rem;color:var(--light-muted);margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.05em}
+
+/* Features */
+.features-section{padding:3rem 5%;background:var(--paper)}
+.section-label{font-size:0.72rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--earth);margin-bottom:0.8rem}
+.section-h{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--text);letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
+.section-sub{font-size:1rem;color:var(--muted);line-height:1.75;font-weight:300;max-width:500px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem;margin-top:0}
+.feat-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;padding:1.2rem;
+  transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;
+}
+.feat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--contour)}
+.feat-icon{
+  width:32px;height:32px;border-radius:5px;
+  background:var(--bagged-bg);border:1px solid rgba(45,90,61,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.95rem;margin-bottom:0.75rem;
+}
+.feat-title{font-family:'Libre Baskerville',serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.35rem}
+.feat-text{font-size:0.78rem;color:var(--muted);line-height:1.65;font-weight:300}
+
+/* Lists section */
+.lists-section{padding:5rem 5%;background:var(--paper-mid)}
+.lists-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.list-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;padding:1.3rem;
+  display:flex;flex-direction:column;gap:0.2rem;
+  transition:border-color 0.15s;
+}
+.list-card:hover{border-color:var(--moss)}
+.list-count{font-family:'Libre Baskerville',serif;font-size:1.8rem;font-weight:700;color:var(--forest)}
+.list-name{font-size:0.875rem;font-weight:500;color:var(--text)}
+.list-desc{font-size:0.75rem;color:var(--light-muted)}
+
+/* ═══════════════ APP ═══════════════ */
+#app{background:var(--paper)}
+.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{
+  background:var(--paper-mid);border-right:1px solid var(--border);
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sidebar-logo{
+  padding:1.2rem 1rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:0.6rem;
+}
+.sidebar-logo-type{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:var(--forest)}
+.sidebar-nav{padding:0.75rem;flex:1}
+.nav-section-label{
+  font-size:0.65rem;font-weight:500;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--light-muted);
+  padding:0.6rem 0.5rem 0.25rem;margin-top:0.25rem;
+}
+.nav-item{
+  display:flex;align-items:center;gap:0.65rem;
+  padding:0.55rem 0.65rem;border-radius:4px;
+  font-size:0.85rem;color:var(--muted);
+  cursor:pointer;transition:all 0.12s;
+  margin-bottom:1px;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--paper-dark);color:var(--text)}
+.nav-item.active{background:var(--bagged-bg);color:var(--forest);font-weight:500}
+.nav-item-icon{font-size:0.9rem;width:18px;text-align:center;flex-shrink:0}
+.nav-count{margin-left:auto;font-size:0.7rem;color:var(--light-muted)}
+.nav-item.active .nav-count{color:var(--moss)}
+.sidebar-footer{
+  padding:0.9rem;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:0.65rem;
+}
+.avatar-sm{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--forest),var(--moss));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.78rem;font-weight:700;color:white;
+}
+.footer-name{font-size:0.82rem;font-weight:500;color:var(--text)}
+.footer-sub{font-size:0.7rem;color:var(--forest)}
+
+/* Main */
+.main-content{overflow-y:auto;min-height:100vh;background:var(--paper)}
+.page-header{
+  padding:1.6rem 2rem 1.2rem;
+  border-bottom:1px solid var(--border);
+  background:var(--canvas);
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:1rem;
+}
+.page-title{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.page-sub{font-size:0.82rem;color:var(--muted);margin-top:0.2rem}
+.content-area{padding:1.75rem 2rem}
+.app-page{display:none}
+.app-page.active{display:block}
+
+/* ── Buttons ── */
+.btn-forest{
+  background:var(--forest);color:white;border:none;
+  padding:0.6rem 1.3rem;border-radius:4px;
+  font-size:0.85rem;font-weight:500;
+  transition:background 0.15s;
+  white-space:nowrap;
+}
+.btn-forest:hover{background:var(--forest-deep)}
+.btn-outline{
+  background:var(--canvas);border:1px solid var(--border);
+  color:var(--text-mid);padding:0.55rem 1.1rem;border-radius:4px;
+  font-size:0.82rem;transition:all 0.12s;
+}
+.btn-outline:hover{border-color:var(--moss);color:var(--forest)}
+
+/* ── Cards ── */
+.card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;
+}
+.card-header{
+  padding:1rem 1.3rem;border-bottom:1px solid var(--border-lt);
+  background:var(--paper-mid);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:0.82rem;font-weight:500;color:var(--text-mid);letter-spacing:0.01em}
+.card-link{font-size:0.75rem;color:var(--moss);background:none;border:none;cursor:pointer}
+.card-link:hover{color:var(--forest)}
+.card-body{padding:1.3rem}
+
+/* ── DASHBOARD ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;padding:1.2rem;
+  border-left:3px solid var(--border);
+}
+.stat-card.green{border-left-color:var(--forest)}
+.stat-card.earth{border-left-color:var(--earth)}
+.stat-card.water{border-left-color:var(--water)}
+.stat-label{font-size:0.68rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--light-muted);margin-bottom:0.4rem}
+.stat-value{font-family:'Libre Baskerville',serif;font-size:1.9rem;font-weight:700;color:var(--text);line-height:1}
+.stat-sub{font-size:0.75rem;color:var(--muted);margin-top:0.25rem}
+.stat-change{font-size:0.72rem;color:var(--forest);margin-top:0.3rem;font-weight:500}
+
+.dash-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
+
+/* Toggle switch */
+.toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--border);border-radius:11px;cursor:pointer;transition:background 0.2s}
+.toggle input:checked+.toggle-track{background:var(--forest)}
+.toggle-track::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.toggle input:checked+.toggle-track::after{transform:translateX(18px)}
+
+/* Autocomplete suggestions */
+#hill-suggestions .suggestion{
+  padding:0.6rem 0.9rem;font-size:0.85rem;cursor:pointer;
+  border-bottom:1px solid var(--border-lt);
+  display:flex;align-items:center;justify-content:space-between;
+}
+#hill-suggestions .suggestion:last-child{border-bottom:none}
+#hill-suggestions .suggestion:hover{background:var(--paper-mid)}
+#hill-suggestions .suggestion-height{font-size:0.75rem;color:var(--earth)}
+#hill-suggestions .suggestion-lists{font-size:0.7rem;color:var(--light-muted)}
+
+/* Profile stats list */
+.profile-stat-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.8rem 1.2rem;border-bottom:1px solid var(--border-lt);
+}
+.profile-stat-row:last-child{border-bottom:none}
+.profile-stat-label{font-size:0.85rem;color:var(--text)}
+.profile-stat-val{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--forest)}
+
+/* Ascent entry with delete */
+.ascent-item{padding:1rem;border-bottom:1px solid var(--border-lt);position:relative}
+.ascent-item:last-child{border-bottom:none}
+.ascent-delete{
+  position:absolute;top:0.8rem;right:0.8rem;
+  background:none;border:none;color:var(--light-muted);
+  font-size:0.85rem;cursor:pointer;padding:0.2rem 0.4rem;
+  border-radius:3px;transition:all 0.15s;
+}
+.ascent-delete:hover{color:var(--path);background:rgba(196,74,10,0.08)}
+
+/* Settings list toggle rows */
+.settings-list-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.9rem 1.2rem;border-bottom:1px solid var(--border-lt);
+}
+.settings-list-row:last-child{border-bottom:none}
+.settings-list-name{font-size:0.875rem;font-weight:500;color:var(--text)}
+.settings-list-meta{font-size:0.75rem;color:var(--light-muted);margin-top:0.15rem}
+.leaflet-popup-content-wrapper{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:6px;box-shadow:var(--shadow-md);
+  font-family:'DM Sans',sans-serif;
+}
+.leaflet-popup-content{font-size:0.82rem;color:var(--text);line-height:1.5;margin:0.7rem 0.9rem}
+.leaflet-popup-tip-container{display:none}
+.leaflet-container{font-family:'DM Sans',sans-serif;border-radius:0 0 6px 6px}
+.map-legend{display:flex;gap:1.2rem;padding:0 1.2rem 1rem;font-size:0.72rem;color:var(--muted)}
+.legend-swatch{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:0.35rem;vertical-align:middle}
+.legend-swatch.b{background:var(--forest)}
+.legend-swatch.u{background:var(--contour-lt);border:1px solid var(--contour)}
+
+/* Premium plan cards */
+.plan-card{
+  border:2px solid var(--border);border-radius:8px;padding:1rem 0.75rem;
+  text-align:center;cursor:pointer;transition:all 0.15s;position:relative;
+  background:var(--canvas);
+}
+.plan-card:hover{border-color:var(--forest);transform:translateY(-1px)}
+.plan-card.selected{border-color:var(--forest);background:rgba(45,90,61,0.04)}
+.plan-card-featured{border-color:var(--forest);background:rgba(45,90,61,0.04)}
+.plan-card-featured.selected{border-color:var(--forest);background:rgba(45,90,61,0.08)}
+.plan-badge{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  background:var(--forest);color:white;
+  font-size:0.62rem;font-weight:600;letter-spacing:0.05em;
+  padding:0.15rem 0.6rem;border-radius:20px;white-space:nowrap;
+}
+.plan-name{font-size:0.78rem;font-weight:500;color:var(--muted);margin-bottom:0.3rem}
+.plan-price{font-family:'Libre Baskerville',serif;font-size:1.7rem;font-weight:700;color:var(--text);line-height:1}
+.plan-period{font-size:0.7rem;color:var(--light-muted);margin-top:0.2rem}
+.plan-note{font-size:0.7rem;color:var(--forest);margin-top:0.4rem;font-weight:500}
+
+/* Premium gate lock icon on nav items */
+.nav-premium-gate .nav-item-icon::after{
+  content:'🔒';font-size:0.55rem;vertical-align:super;margin-left:0.1rem;opacity:0.6;
+}
+.is-premium .nav-premium-gate .nav-item-icon::after{display:none}
+.is-premium .nav-premium-gate{cursor:pointer}
+
+/* Sidebar upgrade nudge */
+.sidebar-upgrade{
+  margin:0.75rem 0.5rem 0;
+  background:linear-gradient(135deg,rgba(45,90,61,0.08),rgba(45,90,61,0.04));
+  border:1px solid rgba(45,90,61,0.2);border-radius:6px;
+  padding:0.75rem 0.9rem;cursor:pointer;transition:all 0.15s;
+}
+.sidebar-upgrade:hover{background:rgba(45,90,61,0.12)}
+.sidebar-upgrade-title{font-size:0.78rem;font-weight:600;color:var(--forest);margin-bottom:0.2rem}
+.sidebar-upgrade-sub{font-size:0.7rem;color:var(--muted);line-height:1.4}
+
+/* Premium badge in sidebar footer */
+.premium-badge{
+  display:inline-block;background:var(--forest);color:white;
+  font-size:0.6rem;font-weight:700;letter-spacing:0.06em;
+  padding:0.1rem 0.45rem;border-radius:20px;margin-left:0.4rem;
+  vertical-align:middle;
+}
+
+/* Badges */
+.badge-row{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.6rem 0.5rem;border-radius:5px;
+  transition:background 0.15s;
+}
+.badge-row:hover{background:var(--paper-mid)}
+.badge-icon{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+}
+.badge-icon.earned{background:linear-gradient(135deg,#2d5a3d,#4a7c59);box-shadow:0 2px 6px rgba(45,90,61,0.3)}
+.badge-icon.locked{background:var(--paper-mid);border:1px solid var(--border);filter:grayscale(1);opacity:0.5}
+.badge-name{font-size:0.82rem;font-weight:500;color:var(--text);line-height:1.3}
+.badge-progress{font-size:0.72rem;color:var(--muted);margin-top:0.1rem}
+.badge-earned-date{font-size:0.68rem;color:var(--forest);margin-top:0.1rem;font-weight:500}
+
+/* Empty states */
+.empty-state{padding:2rem 1.5rem;text-align:center;color:var(--light-muted);font-size:0.85rem;line-height:1.7}
+.empty-state-icon{font-size:2rem;margin-bottom:0.75rem;display:block}
+.empty-state-title{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--text-mid);margin-bottom:0.4rem}
+.empty-state-btn{
+  display:inline-block;margin-top:0.8rem;
+  background:var(--forest);color:white;
+  padding:0.55rem 1.2rem;border-radius:4px;
+  font-size:0.82rem;font-weight:500;cursor:pointer;border:none;
+  font-family:'DM Sans',sans-serif;transition:background 0.15s;
+}
+.empty-state-btn:hover{background:var(--forest-deep)}
+
+/* Nav active — left border treatment */
+.nav-item.active{
+  background:rgba(45,90,61,0.1);color:var(--forest);font-weight:500;
+  border-left:2px solid var(--forest);padding-left:calc(0.65rem - 2px);
+}
+
+/* Stat card hover */
+.stat-card{transition:transform 0.15s,box-shadow 0.15s}
+.stat-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+
+/* Page fade in */
+.app-page.active{animation:fadeIn 0.18s ease}
+
+/* Loading bar pulse */
+@keyframes loadingPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.loading-pulse{animation:loadingPulse 1.4s ease infinite}
+
+/* Progress */
+.progress-section{display:flex;flex-direction:column;align-items:center;padding:1.5rem 1.2rem}
+.progress-ring-wrap{position:relative;width:140px;height:140px;margin-bottom:1rem}
+.progress-ring-bg{fill:none;stroke:var(--border);stroke-width:10}
+.progress-ring-fill{fill:none;stroke:var(--forest);stroke-width:10;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1.5s ease}
+.progress-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.progress-num{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--text);line-height:1}
+.progress-den{font-size:0.72rem;color:var(--muted)}
+.list-pills{display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;margin-top:0.8rem}
+.list-pill-sm{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:3px;padding:0.25rem 0.6rem;
+  font-size:0.7rem;color:var(--muted);
+}
+.list-pill-sm strong{color:var(--forest)}
+
+/* Activity feed */
+.activity-list{display:flex;flex-direction:column}
+.activity-row{
+  display:flex;align-items:center;gap:0.9rem;
+  padding:0.8rem 0;border-bottom:1px solid var(--border-lt);
+}
+.activity-row:last-child{border-bottom:none;padding-bottom:0}
+.activity-dot{
+  width:30px;height:30px;border-radius:5px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:0.85rem;
+}
+.ad-strava{background:rgba(252,76,2,0.1);color:#FC4C02}
+.ad-manual{background:var(--bagged-bg);color:var(--forest)}
+.activity-main{flex:1}
+.activity-name{font-size:0.85rem;font-weight:500;color:var(--text)}
+.activity-meta{font-size:0.72rem;color:var(--light-muted);margin-top:0.1rem}
+.strava-pill{
+  display:inline-flex;align-items:center;gap:0.2rem;
+  background:rgba(252,76,2,0.08);color:#e04400;
+  font-size:0.62rem;font-weight:500;padding:0.1rem 0.4rem;border-radius:2px;
+  margin-left:0.3rem;vertical-align:middle;
+}
+.activity-ht{font-size:0.78rem;color:var(--earth);font-weight:500;white-space:nowrap}
+
+/* ── MUNROS LIST ── */
+.list-controls{display:flex;gap:0.75rem;margin-bottom:1.3rem;flex-wrap:wrap;align-items:center}
+.search-input{
+  flex:1;min-width:180px;
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:4px;padding:0.55rem 0.9rem;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  outline:none;transition:border-color 0.15s;
+}
+.search-input:focus{border-color:var(--moss)}
+.search-input::placeholder{color:var(--light-muted)}
+.filter-sel{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:4px;padding:0.55rem 0.9rem;
+  color:var(--text);font-size:0.82rem;outline:none;cursor:pointer;
+}
+.filter-toggle{
+  display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;
+}
+.ftog-btn{
+  background:var(--canvas);border:none;border-right:1px solid var(--border);
+  padding:0.5rem 0.9rem;font-size:0.8rem;color:var(--muted);
+  transition:all 0.12s;
+}
+.ftog-btn:last-child{border-right:none}
+.ftog-btn.active{background:var(--forest);color:white}
+.ftog-btn:hover:not(.active){background:var(--paper-dark);color:var(--text)}
+
+.munro-grid{background:var(--canvas);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.munro-table{width:100%;border-collapse:collapse}
+.munro-table th{
+  text-align:left;font-size:0.68rem;font-weight:500;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--light-muted);
+  padding:0.65rem 1rem;border-bottom:1px solid var(--border);
+  background:var(--paper-mid);
+}
+.munro-table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border-lt);font-size:0.85rem;vertical-align:middle}
+.munro-table tr:last-child td{border-bottom:none}
+.munro-table tbody tr{cursor:pointer;transition:background 0.1s}
+.munro-table tbody tr:hover td{background:var(--paper-mid)}
+.mname{font-weight:500;color:var(--text)}
+.mgaelic{font-size:0.72rem;color:var(--light-muted);font-style:italic;margin-top:0.1rem}
+.mheight{color:var(--earth);font-weight:500;font-family:'Libre Baskerville',serif}
+.mregion{color:var(--muted);font-size:0.78rem}
+.mdate{color:var(--forest);font-size:0.78rem;font-weight:500}
+.badge-yes{
+  display:inline-flex;align-items:center;gap:0.25rem;
+  background:var(--bagged-bg);color:var(--forest);border:1px solid rgba(45,90,61,0.15);
+  font-size:0.68rem;font-weight:500;padding:0.18rem 0.5rem;border-radius:2px;
+}
+.badge-no{
+  background:var(--paper-mid);color:var(--light-muted);border:1px solid var(--border);
+  font-size:0.68rem;padding:0.18rem 0.5rem;border-radius:2px;
+  display:inline-flex;align-items:center;
+}
+
+/* ── HILL DETAIL ── */
+.hill-layout{display:grid;grid-template-columns:1fr 320px;gap:1.25rem}
+.hill-banner{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:6px;padding:2rem;
+  position:relative;overflow:hidden;
+}
+.hill-banner::after{
+  content:'';position:absolute;right:-20px;bottom:-20px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,90,61,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+/* Topo pattern on banner */
+.hill-banner::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    repeating-radial-gradient(circle at 85% 30%,transparent 30px,transparent 44px,rgba(184,153,106,0.08) 45px,transparent 46px),
+    repeating-radial-gradient(circle at 85% 30%,transparent 60px,transparent 74px,rgba(184,153,106,0.05) 75px,transparent 76px);
+}
+.hill-eyebrow{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  border:1px solid var(--contour);color:var(--earth);background:rgba(139,105,20,0.06);
+  font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
+  padding:0.25rem 0.7rem;border-radius:2px;margin-bottom:1rem;
+}
+.hill-name-lg{font-family:'Libre Baskerville',serif;font-size:2.4rem;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:0.3rem}
+.hill-gaelic-lg{font-family:'Libre Baskerville',serif;font-style:italic;font-size:1rem;color:var(--muted);margin-bottom:0.9rem}
+.hill-tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.3rem}
+.hill-tag{
+  font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:2px;font-weight:500;
+}
+.tag-bagged{background:var(--bagged-bg);color:var(--forest);border:1px solid rgba(45,90,61,0.15)}
+.tag-strava{background:rgba(252,76,2,0.08);color:#e04400;border:1px solid rgba(252,76,2,0.2)}
+.hill-stats{display:flex;gap:2.5rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+.hstat-val{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;color:var(--text)}
+.hstat-key{font-size:0.68rem;color:var(--light-muted);letter-spacing:0.05em;text-transform:uppercase;margin-top:0.15rem}
+
+.ascent-item{padding:1rem;border-bottom:1px solid var(--border-lt)}
+.ascent-item:last-child{border-bottom:none}
+.ascent-date{font-size:0.72rem;font-weight:500;color:var(--forest);margin-bottom:0.3rem;display:flex;align-items:center;gap:0.4rem}
+.ascent-companions{font-size:0.82rem;color:var(--text)}
+.ascent-companions span{color:var(--muted)}
+.ascent-notes{font-size:0.78rem;color:var(--muted);margin-top:0.3rem;line-height:1.6;font-style:italic}
+.ascent-source-tag{font-size:0.65rem;color:var(--light-muted);margin-top:0.35rem;display:flex;align-items:center;gap:0.3rem}
+
+.log-full-btn{
+  width:100%;background:var(--forest);color:white;border:none;
+  padding:0.75rem;border-radius:4px;font-size:0.875rem;font-weight:500;
+  margin:1rem 0 0;transition:background 0.15s;
+}
+.log-full-btn:hover{background:var(--forest-deep)}
+
+.info-card{background:var(--canvas);border:1px solid var(--border);border-radius:6px;margin-top:1.2rem;overflow:hidden}
+.info-body{padding:1.1rem 1.3rem}
+.info-body p{font-size:0.85rem;color:var(--muted);line-height:1.75;font-weight:300}
+.pron-big{font-family:'Libre Baskerville',serif;font-size:1.2rem;color:var(--text);margin-bottom:0.3rem}
+.pron-ipa{font-size:0.82rem;color:var(--muted);margin-bottom:0.5rem}
+.pron-note{font-size:0.78rem;color:var(--light-muted);line-height:1.6}
+
+.cond-item{padding:0.9rem;border-bottom:1px solid var(--border-lt)}
+.cond-item:last-child{border-bottom:none}
+.cond-date{font-size:0.7rem;color:var(--light-muted);margin-bottom:0.25rem}
+.cond-text{font-size:0.82rem;color:var(--text);line-height:1.55}
+
+/* ── PROFILE ── */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.profile-top{grid-column:1/-1;background:var(--canvas);border:1px solid var(--border);border-radius:6px;padding:1.8rem;display:flex;align-items:center;gap:1.5rem}
+.avatar-lg{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--sage));display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:white;flex-shrink:0}
+.profile-name-lg{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:0.2rem}
+.profile-loc{font-size:0.85rem;color:var(--muted)}
+.strava-connected{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:rgba(252,76,2,0.08);border:1px solid rgba(252,76,2,0.2);
+  color:#e04400;font-size:0.75rem;padding:0.3rem 0.7rem;border-radius:3px;margin-top:0.7rem;
+}
+.achievements{display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:1rem}
+.achiev{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:3px;padding:0.5rem 0.8rem;
+  font-size:0.78rem;color:var(--text);
+  display:flex;align-items:center;gap:0.4rem;
+}
+.export-list{display:flex;flex-direction:column;gap:0.6rem;padding:1rem}
+.export-row{
+  background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:4px;padding:0.7rem 1rem;
+  display:flex;align-items:center;gap:0.75rem;
+  transition:border-color 0.12s,background 0.12s;
+}
+.export-row:hover{border-color:var(--moss);background:var(--canvas);cursor:pointer}
+.export-icon{color:var(--forest);font-size:0.95rem}
+.export-title{font-size:0.85rem;font-weight:500;color:var(--text)}
+.export-sub{font-size:0.72rem;color:var(--light-muted);margin-top:0.1rem}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(26,25,22,0.55);
+  backdrop-filter:blur(4px);z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:8px;padding:1.8rem;width:90%;max-width:460px;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(16px);transition:transform 0.2s;
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:'Libre Baskerville',serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:0.2rem}
+.modal-sub{font-size:0.82rem;color:var(--muted);margin-bottom:1.4rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border-lt)}
+.form-group{margin-bottom:1.1rem}
+.form-label{display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
+.form-input{
+  width:100%;background:var(--paper-mid);border:1px solid var(--border);
+  border-radius:4px;padding:0.65rem 0.9rem;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;
+  outline:none;transition:border-color 0.15s;
+}
+.form-input:focus{border-color:var(--moss)}
+.form-input::placeholder{color:var(--light-muted)}
+textarea.form-input{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem}
+.modal-actions{display:flex;gap:0.65rem;margin-top:1.3rem}
+.btn-modal-primary{flex:1;background:var(--forest);color:white;border:none;padding:0.75rem;border-radius:4px;font-size:0.875rem;font-weight:500;transition:background 0.15s}
+.btn-modal-primary:hover{background:var(--forest-deep)}
+.btn-modal-cancel{background:var(--paper-mid);border:1px solid var(--border);color:var(--muted);padding:0.75rem 1.2rem;border-radius:4px;font-size:0.875rem}
+
+.back-btn{display:inline-flex;align-items:center;gap:0.4rem;background:none;border:none;color:var(--muted);font-size:0.82rem;padding:0;margin-bottom:1.2rem;transition:color 0.12s}
+.back-btn:hover{color:var(--forest)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--forest);display:inline-block;margin-right:0.4rem;animation:pulse 2.5s infinite}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  /* Landing */
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .lists-grid{grid-template-columns:1fr 1fr}
+  .hero{min-height:auto;padding:5rem 5% 3rem}
+
+  /* App layout — sidebar hidden, bottom nav shown */
+  .app-layout{grid-template-columns:1fr;padding-bottom:60px}
+  .sidebar{display:none}
+  .main-content{min-height:calc(100vh - 60px)}
+
+  /* Bottom navigation bar */
+  .mobile-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--canvas);border-top:1px solid var(--border);
+    z-index:200;height:60px;
+    box-shadow:0 -2px 12px rgba(26,25,22,0.08);
+  }
+  .mobile-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:0.2rem;
+    font-size:0.6rem;color:var(--muted);
+    background:none;border:none;cursor:pointer;
+    font-family:'DM Sans',sans-serif;padding:0.3rem 0;
+    transition:color 0.15s;
+  }
+  .mobile-nav-item.active{color:var(--forest)}
+  .mobile-nav-item svg,.mobile-nav-icon{font-size:1.2rem;line-height:1}
+
+  /* Page adjustments */
+  .dash-grid,.hill-layout,.profile-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .page-header{padding:1rem 1rem 0.75rem;flex-wrap:wrap;gap:0.5rem}
+  .content-area{padding:1rem}
+  .card{border-radius:6px}
+
+  /* Landing pricing section — stack to single column */
+  .landing-pricing-grid{grid-template-columns:1fr !important}
+  .pricing-grid-mobile{grid-template-columns:1fr !important}
+  .plan-card{padding:0.9rem 0.75rem}
+  .plan-price{font-size:1.4rem}
+}
+
+@media(max-width:480px){
+  /* Feature cards — single column on small phones */
+  .feat-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:2rem}
+
+  /* Landing pricing — single column on small phones */
+  .landing-pricing-grid{grid-template-columns:1fr !important}
+
+  /* Pricing modal plan cards stack */
+  .pricing-grid-mobile{grid-template-columns:1fr !important}
+  .plan-card{margin-bottom:0.4rem}
+
+  /* Stat cards 1 column on very small screens */
+  .stats-row{grid-template-columns:1fr}
+
+  /* Tighten modal on small phones */
+  .modal{padding:1.2rem;margin:0.5rem}
+  .modal-overlay{align-items:flex-end}
+  .modal{border-radius:12px 12px 0 0;max-height:92vh;overflow-y:auto}
+}
 </style>
 </head>
 <body>
-<nav>
-  <a href="/" class="logo">
-    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+<!-- ════════════ LANDING ════════════ -->
+<div id="landing" class="view active">
+  <nav class="landing-nav">
+    <a href="#" class="logo" onclick="return false">
+      <!-- Topo contour logo -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="32" height="32" rx="16" fill="#f4eddf"/>
   <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
   <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
 </svg>
-    Summit
-  </a>
-  <a href="/" class="back">← Back to Summit</a>
-</nav>
+      <span class="logo-type">Summit</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:1.2rem">
+      <a href="#pricing" style="font-size:0.85rem;color:var(--muted);text-decoration:none;font-weight:500">Pricing</a>
+      <button class="nav-cta" onclick="connectStrava()">Get Started Free</button>
+    </div>
+  </nav>
 
-<main>
-  <h1>Terms of Service</h1>
-  <p class="updated">Last updated: April 2026</p>
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-kicker">⛰ 2,548 UK hills tracked</div>
+        <h1 class="hero-h1">Every summit.<br><em>Finally logged.</em></h1>
+        <p class="hero-sub">Connect Strava and Summit automatically finds every Munro, Corbett, Wainwright and Marilyn in your GPS history. Free for Munros. Premium unlocks everything.</p>
+        <div class="hero-actions">
+          <button class="strava-btn" onclick="connectStrava()">
+            <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+            Connect with Strava — it's free
+          </button>
+          <span class="hero-note">Free forever for Munros · No credit card · Full Strava history import</span>
+        </div>
+      </div>
 
-  <p>These Terms of Service ("Terms") govern your use of Summit ("the Service"), operated by Summit ("we", "us", "our"). By using Summit, you agree to these Terms. If you don't agree, please don't use the Service.</p>
+      <!-- Preview card -->
+      <div class="hero-visual">
+        <div class="map-card">
+          <div class="map-card-header">
+            <span class="map-card-title">Your Progress</span>
+            <span class="map-card-badge">✓ Synced from Strava</span>
+          </div>
+          <div class="stat-strip">
+            <div class="strip-item"><div class="strip-num" style="color:var(--forest)">47</div><div class="strip-label">Munros</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--earth)">12</div><div class="strip-label">Corbetts</div></div>
+            <div class="strip-item"><div class="strip-num" style="color:var(--water)">23</div><div class="strip-label">Marilyns</div></div>
+          </div>
+          <div style="padding:1rem 1.2rem;background:var(--paper-mid);font-size:0.82rem;color:var(--text-mid)">
+            <div style="display:flex;flex-direction:column;gap:0.5rem">
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--forest);flex-shrink:0"></span>
+                <span><strong>Cruach Ardrain</strong> · 1,045m · 11 Oct 2025</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--forest);flex-shrink:0"></span>
+                <span><strong>Ben More</strong> · 1,174m · 11 Oct 2025</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--forest);flex-shrink:0"></span>
+                <span><strong>Ben Lawers</strong> · 1,214m · 31 Aug 2025</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem;color:var(--light-muted)">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--contour-lt);border:1px solid var(--contour);flex-shrink:0"></span>
+                <span>An Teallach · 1,062m · not yet bagged</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0.8rem 1.2rem;border-top:1px solid var(--border-lt);font-size:0.72rem;color:var(--light-muted);display:flex;align-items:center;gap:0.4rem">
+            <span class="sync-dot"></span>Detected automatically from your Strava GPS tracks
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <div class="warning">
-    <strong>Safety disclaimer:</strong> Summit is a hill tracking and logging tool. It is not a navigation or safety application. Never rely solely on any app when hillwalking. Always carry a map and compass, check weather forecasts, and tell someone where you're going. Mountain conditions can be dangerous and unpredictable.
+  <!-- FEATURES — compact, honest about what's built -->
+  <section class="features-section" style="padding:3.5rem 5%">
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:0">
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⚡</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Auto-detects from Strava</h3>
+          <p class="feat-text" style="font-size:0.8rem">Scans your full GPS history. Every summit you passed within 150m — automatically logged. No manual entry for past walks.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📝</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Notes & companions per ascent</h3>
+          <p class="feat-text" style="font-size:0.8rem">Log conditions, who you were with, and how it felt. Multiple ascents of the same hill tracked separately — your second round is a different day.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🗺</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Interactive topo map</h3>
+          <p class="feat-text" style="font-size:0.8rem">Your bagged hills on a real topographic map. Zoom in to see contours and footpaths. Filter by list, region, or completion status.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📥</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Import from spreadsheet</h3>
+          <p class="feat-text" style="font-size:0.8rem">Already tracking hills in Excel? Download our template, fill it in, upload it back. Years of data imported in minutes.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📊</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Stats that mean something</h3>
+          <p class="feat-text" style="font-size:0.8rem">Total elevation, highest summit, this month's count, progress across every list. Your logbook does the maths.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⬇</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Export anywhere</h3>
+          <p class="feat-text" style="font-size:0.8rem">Download as CSV or in hill-bagging.co.uk format. Your data is yours — always exportable, never locked in.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING SECTION -->
+  <section id="pricing" style="padding:3.5rem 5% 2.5rem;background:var(--canvas)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 class="section-h" style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem)">Simple, honest pricing</h2>
+      <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:2rem;max-width:440px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock every hill in Britain.</p>
+
+      <div class="landing-pricing-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
+
+        <!-- Free -->
+        <div style="background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:2rem 1.5rem">
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem">Free</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:var(--text);margin-bottom:0.2rem">£0</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem">forever</div>
+          <div style="font-size:0.85rem;color:var(--muted);display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.8rem">
+            <div>✓ Munros (282 peaks)</div>
+            <div>✓ Strava auto-detection</div>
+            <div>✓ Manual ascent logging</div>
+            <div style="color:var(--light-muted)">– Last 50 activities only</div>
+            <div style="color:var(--light-muted)">– Other lists locked</div>
+          </div>
+          <button onclick="connectStrava()" class="btn-outline" style="width:100%">Get started free</button>
+        </div>
+
+        <!-- Annual (featured) -->
+        <div style="background:var(--forest);border:2px solid var(--forest);border-radius:10px;padding:2rem 1.5rem;position:relative">
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--earth);color:white;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;padding:0.2rem 0.8rem;border-radius:20px;white-space:nowrap;text-transform:uppercase">Most popular</div>
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:0.75rem">Annual</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:white;margin-bottom:0.2rem">£25</div>
+          <div style="font-size:0.82rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem">per year · save 31%</div>
+          <div style="font-size:0.85rem;color:rgba(255,255,255,0.85);display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.8rem">
+            <div>✓ All 8 hill lists</div>
+            <div>✓ Full Strava history</div>
+            <div>✓ Excel import</div>
+            <div>✓ Badges & awards</div>
+            <div>✓ Priority support</div>
+          </div>
+          <button onclick="connectStrava()" style="width:100%;background:white;color:var(--forest);border:none;padding:0.75rem;border-radius:5px;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Start free, upgrade in-app</button>
+        </div>
+
+        <!-- Monthly -->
+        <div style="background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:2rem 1.5rem">
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem">Monthly</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:var(--text);margin-bottom:0.2rem">£3</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem">per month · cancel anytime</div>
+          <div style="font-size:0.85rem;color:var(--muted);display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.8rem">
+            <div>✓ All 8 hill lists</div>
+            <div>✓ Full Strava history</div>
+            <div>✓ Excel import</div>
+            <div>✓ Badges & awards</div>
+            <div>✓ 14-day money-back guarantee</div>
+          </div>
+          <button onclick="connectStrava()" class="btn-outline" style="width:100%">Start free, upgrade in-app</button>
+        </div>
+      </div>
+
+      <!-- Lifetime note -->
+      <div style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:2rem">
+        Want to pay once? <a href="#" onclick="connectStrava();return false" style="color:var(--forest);font-weight:500">Lifetime access is £100</a> — one payment, forever.
+      </div>
+
+      <!-- Donation note -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;background:rgba(45,90,61,0.06);border:1px solid rgba(45,90,61,0.15);border-radius:8px;padding:1.2rem 2rem;max-width:560px;margin:0 auto 1rem">
+        <span style="font-size:1.5rem">🌿</span>
+        <div style="font-size:0.875rem;color:var(--text)">
+          <strong>We donate 10% of every subscription</strong> — 5% to
+          <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:var(--forest)">Scottish Wildlife Trust</a>
+          and 5% to
+          <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>.
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:0.75rem;color:var(--light-muted);margin-top:1.2rem">
+        Secure payments via Stripe · 14-day money-back guarantee ·
+        <a href="/terms.html" style="color:var(--light-muted)">Terms</a> ·
+        <a href="/privacy.html" style="color:var(--light-muted)">Privacy</a> ·
+        <a href="/contact.html" style="color:var(--light-muted)">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONATION TRACKER -->
+  <section style="padding:2.5rem 5%;background:var(--paper)">
+    <div style="max-width:700px;margin:0 auto">
+      <div style="background:var(--canvas);border:1px solid rgba(45,90,61,0.2);border-radius:10px;padding:1.8rem 2rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem">
+          <span style="font-size:1.5rem">🌿</span>
+          <div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:var(--text)">Giving back to the hills</div>
+            <div style="font-size:0.82rem;color:var(--muted)">10% of every subscription goes to two causes that matter to hillwalkers</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+          <div style="background:var(--paper);border-radius:6px;padding:1rem 1.1rem;border:1px solid var(--border)">
+            <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem">Scottish Wildlife Trust</div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--forest)" id="swt-total">£0</div>
+            <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.2rem">donated to date</div>
+          </div>
+          <div style="background:var(--paper);border-radius:6px;padding:1rem 1.1rem;border:1px solid var(--border)">
+            <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem">Mountain Rescue Scotland</div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--forest)" id="mrs-total">£0</div>
+            <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.2rem">donated to date</div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--light-muted);line-height:1.6">
+          Donations are made quarterly. 5% of net revenue to each charity.
+          <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:var(--forest)">Scottish Wildlife Trust</a> ·
+          <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:var(--text);color:rgba(255,255,255,0.6);padding:3rem 5%;font-size:0.82rem">
+    <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:2rem">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:white;margin-bottom:0.5rem">Summit</div>
+        <div style="line-height:1.7;max-width:280px">Track every Munro, Corbett, Graham, Wainwright and Marilyn. Built for hillwalkers, by a hillwalker.</div>
+        <div style="margin-top:0.75rem;color:rgba(255,255,255,0.4)">© 2026 Summit. Made in Scotland.</div>
+      </div>
+      <div style="display:flex;gap:3rem;flex-wrap:wrap">
+        <div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Product</div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <a href="#" onclick="connectStrava();return false" style="color:rgba(255,255,255,0.6);text-decoration:none">Get started</a>
+            <a href="#pricing" style="color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a>
+          </div>
+        </div>
+        <div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Legal</div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <a href="/privacy.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Privacy Policy</a>
+            <a href="/terms.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Terms of Service</a>
+            <a href="/contact.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Contact & Support</a>
+            <a href="mailto:hello@summitapp.uk" style="color:rgba(255,255,255,0.6);text-decoration:none">hello@summitapp.uk</a>
+          </div>
+        </div>
+        <div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Giving back</div>
+          <div style="display:flex;flex-direction:column;gap:0.35rem">
+            <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Scottish Wildlife Trust</a>
+            <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Mountain Rescue Scotland</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════ APP ════════════ -->
+<div id="app" class="view">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
+</svg>
+        <span class="sidebar-logo-type">Summit</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">My Hills</div>
+        <button class="nav-item active" onclick="showPage('dashboard')"><span class="nav-item-icon">⊞</span>Dashboard</button>
+        <button class="nav-item" data-list="M" onclick="switchList('M')"><span class="nav-item-icon">≡</span>All Hills<span class="nav-count">0/282</span></button>
+        <div class="nav-section-label">Lists</div>
+        <button class="nav-item" data-list="M" onclick="switchList('M')"><span class="nav-item-icon">▲</span>Munros<span class="nav-count">0/282</span></button>
+        <button class="nav-item nav-premium-gate" data-list="C" onclick="premiumGate('corbetts')"><span class="nav-item-icon">△</span>Corbetts<span class="nav-count">0/222</span></button>
+        <button class="nav-item nav-premium-gate" data-list="G" onclick="premiumGate('grahams')"><span class="nav-item-icon">◇</span>Grahams<span class="nav-count">0/231</span></button>
+        <button class="nav-item nav-premium-gate" data-list="W" onclick="premiumGate('wainwrights')"><span class="nav-item-icon">◻</span>Wainwrights<span class="nav-count">0/214</span></button>
+        <button class="nav-item nav-premium-gate" data-list="Ma" onclick="premiumGate('marilyns')"><span class="nav-item-icon">○</span>Marilyns<span class="nav-count">0/2009</span></button>
+        <div class="nav-section-label">Account</div>
+        <button class="nav-item" onclick="showPage('profile')"><span class="nav-item-icon">○</span>Profile</button>
+        <button class="nav-item" onclick="showPage('settings')"><span class="nav-item-icon">⚙</span>Settings</button>
+        <div id="sidebar-upgrade-wrap"></div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="avatar-sm" id="sidebar-avatar">—</div>
+        <div>
+          <div class="footer-name">—</div>
+          <div class="footer-sub">Loading…</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="app-page active">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Good morning, Jamie</div>
+            <div class="page-sub"><span class="sync-dot"></span>Strava synced 2 min ago · 3 new summits detected</div>
+          </div>
+          <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
+        </div>
+        <div class="content-area">
+          <div class="stats-row">
+            <div class="stat-card green">
+              <div class="stat-label">Munros Bagged</div>
+              <div class="stat-value" id="stat-munros">0</div>
+              <div class="stat-sub" id="stat-munros-sub">of 282 · 0%</div>
+              <div class="stat-change" id="stat-munros-change" style="visibility:hidden">—</div>
+            </div>
+            <div class="stat-card earth">
+              <div class="stat-label">Total Ascents</div>
+              <div class="stat-value" id="stat-ascents">0</div>
+              <div class="stat-sub">across all lists</div>
+            </div>
+            <div class="stat-card water">
+              <div class="stat-label">All Lists</div>
+              <div class="stat-value" id="stat-all-lists">0</div>
+              <div class="stat-sub" id="stat-all-lists-sub">unique hills bagged</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Highest Summit</div>
+              <div class="stat-value" id="stat-highest" style="font-size:1.1rem;line-height:1.3">—</div>
+              <div class="stat-sub" id="stat-highest-sub">—</div>
+            </div>
+          </div>
+
+          <div class="dash-grid">
+            <!-- Map -->
+            <div class="card" style="overflow:hidden">
+              <div class="card-header">
+                <span class="card-title">My Hills — Interactive Map</span>
+                <button class="card-link" onclick="showPage('list')">View full list →</button>
+              </div>
+              <div id="summit-map" style="height:420px;width:100%;"></div>
+              <div class="map-legend" id="map-legend">
+                <span><span class="legend-swatch b"></span>Bagged (0)</span>
+                <span><span class="legend-swatch u"></span>Remaining</span>
+              </div>
+            </div>
+
+            <!-- Right -->
+            <div style="display:flex;flex-direction:column;gap:1.1rem">
+              <!-- Progress ring -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Munro Progress</span></div>
+                <div class="progress-section">
+                  <div class="progress-ring-wrap">
+                    <svg width="140" height="140" viewBox="0 0 140 140">
+                      <circle class="progress-ring-bg" cx="70" cy="70" r="56"/>
+                      <circle class="progress-ring-fill" id="progress-ring" cx="70" cy="70" r="56" stroke-dasharray="351.86" stroke-dashoffset="293.22"/>
+                    </svg>
+                    <div class="progress-center">
+                      <div class="progress-num" id="progress-num">0</div>
+                      <div class="progress-den" id="progress-den">of 282</div>
+                    </div>
+                  </div>
+                  <div class="list-pills" id="list-pills-dynamic"></div>
+                </div>
+              </div>
+              <!-- Recent -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">Recent Ascents</span>
+                  <button class="card-link" onclick="showPage('list')">All →</button>
+                </div>
+                <div style="padding:0 1.1rem">
+                  <div class="activity-list" id="recent-ascents-list">
+                    <div class="empty-state">Connect Strava to see your recent ascents here</div>
+                  </div>
+                </div>
+              </div>
+              <!-- Badges -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Badges</span></div>
+                <div id="badges-list" style="padding:0.5rem 0.75rem 0.75rem;display:flex;flex-direction:column;gap:0.5rem"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST -->
+      <div id="page-list" class="app-page">
+        <div class="page-header">
+          <div><div class="page-title">All Munros</div><div class="page-sub">282 summits · 47 bagged · 235 remaining</div></div>
+          <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
+        </div>
+        <div class="content-area">
+          <div class="list-controls">
+            <input class="search-input" id="munro-search" type="text" placeholder="Search by name or Gaelic…" oninput="filterMunros()"/>
+            <select class="filter-sel" id="region-filter" onchange="filterMunros()">
+              <option value="">All Regions</option>
+            </select>
+            <div class="filter-toggle">
+              <button class="ftog-btn active" id="btn-all" onclick="setFilter('all')">All</button>
+              <button class="ftog-btn" id="btn-bagged" onclick="setFilter('bagged')">✓ Bagged</button>
+              <button class="ftog-btn" id="btn-remaining" onclick="setFilter('remaining')">○ Remaining</button>
+            </div>
+          </div>
+          <div class="munro-grid">
+            <table class="munro-table">
+              <thead><tr>
+                <th>Mountain</th><th>Height</th><th>Region</th><th>Date Bagged</th><th>Status</th>
+              </tr></thead>
+              <tbody id="munro-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- HILL DETAIL -->
+      <div id="page-hill" class="app-page">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="detail-title">—</div>
+            <div class="page-sub" id="detail-crumb">—</div>
+          </div>
+          <button class="btn-forest" onclick="openLogModal()">+ Log Ascent</button>
+        </div>
+        <div class="content-area">
+          <button class="back-btn" onclick="showPage('list')">← Back to list</button>
+          <div class="hill-layout">
+            <div>
+              <div class="hill-banner">
+                <div class="hill-eyebrow" id="detail-eyebrow">▲ Hill</div>
+                <h1 class="hill-name-lg" id="detail-name">—</h1>
+                <div class="hill-gaelic-lg" id="detail-gaelic">—</div>
+                <div class="hill-tags" id="detail-tags"></div>
+                <div class="hill-stats">
+                  <div><div class="hstat-val" id="detail-height">—</div><div class="hstat-key">Height</div></div>
+                  <div><div class="hstat-val" id="detail-feet">—</div><div class="hstat-key">Imperial</div></div>
+                  <div><div class="hstat-val" id="detail-region">—</div><div class="hstat-key">Region</div></div>
+                  <div><div class="hstat-val" id="detail-country">—</div><div class="hstat-key">Country</div></div>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="card-header"><span class="card-title">About this hill</span></div>
+                <div class="info-body"><p id="detail-desc">—</p></div>
+              </div>
+
+              <div class="info-card">
+                <div class="card-header"><span class="card-title">Conditions — community reports</span></div>
+                <div class="cond-item"><div class="cond-date">Community conditions coming soon</div><div class="cond-text">Be the first to report conditions on this hill after your next visit.</div></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <div class="card-header"><span class="card-title" id="detail-ascents-title">My Ascents</span></div>
+                <div id="detail-ascents-list">
+                  <div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged</div>
+                </div>
+                <div style="padding:0 1rem 1rem">
+                  <button class="log-full-btn" onclick="openLogModal()">+ Log an Ascent</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="page-profile" class="app-page">
+        <div class="page-header">
+          <div><div class="page-title">Profile</div><div class="page-sub">Your stats, data & account</div></div>
+        </div>
+        <div class="content-area">
+          <div class="profile-grid">
+
+            <!-- Upgrade banner — shown for free users only -->
+            <div id="profile-upgrade-banner" class="card" style="background:linear-gradient(135deg,rgba(45,90,61,0.06),rgba(45,90,61,0.02));border:1.5px solid rgba(45,90,61,0.2)">
+              <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:0.95rem;font-weight:600;color:var(--forest);margin-bottom:0.3rem">⛰ Upgrade to Summit Premium</div>
+                  <div style="font-size:0.82rem;color:var(--muted)">Unlock Corbetts, Grahams, Wainwrights, Marilyns and full Strava history. From £3/month.</div>
+                </div>
+                <button class="btn-forest" onclick="openPricingModal('profile')" style="white-space:nowrap;flex-shrink:0">View plans</button>
+              </div>
+            </div>
+            <div class="profile-top">
+              <div class="avatar-lg" id="profile-avatar-lg">—</div>
+              <div style="flex:1">
+                <div class="profile-name-lg" id="profile-name-lg">—</div>
+                <div class="profile-loc">Hillwalker</div>
+                <div class="strava-connected" id="profile-strava-status">⚡ Strava connected</div>
+                <div class="achievements" id="profile-achievements"></div>
+              </div>
+            </div>
+
+            <!-- Stats card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">My Stats</span></div>
+              <div class="card-body" style="padding:0">
+                <div id="profile-stats-list"></div>
+              </div>
+            </div>
+
+            <!-- Export card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Export Data</span></div>
+              <div class="export-list">
+                <div class="export-row" onclick="exportCSV()">
+                  <span class="export-icon">⬇</span>
+                  <div><div class="export-title">Download CSV</div><div class="export-sub">All ascents · dates, notes, companions</div></div>
+                </div>
+                <div class="export-row" onclick="exportHillBagging()">
+                  <span class="export-icon">⬇</span>
+                  <div><div class="export-title">Export for hill-bagging.co.uk</div><div class="export-sub">Compatible import format</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title">Import from Spreadsheet</span></div>
+              <div class="card-body">
+                <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Already have your hills logged in a spreadsheet? Download the template, fill in your ascents, and upload it back. Works with Excel (.xlsx) and CSV.</p>
+                <div style="display:flex;flex-direction:column;gap:0.65rem">
+                  <div class="export-row" onclick="downloadTemplate()">
+                    <span class="export-icon">⬇</span>
+                    <div>
+                      <div class="export-title">Download Import Template</div>
+                      <div class="export-sub">Excel template with all columns pre-filled</div>
+                    </div>
+                  </div>
+                  <label class="export-row" style="cursor:pointer" for="import-file-input">
+                    <span class="export-icon">⬆</span>
+                    <div>
+                      <div class="export-title">Upload Your Spreadsheet</div>
+                      <div class="export-sub">.xlsx or .csv — we'll match hills automatically</div>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(this)"/>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Strava card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Strava Connection</span></div>
+              <div class="card-body">
+                <div style="background:rgba(252,76,2,0.06);border:1px solid rgba(252,76,2,0.15);border-radius:4px;padding:1rem;margin-bottom:1rem;display:flex;gap:0.9rem;align-items:center">
+                  <span style="font-size:1.3rem">⚡</span>
+                  <div>
+                    <div style="font-size:0.875rem;font-weight:500" id="strava-conn-name">Connected</div>
+                    <div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem" id="strava-conn-sub">Summits detected from your activities</div>
+                  </div>
+                </div>
+                <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Summit scans your GPS tracks and detects summits within 100m of known hill coordinates.</p>
+                <button class="btn-outline" style="width:100%;margin-bottom:0.6rem" onclick="resync()">↻ Re-sync Strava history</button>
+                <button class="btn-outline" style="width:100%;color:var(--path)" onclick="disconnectStrava()">Disconnect Strava</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="app-page">
+        <div class="page-header">
+          <div><div class="page-title">Settings</div><div class="page-sub">Customise your Summit experience</div></div>
+        </div>
+        <div class="content-area" style="max-width:600px">
+
+          <!-- Upgrade banner for free users -->
+          <div id="settings-upgrade-banner" class="card" style="margin-bottom:1.2rem;background:linear-gradient(135deg,rgba(45,90,61,0.06),rgba(45,90,61,0.02));border:1.5px solid rgba(45,90,61,0.2)">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+              <div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--forest);margin-bottom:0.25rem">⛰ Unlock all 8 lists</div>
+                <div style="font-size:0.78rem;color:var(--muted)">Corbetts, Grahams, Wainwrights, Marilyns & more · from £3/month</div>
+              </div>
+              <button class="btn-forest" onclick="openPricingModal('settings')" style="white-space:nowrap;flex-shrink:0;font-size:0.82rem;padding:0.5rem 1rem">Upgrade</button>
+            </div>
+          </div>
+            <div class="card-header"><span class="card-title">Lists I'm Tracking</span></div>
+            <div class="card-body" style="padding:0">
+              <div id="settings-lists"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="card-header"><span class="card-title">Summit Detection</span></div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                <div>
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text)">Detection radius</div>
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">GPS points within this distance of a summit count as bagged</div>
+                </div>
+                <select class="filter-sel" id="settings-radius" onchange="saveSettings()">
+                  <option value="100">100m (strict)</option>
+                  <option value="150" selected>150m (default)</option>
+                  <option value="200">200m (relaxed)</option>
+                  <option value="300">300m (loose)</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text)">Include Runs in sync</div>
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">Also scan Strava activities logged as "Run"</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="settings-include-runs" onchange="saveSettings()" checked/>
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Danger Zone</span></div>
+            <div class="card-body">
+              <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Permanently delete all your logged ascents. This cannot be undone.</p>
+              <button class="btn-outline" style="color:var(--path);border-color:rgba(196,74,10,0.3)" onclick="confirmClearData()">Clear all my data</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="mobile-nav" id="mobile-nav" style="display:none">
+      <button class="mobile-nav-item active" id="mob-dashboard" onclick="mobileNav('dashboard')">
+        <span class="mobile-nav-icon">⊞</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-list" onclick="mobileNav('list')">
+        <span class="mobile-nav-icon">▲</span>
+        <span>My Hills</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-log" onclick="openLogModal()">
+        <span style="width:36px;height:36px;background:var(--forest);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;margin-bottom:0.1rem">+</span>
+        <span>Log</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-profile" onclick="mobileNav('profile')">
+        <span class="mobile-nav-icon">○</span>
+        <span>Profile</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-settings" onclick="mobileNav('settings')">
+        <span class="mobile-nav-icon">⚙</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+
   </div>
+</div>
 
-  <h2>1. The Service</h2>
-  <p>Summit allows you to track hill ascents by connecting your Strava account, manually logging ascents, and maintaining a personal hillwalking logbook. The Service uses the Database of British and Irish Hills (DoBIH) data under Creative Commons licence.</p>
-
-  <h2>2. Eligibility</h2>
-  <p>You must be at least 13 years old to use Summit. By using the Service, you confirm you meet this requirement. If you are under 18, you confirm you have parental or guardian consent.</p>
-
-  <h2>3. Your account</h2>
-  <p>Summit uses your Strava account for authentication. You are responsible for maintaining the security of your Strava credentials. You are responsible for all activity that occurs under your account. Notify us immediately at <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a> if you suspect unauthorised access.</p>
-
-  <h2>4. Acceptable use</h2>
-  <p>You agree not to:</p>
-  <ul>
-    <li>Use the Service for any unlawful purpose</li>
-    <li>Attempt to reverse engineer, hack, or interfere with the Service</li>
-    <li>Scrape or systematically download data from the Service</li>
-    <li>Impersonate another person or entity</li>
-    <li>Upload or transmit malicious code</li>
-    <li>Attempt to circumvent any access controls or payment requirements</li>
-  </ul>
-
-  <h2>5. Subscriptions and payments</h2>
-  <p><strong>Free tier:</strong> The free version of Summit provides access to Munro tracking and basic features as described on the pricing page.</p>
-  <p><strong>Premium subscription:</strong> Premium plans are available on a monthly (£3/month), annual (£25/year), or lifetime (£100 one-off) basis. Prices are in GBP and include VAT where applicable.</p>
-  <p><strong>Billing:</strong> Monthly and annual subscriptions are billed automatically via Stripe. You authorise us to charge your payment method on a recurring basis until you cancel.</p>
-  <p><strong>Cancellation:</strong> You may cancel your subscription at any time from your account settings or by emailing <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>. Cancellation takes effect at the end of the current billing period. You retain access to premium features until that date.</p>
-  <p><strong>Refunds:</strong> We offer a 14-day money-back guarantee on all new subscriptions. If you're not satisfied within 14 days of purchase, email us for a full refund. After 14 days, refunds are at our discretion. Lifetime memberships are non-refundable after 30 days.</p>
-  <p><strong>Price changes:</strong> We may change subscription prices with 30 days' notice. Changes apply to renewals, not existing billing periods.</p>
-
-  <h2>6. Donations</h2>
-  <p>Summit donates 5% of net subscription revenue to Scottish Wildlife Trust and 5% to Mountain Rescue Scotland. These donations are made quarterly. This commitment is voluntary and may be adjusted with notice if circumstances change, though we intend it to be permanent.</p>
-
-  <h2>7. Data accuracy</h2>
-  <p>Summit uses GPS data from Strava and hill coordinates from the DoBIH database to detect summit ascents. Summit detection is based on GPS tracks passing within a configurable radius of summit coordinates. We cannot guarantee 100% accuracy — GPS drift, poor signal, or routing may result in missed or incorrect detections. Your manual logs always take precedence.</p>
-
-  <div class="box">
-    The DoBIH data is used under Creative Commons Attribution 4.0 licence. Data © Database of British and Irish Hills contributors.
+<!-- FIRST-RUN LOADING OVERLAY -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:var(--canvas);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem">
+  <svg width="52" height="52" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
+</svg>
+  <div style="text-align:center">
+    <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:0.5rem" id="loading-title">Scanning your hill history…</div>
+    <div style="font-size:0.875rem;color:var(--muted)" id="loading-sub">Checking your Strava activities against 2,548 hills</div>
   </div>
+  <div style="width:240px;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+    <div id="loading-bar" style="height:100%;background:var(--forest);border-radius:2px;width:0%;transition:width 0.4s ease"></div>
+  </div>
+  <div style="font-size:0.78rem;color:var(--light-muted)" id="loading-detail">Loading hill database…</div>
+</div>
 
-  <h2>8. Intellectual property</h2>
-  <p>The Summit application, design, and code are our intellectual property. Your personal ascent data remains yours — you can export it at any time. We do not claim ownership of your logs, notes, or personal data.</p>
+<!-- PRICING MODAL -->
+<div class="modal-overlay" id="pricing-modal">
+  <div class="modal" style="max-width:520px">
+    <div style="text-align:center;padding:0.5rem 0 1.5rem">
+      <div style="font-size:1.8rem;margin-bottom:0.5rem">⛰</div>
+      <div class="modal-title" id="pricing-modal-title">Unlock all lists with Summit Premium</div>
+      <div class="modal-sub" id="pricing-modal-sub">Corbetts, Grahams, Wainwrights, Marilyns and more — plus full Strava history</div>
+    </div>
 
-  <h2>9. Disclaimer of warranties</h2>
-  <p>Summit is provided "as is" and "as available" without warranties of any kind. We do not warrant that the Service will be uninterrupted, error-free, or that summit detection will be accurate in all cases. Use of Summit for navigation or safety purposes is entirely at your own risk.</p>
+    <!-- Plan cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;margin-bottom:1.2rem" class="pricing-grid-mobile">
+      <div class="plan-card" id="plan-monthly" onclick="selectPlan('monthly')">
+        <div class="plan-name">Monthly</div>
+        <div class="plan-price">£3</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-note">Cancel anytime</div>
+      </div>
+      <div class="plan-card plan-card-featured" id="plan-annual" onclick="selectPlan('annual')">
+        <div class="plan-badge">Best value</div>
+        <div class="plan-name">Annual</div>
+        <div class="plan-price">£25</div>
+        <div class="plan-period">per year</div>
+        <div class="plan-note">Save 31%</div>
+      </div>
+      <div class="plan-card" id="plan-lifetime" onclick="selectPlan('lifetime')">
+        <div class="plan-name">Lifetime</div>
+        <div class="plan-price">£100</div>
+        <div class="plan-period">one-off</div>
+        <div class="plan-note">Pay once, forever</div>
+      </div>
+    </div>
 
-  <h2>10. Limitation of liability</h2>
-  <p>To the maximum extent permitted by UK law, Summit shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Service. Our total liability to you for any claim shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
-  <p><strong>Nothing in these Terms limits our liability for death or personal injury caused by negligence, fraud, or any other liability that cannot be excluded by law.</strong></p>
+    <!-- What's included -->
+    <div style="background:var(--paper-mid);border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:0.82rem">
+      <div style="font-weight:500;color:var(--text);margin-bottom:0.6rem">Premium includes:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem 1rem;color:var(--muted)">
+        <div>✓ All 8 hill lists</div>
+        <div>✓ Full Strava history</div>
+        <div>✓ Excel import</div>
+        <div>✓ Badges & awards</div>
+        <div>✓ Unlimited notes</div>
+        <div>✓ Priority support</div>
+      </div>
+    </div>
 
-  <h2>11. Termination</h2>
-  <p>We may suspend or terminate your account if you breach these Terms. You may delete your account at any time via the Settings page. Upon termination, your data will be deleted in accordance with our Privacy Policy.</p>
+    <!-- Donation note -->
+    <div style="display:flex;align-items:center;gap:0.6rem;background:rgba(45,90,61,0.06);border:1px solid rgba(45,90,61,0.15);border-radius:6px;padding:0.75rem 1rem;margin-bottom:1.2rem;font-size:0.78rem;color:var(--forest)">
+      <span style="font-size:1.1rem">🌿</span>
+      <span>5% of revenue goes to <strong>Scottish Wildlife Trust</strong> + 5% to <strong>Mountain Rescue Scotland</strong></span>
+    </div>
 
-  <h2>12. Changes to these Terms</h2>
-  <p>We may update these Terms from time to time. We'll notify you of material changes by email or via the app. Continued use of Summit after changes constitutes acceptance of the new Terms.</p>
+    <!-- Promo code -->
+    <div style="margin-bottom:1.2rem">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.35rem">Have a promo code?</div>
+      <input class="form-input" id="promo-code-input" type="text" placeholder="Enter code (e.g. BETA3)" style="font-size:0.85rem;padding:0.5rem 0.75rem"/>
+    </div>
 
-  <h2>13. Governing law</h2>
-  <p>These Terms are governed by the laws of Scotland and the United Kingdom. Any disputes shall be subject to the exclusive jurisdiction of the Scottish courts, unless you are a consumer in another UK jurisdiction in which case your local courts may also apply.</p>
+    <div class="modal-actions" style="flex-direction:column;gap:0.6rem">
+      <button class="btn-forest" id="pricing-cta-btn" onclick="startCheckout()" style="width:100%;padding:0.85rem;font-size:0.95rem">
+        Continue to payment →
+      </button>
+      <div style="font-size:0.72rem;color:var(--light-muted);text-align:center;line-height:1.6">
+        Secure payment via Stripe · 14-day money-back guarantee<br>
+        <a href="/terms.html" target="_blank" style="color:var(--muted)">Terms</a> ·
+        <a href="/privacy.html" target="_blank" style="color:var(--muted)">Privacy Policy</a>
+      </div>
+      <button class="btn-modal-cancel" onclick="closePricingModal()" style="width:100%;text-align:center">Maybe later</button>
+    </div>
+  </div>
+</div>
 
-  <h2>14. Contact</h2>
-  <p>Questions about these Terms? Email <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>.</p>
-</main>
+<!-- IMPORT PREVIEW MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:600px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title">Import Ascents</div>
+    <div class="modal-sub" id="import-modal-sub">Review before importing</div>
+    <div id="import-summary" style="display:flex;gap:1rem;padding:0.75rem 1rem;background:var(--paper-mid);border-radius:4px;margin-bottom:1rem;font-size:0.82rem;flex-wrap:wrap"></div>
+    <div id="import-results" style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:4px;margin-bottom:1rem;max-height:360px"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeImportModal()">Cancel</button>
+      <button class="btn-modal-primary" id="import-confirm-btn" onclick="confirmImport()">Import matched ascents</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="log-modal">
+  <div class="modal">
+    <div class="modal-title">Log an Ascent</div>
+    <div class="modal-sub" id="modal-hill-sub">Recording a summit in your logbook</div>
+    <div class="form-group" style="position:relative">
+      <label class="form-label">Mountain</label>
+      <input class="form-input" id="log-hill" type="text" placeholder="Start typing a hill name…" autocomplete="off" oninput="hillAutocomplete(this.value)"/>
+      <div id="hill-suggestions" style="position:absolute;top:100%;left:0;right:0;background:var(--canvas);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;z-index:100;display:none"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" id="log-date" type="date"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Who were you with?</label>
+      <input class="form-input" id="log-companions" type="text" placeholder="Names, or leave blank for solo"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Conditions</label>
+      <input class="form-input" id="log-conditions" type="text" placeholder="e.g. Clear, snow above 900m, strong wind"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="log-notes" placeholder="Your memories — visibility, route, how it felt…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-modal-primary" id="save-ascent-btn" onclick="saveAscent()">Save Ascent</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let HILLS = [];
+let ASCENTS = [];          // full ascents array from Supabase (all entries per hill)
+let currentFilter = 'all';
+let currentList = 'M';
+let currentHill = null;
+let currentHills = [];
+
+const SETTINGS_KEY = 'summit_settings';
+
+const DEFAULT_SETTINGS = {
+  trackedLists:   ['M','C','G','D','W','Ma','MT'],
+  detectionRadius: 150,
+  includeRuns:    true,
+};
+
+function getSettings() {
+  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY)) }; }
+  catch { return { ...DEFAULT_SETTINGS }; }
+}
+function saveSettings() {
+  const s = getSettings();
+  s.detectionRadius = parseInt(document.getElementById('settings-radius')?.value || 150);
+  s.includeRuns     = document.getElementById('settings-include-runs')?.checked ?? true;
+  s.trackedLists    = [...document.querySelectorAll('.settings-list-toggle:checked')].map(el => el.dataset.list);
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  toast('Settings saved');
+}
+
+const LIST_META = {
+  M:  { name:'Munros',      total:282,  desc:'Scotland\'s 3000ft peaks' },
+  C:  { name:'Corbetts',    total:222,  desc:'2500–3000ft Scottish hills' },
+  G:  { name:'Grahams',     total:231,  desc:'2000–2500ft Scottish hills' },
+  D:  { name:'Donalds',     total:89,   desc:'Southern Upland 2000ft hills' },
+  W:  { name:'Wainwrights', total:214,  desc:'Lake District fells' },
+  Ma: { name:'Marilyns',    total:2009, desc:'UK prominent summits' },
+  MT: { name:'Munro Tops',  total:226,  desc:'Subsidiary Munro tops' },
+};
+
+// ── CORE NAVIGATION ──
+// ── MOBILE NAV ──
+function mobileNav(page) {
+  showPage(page);
+  // Update active state on mobile nav
+  ['dashboard','list','profile','settings'].forEach(p => {
+    const btn = document.getElementById(`mob-${p}`);
+    if (btn) btn.classList.toggle('active', p === page);
+  });
+  // Also sync switchList for hills
+  if (page === 'list') switchList(currentList);
+}
+
+function showMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  if (nav && window.innerWidth <= 900) nav.style.display = 'flex';
+}
+
+function enterApp() {
+  document.getElementById('landing').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  showMobileNav();
+  updateListView();
+  updateDashboard();
+  renderMap();
+}
+
+function showPage(p) {
+  document.querySelectorAll('.app-page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  const pg = document.getElementById('page-' + p);
+  if (pg) pg.classList.add('active');
+  if (p === 'profile') updateProfilePage();
+  if (p === 'settings') updateSettingsPage();
+}
+
+function switchList(listCode) {
+  currentList = listCode;
+  currentFilter = 'all';
+  updateListView();
+  showPage('list');
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.list === listCode);
+  });
+}
+
+// ── DATA ──
+function getListHills(listCode) {
+  return HILLS.filter(h => h.lists.includes(listCode));
+}
+
+function getBaggedCount(listCode) {
+  return getListHills(listCode).filter(h => h.bagged).length;
+}
+
+// ── DASHBOARD ──
+function updateDashboard() {
+  const munros  = getListHills('M');
+  const bagged  = munros.filter(h => h.bagged);
+  const total   = munros.length;
+  const pct     = total > 0 ? bagged.length / total : 0;
+  const baggedAll = HILLS.filter(h => h.bagged);
+
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('stat-munros',        bagged.length);
+  setEl('stat-munros-sub',    `of ${total} · ${Math.round(pct * 1000) / 10}%`);
+  setEl('stat-ascents',       ASCENTS.filter(a => !a.deleted_at).length);
+  setEl('stat-all-lists',     baggedAll.length);
+
+  const listsWithBagged = Object.keys(LIST_META).filter(l => getBaggedCount(l) > 0).length;
+  setEl('stat-all-lists-sub', `across ${listsWithBagged || 0} lists`);
+
+  const highest = [...baggedAll].sort((a,b) => b.height - a.height)[0];
+  if (highest) {
+    setEl('stat-highest',     highest.name);
+    setEl('stat-highest-sub', `${highest.height}m · ${highest.date || ''}`);
+  } else {
+    setEl('stat-highest',     '—');
+    setEl('stat-highest-sub', 'No summits yet');
+  }
+
+  const changeEl = document.getElementById('stat-munros-change');
+  if (changeEl) {
+    const now = new Date();
+    const thisMonth = bagged.filter(h => {
+      if (!h.date) return false;
+      const d = new Date(h.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+    changeEl.textContent = thisMonth > 0 ? `↑ +${thisMonth} this month` : '';
+    changeEl.style.visibility = thisMonth > 0 ? 'visible' : 'hidden';
+  }
+
+  // Progress ring
+  const ring = document.getElementById('progress-ring');
+  if (ring) {
+    const r = 56, c = 2 * Math.PI * r;
+    ring.setAttribute('stroke-dasharray', c);
+    ring.setAttribute('stroke-dashoffset', c);
+    setTimeout(() => ring.setAttribute('stroke-dashoffset', c * (1 - pct)), 300);
+  }
+  setEl('progress-num', bagged.length);
+  const denEl = document.getElementById('progress-den');
+  if (denEl) denEl.textContent = `of ${total}`;
+
+  // Sidebar nav counts
+  document.querySelectorAll('.nav-item[data-list]').forEach(n => {
+    const countEl = n.querySelector('.nav-count');
+    if (countEl) countEl.textContent = `${getBaggedCount(n.dataset.list)}/${LIST_META[n.dataset.list]?.total || '?'}`;
+  });
+
+  // List pills
+  const pills = document.getElementById('list-pills-dynamic');
+  if (pills) {
+    pills.innerHTML = Object.entries(LIST_META)
+      .filter(([code]) => code !== 'M')
+      .map(([code, meta]) => `<div class="list-pill-sm">${meta.name} <strong>${getBaggedCount(code)}/${meta.total}</strong></div>`)
+      .join('');
+  }
+
+  // Footer
+  const footerSub = document.querySelector('.footer-sub');
+  if (footerSub) footerSub.textContent = `${bagged.length} Munros · ${Math.round(pct * 1000) / 10}%`;
+}
+
+// ── LIST VIEW ──
+function updateListView() {
+  currentHills = getListHills(currentList);
+  const meta = LIST_META[currentList];
+
+  // Update page header
+  const title = document.querySelector('#page-list .page-title');
+  if (title) title.textContent = meta?.name || currentList;
+
+  // Populate region filter dynamically
+  const regions = [...new Set(currentHills.map(h => h.region).filter(Boolean))].sort();
+  const sel = document.getElementById('region-filter');
+  if (sel) {
+    sel.innerHTML = '<option value="">All Regions</option>' +
+      regions.map(r => `<option>${r}</option>`).join('');
+  }
+
+  filterHills();
+}
+
+// ── LEAFLET MAP ──
+let leafletMap = null;
+let mapMarkerLayer = null;
+
+function renderMap() {
+  if (!HILLS.length) return;
+
+  const mapEl = document.getElementById('summit-map');
+  if (!mapEl) return;
+
+  if (!leafletMap) {
+    const isMobile = window.innerWidth <= 900 || 'ontouchstart' in window;
+
+    leafletMap = L.map('summit-map', {
+      center:          [57.0, -4.5],
+      zoom:            6,
+      zoomControl:     !isMobile,  // hide default zoom on mobile (use pinch)
+      scrollWheelZoom: !isMobile,  // scroll wheel on desktop only
+      tap:             false,       // fixes iOS double-tap issues
+      tapTolerance:    15,
+    });
+
+    // On mobile, add zoom control bottom-right so it doesn't overlap
+    if (isMobile) {
+      L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
+    }
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: '© <a href="https://www.esri.com">Esri</a>, USGS, NOAA',
+    }).addTo(leafletMap);
+
+    mapMarkerLayer = L.layerGroup().addTo(leafletMap);
+
+    // Re-render markers when zoom changes
+    leafletMap.on('zoomend', () => refreshMapMarkers());
+  }
+
+  refreshMapMarkers();
+}
+
+function refreshMapMarkers() {
+  if (!leafletMap || !mapMarkerLayer) return;
+  mapMarkerLayer.clearLayers();
+
+  const zoom = leafletMap.getZoom();
+
+  // List colours for bagged markers
+  const listColors = {
+    M:  '#2d5a3d',  // Munros — forest green
+    C:  '#3a6e8a',  // Corbetts — blue
+    G:  '#7a5510',  // Grahams — brown
+    W:  '#8b3a1a',  // Wainwrights — rust
+    Ma: '#5a4070',  // Marilyns — purple
+    D:  '#3d6644',  // Donalds — moss
+    MT: '#4a6e3d',  // Munro Tops — light green
+  };
+
+  function primaryList(h) {
+    const order = ['M','C','G','D','W','Ma','MT'];
+    for (const l of order) if (h.lists.includes(l)) return l;
+    return h.lists[0];
+  }
+
+  const settings = getSettings();
+  const trackedLists = settings.trackedLists || ['M','C','G','D','W','Ma'];
+
+  // ── UNBAGGED HILLS ──
+  // Zoom-dependent: show more lists as user zooms in
+  // z<7: Munros only | z7-8: + Corbetts | z9+: all tracked lists
+  let unbaggedLists;
+  if (zoom < 7)      unbaggedLists = ['M'];
+  else if (zoom < 9) unbaggedLists = ['M','C','W'];
+  else               unbaggedLists = trackedLists;
+
+  const unbaggedSet = new Set();
+  const unbagged = HILLS.filter(h => {
+    if (h.bagged) return false;
+    if (!h.lists.some(l => unbaggedLists.includes(l))) return false;
+    if (unbaggedSet.has(h.id)) return false;
+    unbaggedSet.add(h.id);
+    return true;
+  });
+
+  // Dot size scales with zoom
+  const unbaggedRadius = zoom < 7 ? 2.5 : zoom < 9 ? 3 : 3.5;
+
+  unbagged.forEach(h => {
+    const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    L.circleMarker([h.lat, h.lng], {
+      radius: unbaggedRadius,
+      fillColor: '#d4bfa0',
+      color: '#b8996a',
+      weight: 0.8,
+      opacity: 0.7,
+      fillOpacity: 0.45,
+    })
+    .bindPopup(`<strong>${h.name}</strong><br>${h.height}m · ${h.region}<br><small style="color:#9e9486">${lists}</small><br><em style="color:#9e9486">Not yet bagged</em>`)
+    .on('click', () => openHill(h.id))
+    .addTo(mapMarkerLayer);
+  });
+
+  // ── BAGGED HILLS ── (always show all, on top)
+  const baggedAll = HILLS.filter(h => h.bagged);
+  const baggedRadius = zoom < 7 ? 5 : zoom < 9 ? 6 : 7;
+
+  baggedAll.forEach(h => {
+    const col   = listColors[primaryList(h)] || '#2d5a3d';
+    const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    L.circleMarker([h.lat, h.lng], {
+      radius: baggedRadius,
+      fillColor: col,
+      color: col,
+      weight: 1.5,
+      opacity: 1,
+      fillOpacity: 0.9,
+    })
+    .bindPopup(`
+      <strong>${h.name}</strong><br>
+      ${h.height}m · ${h.region}<br>
+      <span style="color:#2d5a3d;font-weight:500">✓ Bagged${h.date ? ' · ' + h.date : ''}</span><br>
+      <small>${lists}</small>
+    `)
+    .on('click', () => openHill(h.id))
+    .addTo(mapMarkerLayer);
+  });
+
+  // ── LEGEND ──
+  const legend = document.getElementById('map-legend');
+  if (legend) {
+    const unbaggedLabel = zoom < 7
+      ? `Munros unbagged (${unbagged.length})`
+      : zoom < 9
+        ? `Munros & Corbetts unbagged (${unbagged.length})`
+        : `All tracked lists unbagged (${unbagged.length})`;
+    legend.innerHTML = `
+      <span><span class="legend-swatch b"></span>Bagged (${baggedAll.length})</span>
+      <span><span class="legend-swatch u"></span>${unbaggedLabel}</span>
+      <span style="color:var(--light-muted);font-size:0.68rem">Zoom in to see more</span>`;
+  }
+
+  // Fit map to bagged hills on first load
+  if (baggedAll.length > 0 && !leafletMap._hasFitted) {
+    leafletMap._hasFitted = true;
+    const lats = baggedAll.map(h => h.lat);
+    const lngs = baggedAll.map(h => h.lng);
+    leafletMap.fitBounds(
+      L.latLngBounds(
+        [Math.min(...lats) - 0.3, Math.min(...lngs) - 0.3],
+        [Math.max(...lats) + 0.3, Math.max(...lngs) + 0.3]
+      ),
+      { padding: [20, 20], maxZoom: 9 }
+    );
+  }
+
+  setTimeout(() => leafletMap.invalidateSize(), 200);
+}
+
+function renderTable(data) {
+  document.getElementById('munro-tbody').innerHTML = data.map(h => `
+    <tr onclick="openHill(${h.id})">
+      <td><div class="mname">${h.name}</div><div class="mgaelic">${h.lists.join(', ')}</div></td>
+      <td class="mheight">${h.height}m</td>
+      <td class="mregion">${h.region}</td>
+      <td class="mdate">${h.date || '—'}</td>
+      <td>${h.bagged
+        ? `<span class="badge-yes">✓ ${h.source === 'strava' ? '⚡ ' : ''}Bagged</span>`
+        : '<span class="badge-no">○ Remaining</span>'
+      }</td>
+    </tr>`).join('');
+
+  const sub = document.querySelector('#page-list .page-sub');
+  const bagged = data.filter(h => h.bagged).length;
+  if (sub) sub.textContent = `${data.length} hills · ${bagged} bagged · ${data.length - bagged} remaining`;
+}
+
+function filterHills() {
+  const q = (document.getElementById('munro-search')?.value || '').toLowerCase();
+  const r = document.getElementById('region-filter')?.value || '';
+  const filtered = currentHills.filter(h => {
+    const mq = !q || h.name.toLowerCase().includes(q) || h.region.toLowerCase().includes(q);
+    const mr = !r || h.region === r;
+    const mf = currentFilter === 'all' ||
+               (currentFilter === 'bagged' && h.bagged) ||
+               (currentFilter === 'remaining' && !h.bagged);
+    return mq && mr && mf;
+  });
+  renderTable(filtered);
+}
+
+// alias for HTML onclick
+function filterMunros() { filterHills(); }
+
+function setFilter(f) {
+  currentFilter = f;
+  ['all','bagged','remaining'].forEach(x =>
+    document.getElementById('btn-' + x)?.classList.toggle('active', x === f)
+  );
+  filterHills();
+}
+
+// ── HILL DETAIL ──
+function openHill(id) {
+  const h = HILLS.find(x => x.id === id);
+  if (!h) return;
+  currentHill = h;
+
+  const listNames = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+  const feet = Math.round(h.height * 3.28084).toLocaleString();
+  const countryMap = { S: 'Scotland', E: 'England', W: 'Wales', I: 'Ireland', C: 'Channel Islands', M: 'Isle of Man' };
+  const country = countryMap[h.country] || h.country || '—';
+
+  document.getElementById('detail-title').textContent = h.name;
+  document.getElementById('detail-crumb').textContent = `${listNames} · ${h.region}`;
+  document.getElementById('detail-eyebrow').textContent = `▲ ${listNames}`;
+  document.getElementById('detail-name').textContent = h.name;
+  document.getElementById('detail-gaelic').textContent = h.region;
+  document.getElementById('detail-height').textContent = `${h.height}m`;
+  document.getElementById('detail-feet').textContent = `${feet}ft`;
+  document.getElementById('detail-region').textContent = h.region;
+  document.getElementById('detail-country').textContent = country;
+  document.getElementById('detail-desc').textContent =
+    `${h.name} stands at ${h.height}m (${feet}ft) in ${h.region}, ${country}. ` +
+    `It appears on the following lists: ${listNames}.`;
+
+  // Tags
+  const tagsEl = document.getElementById('detail-tags');
+  if (tagsEl) {
+    tagsEl.innerHTML = h.bagged
+      ? `<span class="hill-tag tag-bagged">✓ Bagged${h.date ? ' · ' + h.date : ''}</span>
+         ${h.source === 'strava' ? '<span class="hill-tag tag-strava">⚡ Via Strava</span>' : ''}`
+      : '<span class="hill-tag" style="background:var(--paper-mid);color:var(--muted);border:1px solid var(--border)">○ Not yet bagged</span>';
+  }
+
+  // Ascents panel — show ALL ascents for this hill
+  const hillAscents = ASCENTS.filter(a => a.hill_id === h.id && !a.deleted_at)
+    .sort((a, b) => b.date > a.date ? 1 : -1);
+
+  const ascentTitle = document.getElementById('detail-ascents-title');
+  const ascentList  = document.getElementById('detail-ascents-list');
+  if (ascentTitle) ascentTitle.textContent = `My Ascents (${hillAscents.length})`;
+  if (ascentList) {
+    if (hillAscents.length > 0) {
+      ascentList.innerHTML = hillAscents.map(a => {
+        const sourceIcon = a.source === 'strava' ? '⚡ Auto-detected from Strava' : '✎ Manually logged';
+        return `<div class="ascent-item">
+          <button class="ascent-delete" onclick="deleteAscent('${a.id}', ${h.id})" title="Delete this ascent">✕</button>
+          <div class="ascent-date">
+            ↑ ${a.date || 'Date unknown'}
+            ${a.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
+          </div>
+          <div class="ascent-companions">With: <span>${a.companions || 'Solo'}</span></div>
+          ${a.conditions ? `<div class="ascent-notes" style="font-style:normal;color:var(--text-mid)">Conditions: ${a.conditions}</div>` : ''}
+          ${a.notes      ? `<div class="ascent-notes">"${a.notes}"</div>` : ''}
+          <div class="ascent-source-tag">${sourceIcon}</div>
+        </div>`;
+      }).join('');
+    } else {
+      ascentList.innerHTML = '<div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged — log an ascent below</div>';
+    }
+  }
+
+  document.getElementById('log-hill').value = h.name;
+  showPage('hill');
+}
+
+// ── AUTOCOMPLETE ──
+function hillAutocomplete(val) {
+  const box = document.getElementById('hill-suggestions');
+  if (!val || val.length < 2) { box.style.display = 'none'; return; }
+  const q = val.toLowerCase();
+  const matches = HILLS.filter(h => h.name.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  box.innerHTML = matches.map(h => {
+    const lists = h.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    return `<div class="suggestion" onclick="selectHill('${h.name.replace(/'/g,"\\'")}')">
+      <div><div>${h.name}</div><div class="suggestion-lists">${lists}</div></div>
+      <div class="suggestion-height">${h.height}m</div>
+    </div>`;
+  }).join('');
+  box.style.display = 'block';
+}
+
+function selectHill(name) {
+  document.getElementById('log-hill').value = name;
+  document.getElementById('hill-suggestions').style.display = 'none';
+  const hill = HILLS.find(h => h.name === name);
+  if (hill) {
+    const lists = hill.lists.map(l => LIST_META[l]?.name || l).join(', ');
+    document.getElementById('modal-hill-sub').textContent = `${hill.height}m · ${hill.region} · ${lists}`;
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#log-hill') && !e.target.closest('#hill-suggestions')) {
+    const box = document.getElementById('hill-suggestions');
+    if (box) box.style.display = 'none';
+  }
+});
+
+// ── MODAL ──
+function openLogModal(hillName) {
+  document.getElementById('log-modal').classList.add('open');
+  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('log-companions').value = '';
+  document.getElementById('log-conditions').value = '';
+  document.getElementById('log-notes').value = '';
+  const box = document.getElementById('hill-suggestions');
+  if (box) box.style.display = 'none';
+  const name = hillName || currentHill?.name || '';
+  document.getElementById('log-hill').value = name;
+  if (name) selectHill(name);
+  else document.getElementById('modal-hill-sub').textContent = 'Start typing to search all 2,548 hills';
+}
+function closeModal() {
+  document.getElementById('log-modal').classList.remove('open');
+  const box = document.getElementById('hill-suggestions');
+  if (box) box.style.display = 'none';
+}
+document.getElementById('log-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+async function saveAscent() {
+  const hillName = document.getElementById('log-hill').value.trim();
+  if (!hillName) {
+    document.getElementById('log-hill').style.borderColor = 'var(--earth)';
+    return;
+  }
+
+  const date     = document.getElementById('log-date').value;
+  const companions = document.getElementById('log-companions').value.trim();
+  const conditions = document.getElementById('log-conditions').value.trim();
+  const notes    = document.getElementById('log-notes').value.trim();
+
+  // Find the hill in our dataset
+  const hill = HILLS.find(h => h.name.toLowerCase() === hillName.toLowerCase())
+            || HILLS.find(h => h.name.toLowerCase().includes(hillName.toLowerCase()));
+
+  if (!hill) {
+    toast('Hill not found — check spelling');
+    return;
+  }
+
+  // Disable button while saving
+  const btn = document.querySelector('.btn-modal-primary');
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+
+  const session = getSession();
+
+  // Optimistically update local state
+  hill.bagged     = true;
+  hill.date       = date ? new Date(date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  hill.source     = 'manual';
+  hill.companions = companions || null;
+  hill.conditions = conditions || null;
+  hill.notes      = notes || null;
+
+  // Add to ASCENTS array so hill detail shows it immediately
+  const optimisticAscent = {
+    id:           'pending-' + Date.now(),
+    user_id:      session?.user_id,
+    hill_id:      hill.id,
+    hill_name:    hill.name,
+    hill_lists:   hill.lists,
+    height:       hill.height,
+    region:       hill.region,
+    date:         date || new Date().toISOString().split('T')[0],
+    source:       'manual',
+    companions:   companions || null,
+    conditions:   conditions || null,
+    notes:        notes || null,
+    deleted_at:   null,
+  };
+  ASCENTS.unshift(optimisticAscent);
+
+  closeModal();
+  updateDashboard();
+  filterHills();
+  updateRecentAscents();
+  renderMap();
+
+  // Save to Supabase
+  if (session?.user_id) {
+    try {
+      const token = await getValidToken(session);
+      const res = await fetch(`${WORKER}/api/ascents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: session.user_id,
+          ascents: [{
+            hill_id:    hill.id,
+            hill_name:  hill.name,
+            hill_lists: hill.lists,
+            height:     hill.height,
+            region:     hill.region,
+            date:       date || new Date().toISOString().split('T')[0],
+            source:     'manual',
+            companions,
+            conditions,
+            notes,
+          }],
+        }),
+      });
+      if (res.ok) {
+        toast(`✓ ${hill.name} saved to your logbook`);
+      } else {
+        toast(`✓ ${hill.name} saved locally — will sync shortly`);
+      }
+    } catch (e) {
+      console.error('Save failed:', e);
+      toast(`✓ ${hill.name} saved locally`);
+    }
+  } else {
+    toast(`✓ ${hill.name} saved — reconnect Strava to sync`);
+  }
+
+  // Reset button
+  if (btn) { btn.textContent = 'Save Ascent'; btn.disabled = false; }
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--forest);color:white;padding:0.7rem 1.2rem;border-radius:4px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:var(--shadow-md);animation:fadeUp 0.3s forwards`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+// ── PROFILE PAGE ──
+function updateProfilePage() {
+  const session = getSession();
+  if (!session) return;
+
+  // Show/hide upgrade banner
+  const banner = document.getElementById('profile-upgrade-banner');
+  if (banner) banner.style.display = session.premium ? 'none' : '';
+
+  const parts = session.name.split(' ');
+  const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+  const avatarEl = document.getElementById('profile-avatar-lg');
+  if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+  const nameEl = document.getElementById('profile-name-lg');
+  if (nameEl) nameEl.textContent = session.name;
+  const stravaName = document.getElementById('strava-conn-name');
+  if (stravaName) stravaName.textContent = `Connected as ${session.name}`;
+  const baggedAll = HILLS.filter(h => h.bagged);
+  const stravaSub = document.getElementById('strava-conn-sub');
+  if (stravaSub) stravaSub.textContent = `${baggedAll.length} summits across all lists`;
+  const statsList = document.getElementById('profile-stats-list');
+  if (statsList) {
+    const highest = [...baggedAll].sort((a,b) => b.height - a.height)[0];
+    const totalElev = baggedAll.reduce((sum, h) => sum + h.height, 0);
+    const activeAscents = ASCENTS.filter(a => !a.deleted_at);
+    statsList.innerHTML = [
+      ['Munros', `${getBaggedCount('M')} / 282`],
+      ['Corbetts', `${getBaggedCount('C')} / 222`],
+      ['Grahams', `${getBaggedCount('G')} / 231`],
+      ['Wainwrights', `${getBaggedCount('W')} / 214`],
+      ['Marilyns', `${getBaggedCount('Ma')} / 2009`],
+      ['Total unique hills', baggedAll.length],
+      ['Total ascents logged', activeAscents.length],
+      ['Highest summit', highest ? `${highest.name} (${highest.height}m)` : '—'],
+      ['Total elevation', `${Math.round(totalElev / 1000)}km`],
+    ].map(([l,v]) => `<div class="profile-stat-row"><span class="profile-stat-label">${l}</span><span class="profile-stat-val">${v}</span></div>`).join('');
+  }
+  const ach = document.getElementById('profile-achievements');
+  if (ach) {
+    const m = getBaggedCount('M'), c = getBaggedCount('C'), w = getBaggedCount('W');
+    const items = [];
+    if (m >= 282) items.push('🏔 Munro Compleater!');
+    else if (m >= 100) items.push('💯 100 Munros');
+    else if (m >= 50) items.push('⛰ 50 Munros');
+    else if (m >= 1) items.push(`▲ ${m} Munros`);
+    if (c > 0) items.push(`△ ${c} Corbetts`);
+    if (w > 0) items.push(`◻ ${w} Wainwrights`);
+    ach.innerHTML = items.map(i => `<div class="achiev">${i}</div>`).join('');
+  }
+}
+
+// ── SETTINGS PAGE ──
+function updateSettingsPage() {
+  const settings = getSettings();
+
+  // Show/hide upgrade banner
+  const banner = document.getElementById('settings-upgrade-banner');
+  if (banner) banner.style.display = isPremium() ? 'none' : '';
+
+  const radiusSel = document.getElementById('settings-radius');
+  if (radiusSel) radiusSel.value = settings.detectionRadius;
+  const runsToggle = document.getElementById('settings-include-runs');
+  if (runsToggle) runsToggle.checked = settings.includeRuns;
+  const listContainer = document.getElementById('settings-lists');
+  if (listContainer) {
+    listContainer.innerHTML = Object.entries(LIST_META).map(([code, meta]) => {
+      const tracked = settings.trackedLists.includes(code);
+      const bagged = getBaggedCount(code);
+      return `<div class="settings-list-row">
+        <div><div class="settings-list-name">${meta.name}</div><div class="settings-list-meta">${meta.desc} · ${bagged} bagged</div></div>
+        <label class="toggle"><input type="checkbox" class="settings-list-toggle" data-list="${code}" onchange="saveSettings()" ${tracked ? 'checked' : ''}/><span class="toggle-track"></span></label>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── DELETE ASCENT ──
+// Cache deleted ascents by hillId_date — immune to UUID vs fake-ID mismatches
+function getDeletedKeys() {
+  try { return new Set(JSON.parse(localStorage.getItem('summit_deleted_v2') || '[]')); }
+  catch { return new Set(); }
+}
+function addDeletedKey(hillId, date) {
+  const keys = getDeletedKeys();
+  keys.add(`${hillId}_${date}`);
+  localStorage.setItem('summit_deleted_v2', JSON.stringify([...keys]));
+}
+
+async function deleteAscent(ascentId, hillId) {
+  if (!confirm('Delete this ascent?')) return;
+
+  // Find the ascent to get its date
+  const ascent = ASCENTS.find(a => a.id === ascentId);
+  const date = ascent?.date || '';
+
+  // Cache hillId+date — works even if Supabase fails or IDs mismatch
+  addDeletedKey(hillId, date);
+
+  // Mark locally
+  const idx = ASCENTS.findIndex(a => a.id === ascentId);
+  if (idx > -1) ASCENTS[idx].deleted_at = new Date().toISOString();
+
+  // Try Supabase soft delete (best effort)
+  const session = getSession();
+  if (session?.user_id) {
+    try {
+      const token = await getValidToken(session);
+      // Try by ID first, then fall back to hill_id+date
+      const res = await fetch(`${WORKER}/api/ascents/${encodeURIComponent(ascentId)}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        // Fallback: delete by hill_id and date
+        await fetch(`${WORKER}/api/ascents/by-hill`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ user_id: session.user_id, hill_id: hillId, date }),
+        });
+      }
+    } catch (e) { console.warn('Delete request failed — using local cache', e); }
+  }
+
+  // Update hills
+  const remaining = ASCENTS.filter(a => a.hill_id === hillId && !a.deleted_at);
+  const hill = HILLS.find(h => h.id === hillId);
+  if (hill) {
+    if (remaining.length === 0) {
+      hill.bagged=false; hill.date=null; hill.source=null;
+      hill.companions=null; hill.conditions=null; hill.notes=null;
+    } else {
+      const latest = remaining.sort((a,b) => b.date > a.date ? 1 : -1)[0];
+      hill.date=latest.date; hill.source=latest.source;
+      hill.companions=latest.companions; hill.conditions=latest.conditions; hill.notes=latest.notes;
+    }
+  }
+
+  updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
+  if (currentHill?.id === hillId) openHill(hillId);
+  toast('Ascent deleted');
+}
+
+function disconnectStrava() {
+  if (!confirm('Disconnect Strava? Your logged ascents will be kept.')) return;
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+async function confirmClearData() {
+  if (!confirm('Delete ALL ascents permanently? This cannot be undone.')) return;
+  const session = getSession();
+  if (!session?.user_id) return;
+  try {
+    const token = await getValidToken(session);
+    await fetch(`${WORKER}/api/ascents/all?user_id=${session.user_id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (e) { console.error('Clear failed', e); }
+  ASCENTS = [];
+  HILLS.forEach(h => { h.bagged=false; h.date=null; h.source=null; h.companions=null; h.conditions=null; h.notes=null; });
+  updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
+  toast('All ascents cleared');
+}
+
+// ── EXPORT ──
+function exportCSV() {
+  const rows = ASCENTS.filter(a => !a.deleted_at).map(a =>
+    `"${a.hill_name}",${a.height},"${a.region}","${(a.hill_lists||[]).join(',')}","${a.date||''}","${a.source||''}","${(a.companions||'').replace(/"/g,'""')}","${(a.notes||'').replace(/"/g,'""')}"`
+  );
+  const blob = new Blob(['Name,Height (m),Region,Lists,Date,Source,Companions,Notes\n'+rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='summit-ascents.csv'; a.click();
+  toast(`Exported ${rows.length} ascents`);
+}
+
+function exportHillBagging() {
+  const rows = ASCENTS.filter(a => !a.deleted_at && a.date).map(a => `${a.hill_id},${a.date},${a.hill_name}`);
+  const blob = new Blob(['hill_id,date,name\n'+rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='summit-hill-bagging-export.csv'; a.click();
+  toast(`Exported ${rows.length} ascents`);
+}
+
+// ── IMPORT ──
+
+// Download a pre-filled Excel template
+function downloadTemplate() {
+  if (!window.XLSX) { toast('Loading Excel library…'); return; }
+
+  // Build template with example rows and all columns
+  const headers = ['Hill Name', 'Date (YYYY-MM-DD)', 'Companions', 'Conditions', 'Notes'];
+  const examples = [
+    ['Ben Nevis',         '2023-08-14', 'Sarah, David', 'Clear summit, warm', 'Perfect day. Took the tourist track.'],
+    ['Cairn Gorm',        '2023-04-03', '',             'Snow above 900m',    ''],
+    ['Ben Lomond',        '2019-05-12', 'Solo',         'Misty all day',      'First Munro!'],
+    ['Schiehallion',      '2022-06-18', 'Family',       'Perfect visibility', 'Kids loved it'],
+    ['Beinn Eighe',       '',           '',             '',                   ''],
+  ];
+
+  const wsData = [headers, ...examples];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 30 },  // Hill Name
+    { wch: 18 },  // Date
+    { wch: 25 },  // Companions
+    { wch: 30 },  // Conditions
+    { wch: 40 },  // Notes
+  ];
+
+  // Style header row (bold)
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = ws[XLSX.utils.encode_cell({ r: 0, c })];
+    if (cell) {
+      cell.s = { font: { bold: true }, fill: { fgColor: { rgb: 'E2D8C4' } } };
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'My Ascents');
+
+  // Add a "Hill Lists" reference sheet
+  const listsData = [
+    ['List', 'Count', 'Description'],
+    ['Munros',     282,  'Scottish mountains over 3,000ft'],
+    ['Corbetts',   222,  'Scottish mountains 2,500-3,000ft'],
+    ['Grahams',    231,  'Scottish mountains 2,000-2,500ft'],
+    ['Donalds',    89,   'Southern Upland hills over 2,000ft'],
+    ['Wainwrights',214,  'Lake District fells'],
+    ['Marilyns',   2009, 'UK hills with 150m+ prominence'],
+  ];
+  const wsLists = XLSX.utils.aoa_to_sheet(listsData);
+  wsLists['!cols'] = [{ wch: 15 }, { wch: 8 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, wsLists, 'Hill Lists Reference');
+
+  XLSX.writeFile(wb, 'summit-import-template.xlsx');
+  toast('Template downloaded — fill in your ascents and upload');
+}
+
+// Handle file upload
+let importPreviewData = [];
+
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (!window.XLSX) {
+    toast('Excel library still loading — try again in a moment');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb   = XLSX.read(data, { type: 'array', cellDates: true });
+
+      // Use first sheet
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      if (rows.length < 2) {
+        toast('File appears empty — check you filled in the template');
+        return;
+      }
+
+      parseAndPreviewImport(rows);
+    } catch (err) {
+      console.error('Parse error:', err);
+      toast('Could not read file — make sure it\'s a valid .xlsx or .csv');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+
+  // Reset input so same file can be re-uploaded
+  input.value = '';
+}
+
+function parseAndPreviewImport(rows) {
+  // Find header row — look for a row containing "Hill Name" or "Name"
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(rows.length, 5); i++) {
+    const row = rows[i].map(c => String(c).toLowerCase());
+    if (row.some(c => c.includes('hill') || c.includes('name') || c.includes('mountain'))) {
+      headerIdx = i;
+      break;
+    }
+  }
+
+  const headers = rows[headerIdx].map(h => String(h).toLowerCase().trim());
+
+  // Find column indices flexibly
+  const colIdx = {
+    name:       headers.findIndex(h => h.includes('hill') || h.includes('name') || h.includes('mountain')),
+    date:       headers.findIndex(h => h.includes('date')),
+    companions: headers.findIndex(h => h.includes('companion') || h.includes('with') || h.includes('who')),
+    conditions: headers.findIndex(h => h.includes('condition') || h.includes('weather')),
+    notes:      headers.findIndex(h => h.includes('note') || h.includes('comment') || h.includes('memo')),
+  };
+
+  if (colIdx.name === -1) {
+    toast('Could not find a "Hill Name" column — please use the template');
+    return;
+  }
+
+  // Parse data rows
+  const dataRows = rows.slice(headerIdx + 1).filter(row => row[colIdx.name]?.toString().trim());
+
+  importPreviewData = dataRows.map(row => {
+    const rawName = String(row[colIdx.name] || '').trim();
+    const rawDate = colIdx.date >= 0 ? row[colIdx.date] : '';
+
+    // Parse date — handles Date objects, YYYY-MM-DD strings, DD/MM/YYYY, etc.
+    let dateStr = '';
+    if (rawDate) {
+      if (rawDate instanceof Date) {
+        dateStr = rawDate.toISOString().split('T')[0];
+      } else {
+        const s = String(rawDate).trim();
+        // Try YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) dateStr = s;
+        // Try DD/MM/YYYY
+        else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+          const [d, m, y] = s.split('/');
+          dateStr = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        }
+        // Try DD-MM-YYYY
+        else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
+          const [d, m, y] = s.split('-');
+          dateStr = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        }
+      }
+    }
+
+    // Fuzzy match against HILLS — try exact first, then case-insensitive, then partial
+    const nameLower = rawName.toLowerCase();
+    let matched = HILLS.find(h => h.name.toLowerCase() === nameLower)
+               || HILLS.find(h => h.name.toLowerCase().includes(nameLower))
+               || HILLS.find(h => nameLower.includes(h.name.toLowerCase()));
+
+    return {
+      rawName,
+      dateStr,
+      companions: colIdx.companions >= 0 ? String(row[colIdx.companions] || '').trim() : '',
+      conditions: colIdx.conditions >= 0 ? String(row[colIdx.conditions] || '').trim() : '',
+      notes:      colIdx.notes     >= 0 ? String(row[colIdx.notes]      || '').trim() : '',
+      matched,
+      skip: false,
+    };
+  });
+
+  showImportPreview();
+}
+
+function showImportPreview() {
+  const matched   = importPreviewData.filter(r => r.matched);
+  const unmatched = importPreviewData.filter(r => !r.matched);
+  const existing  = matched.filter(r => {
+    const key = `${r.matched.id}_${r.dateStr}`;
+    const deletedKeys = getDeletedKeys();
+    return ASCENTS.some(a => a.hill_id === r.matched.id && a.date === r.dateStr && !a.deleted_at)
+        && !deletedKeys.has(key);
+  });
+
+  // Summary bar
+  document.getElementById('import-summary').innerHTML = `
+    <span style="color:var(--forest);font-weight:500">✓ ${matched.length} matched</span>
+    ${unmatched.length > 0 ? `<span style="color:var(--earth)">⚠ ${unmatched.length} not found</span>` : ''}
+    ${existing.length > 0  ? `<span style="color:var(--muted)">↩ ${existing.length} already logged</span>` : ''}
+    <span style="color:var(--light-muted)">${importPreviewData.length} rows total</span>
+  `;
+
+  document.getElementById('import-modal-sub').textContent =
+    `${matched.length} ascents ready to import — review below`;
+
+  // Update confirm button
+  const btn = document.getElementById('import-confirm-btn');
+  btn.textContent = `Import ${matched.length} ascent${matched.length !== 1 ? 's' : ''}`;
+  btn.disabled = matched.length === 0;
+
+  // Results list
+  const results = document.getElementById('import-results');
+  results.innerHTML = importPreviewData.map((r, i) => {
+    if (r.matched) {
+      const lists = r.matched.lists.map(l => LIST_META[l]?.name || l).join(', ');
+      return `<div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.8rem 1rem;border-bottom:1px solid var(--border-lt);${i===0?'':''}">
+        <div style="width:18px;height:18px;border-radius:50%;background:var(--bagged-bg);border:1px solid rgba(45,90,61,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:0.7rem;color:var(--forest)">✓</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.875rem;font-weight:500;color:var(--text)">${r.matched.name}</div>
+          <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.15rem">${r.matched.height}m · ${lists}</div>
+          ${r.dateStr ? `<div style="font-size:0.72rem;color:var(--forest);margin-top:0.15rem">${formatDateForDisplay(r.dateStr)}${r.companions ? ' · with ' + r.companions : ''}</div>` : '<div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.15rem">No date</div>'}
+          ${r.notes ? `<div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:0.15rem">"${r.notes.substring(0,80)}${r.notes.length>80?'…':''}"</div>` : ''}
+        </div>
+        ${r.rawName.toLowerCase() !== r.matched.name.toLowerCase() ? `<div style="font-size:0.68rem;color:var(--light-muted);flex-shrink:0">matched from "${r.rawName}"</div>` : ''}
+      </div>`;
+    } else {
+      return `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-bottom:1px solid var(--border-lt);opacity:0.6">
+        <div style="width:18px;height:18px;border-radius:50%;background:var(--paper-mid);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;color:var(--light-muted)">?</div>
+        <div>
+          <div style="font-size:0.875rem;color:var(--muted)">${r.rawName}</div>
+          <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.1rem">Hill not found in database — will be skipped</div>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  // Open modal
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function formatDateForDisplay(isoDate) {
+  if (!isoDate) return '';
+  try {
+    const d = new Date(isoDate + 'T12:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return isoDate; }
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+  importPreviewData = [];
+}
+
+document.getElementById('import-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeImportModal();
+});
+
+async function confirmImport() {
+  const session = getSession();
+  if (!session?.user_id) { toast('Please reconnect Strava first'); return; }
+
+  const toImport = importPreviewData.filter(r => r.matched);
+  if (!toImport.length) return;
+
+  const btn = document.getElementById('import-confirm-btn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  try {
+    const token = await getValidToken(session);
+
+    const ascents = toImport.map(r => ({
+      hill_id:    r.matched.id,
+      hill_name:  r.matched.name,
+      hill_lists: r.matched.lists,
+      height:     r.matched.height,
+      region:     r.matched.region,
+      date:       r.dateStr || null,
+      source:     'import',
+      companions: r.companions || null,
+      conditions: r.conditions || null,
+      notes:      r.notes      || null,
+    }));
+
+    const res = await fetch(`${WORKER}/api/ascents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ user_id: session.user_id, ascents }),
+    });
+
+    if (!res.ok) throw new Error('Save failed');
+
+    // Update local state
+    for (const r of toImport) {
+      const h = r.matched;
+      const displayDate = r.dateStr
+        ? formatDateForDisplay(r.dateStr)
+        : null;
+
+      h.bagged = true;
+      if (!h.date || (displayDate && displayDate > h.date)) {
+        h.date       = displayDate;
+        h.source     = 'import';
+        h.companions = r.companions || null;
+        h.conditions = r.conditions || null;
+        h.notes      = r.notes      || null;
+      }
+
+      ASCENTS.unshift({
+        id:         'import-' + Date.now() + '-' + h.id,
+        user_id:    session.user_id,
+        hill_id:    h.id,    hill_name:  h.name,
+        hill_lists: h.lists, height:     h.height,
+        region:     h.region,
+        date:       r.dateStr || null,
+        source:     'import',
+        companions: r.companions || null,
+        conditions: r.conditions || null,
+        notes:      r.notes      || null,
+        deleted_at: null,
+      });
+    }
+
+    closeImportModal();
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
+    toast(`✓ ${toImport.length} ascents imported successfully`);
+
+  } catch (err) {
+    console.error('Import failed:', err);
+    btn.textContent = 'Import matched ascents'; btn.disabled = false;
+    toast('Import failed — please try again');
+  }
+}
+
+// ── CONSTANTS ──
+const WORKER      = 'https://summit-api.andro-mathewson95.workers.dev';
+const SESSION_KEY = 'summit_session';
+const STRIPE_PK   = 'pk_test_51TL396AD5U8JDQuPCRLm3dv4ws2Pg4qzFrOV8xT0jS4oiW9ljzA6C5R7zMcd0O0WVYjHdcwLFIz30gZOiBgTUAhQ0065hxipwQ';
+
+// Free tier limits
+const FREE_LISTS           = ['M'];          // Only Munros on free
+const FREE_ACTIVITY_LIMIT  = 50;             // Max activities scanned on free
+
+let selectedPlan = 'annual'; // default selected plan
+
+// ── SESSION ──
+function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
+function saveSession(d) { localStorage.setItem(SESSION_KEY, JSON.stringify(d)); }
+
+function connectStrava() {
+  window.location.href = `${WORKER}/auth/strava/connect`;
+}
+
+function handleAuthCallback() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return null;
+  const p = new URLSearchParams(hash);
+  if (p.get('auth') !== 'success') return null;
+  const session = {
+    athlete_id:    p.get('athlete_id'),
+    user_id:       p.get('user_id'),
+    name:          decodeURIComponent(p.get('name') || 'Hillwalker'),
+    access_token:  p.get('access_token'),
+    refresh_token: p.get('refresh_token'),
+    expires_at:    parseInt(p.get('expires_at')),
+    premium:       p.get('premium') === '1',
+    premium_type:  p.get('premium_type') || null,
+  };
+  saveSession(session);
+  history.replaceState(null, '', window.location.pathname);
+  return session;
+}
+
+function applySession(session) {
+  if (!session) return;
+  const first = session.name.split(' ')[0];
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const g = document.querySelector('#page-dashboard .page-title');
+  if (g) g.textContent = `${greeting}, ${first}`;
+  document.querySelectorAll('.footer-name').forEach(el => el.textContent = session.name);
+  document.querySelectorAll('.profile-name-lg').forEach(el => el.textContent = session.name);
+  const parts = session.name.split(' ');
+  const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+  const avatar = document.getElementById('sidebar-avatar');
+  if (avatar) avatar.textContent = initials.toUpperCase();
+
+  // Apply premium UI state
+  applyPremiumUI(session.premium);
+}
+
+// ── PREMIUM ──
+
+function isPremium() {
+  const session = getSession();
+  return session?.premium === true;
+}
+
+function applyPremiumUI(premium) {
+  // Toggle class on app root for CSS-based gating
+  const app = document.getElementById('app');
+  if (app) app.classList.toggle('is-premium', !!premium);
+
+  // Update nav premium gates — make them work properly if premium
+  document.querySelectorAll('.nav-premium-gate').forEach(btn => {
+    if (premium) {
+      const list = btn.dataset.list;
+      if (list) {
+        btn.onclick = () => switchList(list);
+      }
+    }
+  });
+
+  // Sidebar upgrade nudge
+  const wrap = document.getElementById('sidebar-upgrade-wrap');
+  if (wrap) {
+    if (premium) {
+      const session = getSession();
+      const typeLabel = session?.premium_type
+        ? ({ monthly:'Monthly', annual:'Annual', lifetime:'Lifetime', complimentary:'Complimentary' }[session.premium_type] || 'Premium')
+        : 'Premium';
+      wrap.innerHTML = `<div style="margin:0.75rem 0.5rem 0;padding:0.6rem 0.9rem;font-size:0.72rem;color:var(--forest);text-align:center">
+        ✓ <strong>Summit ${typeLabel}</strong><span class="premium-badge">PRO</span>
+      </div>`;
+    } else {
+      wrap.innerHTML = `<div class="sidebar-upgrade" onclick="openPricingModal('sidebar')">
+        <div class="sidebar-upgrade-title">⛰ Unlock all lists</div>
+        <div class="sidebar-upgrade-sub">Corbetts, Grahams, Wainwrights & more from £3/month</div>
+      </div>`;
+    }
+  }
+}
+
+// Called when free user clicks a premium nav item
+function premiumGate(listName) {
+  if (isPremium()) return; // shouldn't happen but safety check
+  openPricingModal(`You're trying to access ${listName}`);
+}
+
+// ── PRICING MODAL ──
+
+function openPricingModal(context) {
+  // Customise the subtitle based on context
+  const sub = document.getElementById('pricing-modal-sub');
+  if (sub) {
+    if (context && context !== 'sidebar' && !context.startsWith('You\'re')) {
+      sub.textContent = context;
+    } else if (context?.startsWith('You\'re trying')) {
+      sub.textContent = `${context} — upgrade to access Corbetts, Grahams, Wainwrights, Marilyns and more.`;
+    } else {
+      sub.textContent = 'Corbetts, Grahams, Wainwrights, Marilyns and more — plus full Strava history.';
+    }
+  }
+  selectPlan('annual'); // default to best value
+  document.getElementById('pricing-modal').classList.add('open');
+}
+
+function closePricingModal() {
+  document.getElementById('pricing-modal').classList.remove('open');
+}
+
+document.getElementById('pricing-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePricingModal();
+});
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  ['monthly','annual','lifetime'].forEach(p => {
+    const el = document.getElementById(`plan-${p}`);
+    if (el) el.classList.toggle('selected', p === plan);
+  });
+  const btn = document.getElementById('pricing-cta-btn');
+  const labels = { monthly: 'Subscribe for £3/month →', annual: 'Subscribe for £25/year →', lifetime: 'Buy lifetime access for £100 →' };
+  if (btn) btn.textContent = labels[plan] || 'Continue to payment →';
+}
+
+async function startCheckout() {
+  const session = getSession();
+  const btn = document.getElementById('pricing-cta-btn');
+  if (btn) { btn.textContent = 'Redirecting to Stripe…'; btn.disabled = true; }
+
+  const promoCode = document.getElementById('promo-code-input')?.value?.trim() || null;
+
+  try {
+    const res = await fetch(`${WORKER}/api/stripe/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan:        selectedPlan,
+        user_id:     session?.user_id     || null,
+        athlete_id:  session?.athlete_id  || null,
+        promo_code:  promoCode,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'No checkout URL returned');
+    }
+  } catch (err) {
+    console.error('Checkout error:', err);
+    toast('Could not start checkout — please try again');
+    if (btn) { btn.textContent = 'Continue to payment →'; btn.disabled = false; }
+  }
+}
+
+// Handle return from Stripe (?upgraded=true or ?upgraded=false)
+async function handleUpgradeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const upgraded = params.get('upgraded');
+
+  if (!upgraded) return false;
+
+  // Clean URL immediately
+  history.replaceState(null, '', window.location.pathname);
+
+  // ── Payment cancelled ──
+  if (upgraded === 'false') {
+    updateSyncStatus(`Upgrade cancelled · <a href="#" onclick="openPricingModal();return false" style="color:var(--forest);text-decoration:underline">View plans</a>`);
+    toast('No problem — you can upgrade any time from the sidebar');
+    return false;
+  }
+
+  const plan = params.get('plan') || 'premium';
+  const session = getSession();
+  if (!session?.user_id) return false;
+
+  // Poll premium status — webhook may take a moment to fire
+  // Retry up to 6 times with 1.5s between attempts (~9s total window)
+  let granted = false;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 1500));
+    try {
+      const res  = await fetch(`${WORKER}/api/stripe/status?user_id=${session.user_id}`);
+      const data = await res.json();
+      if (data.premium) {
+        session.premium      = true;
+        session.premium_type = data.premium_type || plan;
+        saveSession(session);
+        applyPremiumUI(true);
+        granted = true;
+        break;
+      }
+    } catch (e) { /* network error — keep retrying */ }
+  }
+
+  // If still not confirmed after retries, grant optimistically
+  // (Stripe payment succeeded, webhook will eventually fire)
+  if (!granted) {
+    session.premium      = true;
+    session.premium_type = plan;
+    saveSession(session);
+    applyPremiumUI(true);
+  }
+
+  const planLabels = { monthly: 'Monthly', annual: 'Annual', lifetime: 'Lifetime' };
+  toast(`🎉 Welcome to Summit ${planLabels[plan] || 'Premium'}! All lists now unlocked.`);
+  return true;
+}
+
+function updateSyncStatus(msg) {
+  const el = document.querySelector('#page-dashboard .page-sub');
+  if (el) el.innerHTML = `<span class="sync-dot"></span>${msg}`;
+}
+
+// ── TOKEN REFRESH ──
+async function getValidToken(session) {
+  if (!session) return null;
+  const now = Math.floor(Date.now() / 1000);
+  // Refresh if expired or expiring within 5 minutes
+  if ((session.expires_at - now) < 300) {
+    try {
+      const res = await fetch(`${WORKER}/auth/strava/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refresh_token: session.refresh_token,
+          athlete_id:    session.athlete_id,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
+          session.access_token  = data.access_token;
+          session.refresh_token = data.refresh_token;
+          session.expires_at    = data.expires_at;
+          saveSession(session);
+          console.log('Token refreshed successfully');
+          return data.access_token;
+        }
+      }
+    } catch (e) {
+      console.warn('Token refresh failed — using existing token', e);
+    }
+  }
+  return session.access_token;
+}
+
+// ── SUPABASE PERSISTENCE ──
+
+// Load saved ascents from Supabase and apply to HILLS
+async function loadAscents(session) {
+  if (!session?.user_id) return 0;
+  try {
+    const token = await getValidToken(session);
+    const res = await fetch(
+      `${WORKER}/api/ascents?user_id=${session.user_id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const ascents = await res.json();
+    if (!Array.isArray(ascents)) return 0;
+
+    // Filter: remove server-deleted AND locally-cached deleted (hillId_date) keys
+    const deletedKeys = getDeletedKeys();
+    ASCENTS = ascents.filter(a =>
+      !a.deleted_at && !deletedKeys.has(`${a.hill_id}_${a.date}`)
+    );
+
+    // Apply to HILLS — use most recent non-deleted ascent per hill
+    const byHill = {};
+    for (const a of ASCENTS) {
+      if (!byHill[a.hill_id] || a.date > byHill[a.hill_id].date) {
+        byHill[a.hill_id] = a;
+      }
+    }
+
+    let count = 0;
+    for (const [hillId, a] of Object.entries(byHill)) {
+      const hill = HILLS.find(h => h.id === parseInt(hillId));
+      if (hill) {
+        hill.bagged     = true;
+        hill.date       = a.date;
+        hill.source     = a.source;
+        hill.companions = a.companions || null;
+        hill.conditions = a.conditions || null;
+        hill.notes      = a.notes || null;
+        count++;
+      }
+    }
+    return count;
+  } catch (e) {
+    console.error('Failed to load ascents', e);
+    return 0;
+  }
+}
+
+// Save a batch of newly detected ascents to Supabase
+async function saveAscents(session, detectedHills) {
+  if (!session?.user_id || !detectedHills.length) return;
+  try {
+    const ascents = detectedHills.map(({ hill, activity }) => ({
+      hill_id: hill.id,
+      hill_name: hill.name,
+      hill_lists: hill.lists,
+      height: hill.height,
+      region: hill.region,
+      date: hill.date,
+      source: 'strava',
+      strava_activity_id: String(activity.id),
+    }));
+    await fetch(`${WORKER}/api/ascents`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ user_id: session.user_id, ascents }),
+    });
+  } catch (e) { console.error('Failed to save ascents', e); }
+}
+
+// ── SUMMIT DETECTION ──
+function haversineMetres(lat1, lng1, lat2, lng2) {
+  const R = 6371000, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function detectSummitsInActivity(activity, token) {
+  try {
+    const res = await fetch(`${WORKER}/api/activity/${activity.id}/streams`,
+      { headers: { Authorization: `Bearer ${token}` } });
+    const streams = await res.json();
+    if (!streams.latlng?.data) return [];
+    const pts = streams.latlng.data;
+    const found = [];
+    for (const hill of HILLS) {
+      if (hill.bagged) continue;
+      for (const [lat, lng] of pts) {
+        if (haversineMetres(lat, lng, hill.lat, hill.lng) <= 150) {
+          found.push({ hill, activity });
+          break;
+        }
+      }
+    }
+    return found;
+  } catch { return []; }
+}
+
+async function syncStrava(session) {
+  if (!session?.access_token) return;
+
+  const settings = getSettings();
+  const SYNC_KEY = `summit_last_sync_${session.athlete_id}`;
+  const lastSync = localStorage.getItem(SYNC_KEY);
+  const isIncremental = !!lastSync;
+
+  updateSyncStatus(isIncremental
+    ? `Checking for new activities since ${new Date(parseInt(lastSync)*1000).toLocaleDateString('en-GB')}…`
+    : 'Fetching your full Strava history — this may take a minute…'
+  );
+
+  try {
+    const token = await getValidToken(session);
+    const syncStarted = Math.floor(Date.now() / 1000);
+    const premium  = isPremium();
+    const maxActs  = premium ? Infinity : FREE_ACTIVITY_LIMIT;
+    const activityTypes = settings.includeRuns
+      ? ['Hike','Walk','TrailRun','Run']
+      : ['Hike','Walk','TrailRun'];
+
+    let page = 1, all = [], hitLimit = false;
+    while (true) {
+      const afterParam = isIncremental ? `&after=${lastSync}` : '';
+      const res = await fetch(
+        `${WORKER}/api/activities?page=${page}&per_page=100${afterParam}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const acts = await res.json();
+      if (!Array.isArray(acts) || !acts.length) break;
+      const hillActs = acts.filter(a =>
+        activityTypes.includes(a.type) || activityTypes.includes(a.sport_type)
+      );
+      all = all.concat(hillActs);
+      if (all.length >= maxActs) { all = all.slice(0, maxActs); hitLimit = true; break; }
+      if (acts.length < 100 || isIncremental) break;
+      page++;
+    }
+
+    if (all.length === 0 && isIncremental) {
+      updateSyncStatus(`Up to date · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`);
+      return;
+    }
+
+    updateSyncStatus(`Found ${all.length} ${isIncremental ? 'new ' : ''}walks — scanning for summits…`);
+
+    let detected = 0;
+    const newlyDetected = [];
+
+    let actIdx = 0;
+    for (const act of all) {
+      const currentToken = (actIdx > 0 && actIdx % 50 === 0)
+        ? await getValidToken(session)
+        : token;
+      const summits = await detectSummitsInActivity(act, currentToken);
+      actIdx++;
+      for (const { hill, activity } of summits) {
+        const d = new Date(activity.start_date_local);
+        hill.bagged = true;
+        hill.date = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        hill.source = 'strava';
+        newlyDetected.push({ hill, activity });
+        detected++;
+      }
+      if (detected > 0) updateSyncStatus(`Found ${detected} summits so far…`);
+    }
+
+    if (newlyDetected.length > 0) {
+      updateSyncStatus(`Saving ${detected} summits…`);
+      await saveAscents(session, newlyDetected);
+      for (const { hill, activity } of newlyDetected) {
+        ASCENTS.unshift({
+          id: 'strava-' + activity.id,
+          user_id: session.user_id,
+          hill_id: hill.id, hill_name: hill.name,
+          hill_lists: hill.lists, height: hill.height, region: hill.region,
+          date: hill.date, source: 'strava',
+          strava_activity_id: String(activity.id),
+          companions: null, conditions: null, notes: null, deleted_at: null,
+        });
+      }
+    }
+
+    localStorage.setItem(SYNC_KEY, syncStarted.toString());
+
+    const msg = detected > 0
+      ? `✓ ${detected} new summit${detected > 1 ? 's' : ''} detected`
+      : 'Up to date — no new summits';
+
+    const upgradeNudge = hitLimit
+      ? ` · <a href="#" onclick="openPricingModal('full history');return false" style="color:var(--earth);font-weight:500;text-decoration:underline">⬆ Unlock full history</a>`
+      : ` · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Full re-scan</a>`;
+
+    updateSyncStatus(`${msg}${upgradeNudge}`);
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
+
+  } catch (err) {
+    console.error(err);
+    updateSyncStatus('Sync failed — try again');
+  }
+}
+
+// ── RECENT ASCENTS FEED ──
+function updateRecentAscents() {
+  const feed = document.getElementById('recent-ascents-list');
+  if (!feed) return;
+
+  const recent = HILLS
+    .filter(h => h.bagged && h.date)
+    .sort((a, b) => {
+      // Sort by date string — works with "11 Oct 2025" format
+      return new Date(b.date) - new Date(a.date);
+    })
+    .slice(0, 5);
+
+  if (!recent.length) {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-state-icon">⛰</span>
+        <div class="empty-state-title">No ascents yet</div>
+        Connect Strava to automatically import your hill walking history, or log an ascent manually.
+        <br><button class="empty-state-btn" onclick="resync()">Sync Strava</button>
+      </div>`;
+    return;
+  }
+
+  feed.innerHTML = recent.map(h => `
+    <div class="activity-row" onclick="openHill(${h.id})" style="cursor:pointer">
+      <div class="activity-dot ${h.source === 'strava' ? 'ad-strava' : 'ad-manual'}">
+        ${h.source === 'strava' ? '⚡' : '✎'}
+      </div>
+      <div class="activity-main">
+        <div class="activity-name">
+          ${h.name}
+          ${h.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
+        </div>
+        <div class="activity-meta">${h.date}${h.companions ? ' · with ' + h.companions : ''}</div>
+      </div>
+      <div class="activity-ht">${h.height}m</div>
+    </div>`).join('');
+}
+
+// ── BADGES ──
+
+const BADGES = [
+  {
+    id:    'three_peaks_britain',
+    name:  'Three Peaks of Britain',
+    desc:  'Ben Nevis, Scafell Pike & Snowdon',
+    icon:  '🏔',
+    hills: [278, 2359, 1963], // Ben Nevis, Scafell Pike, Snowdon/Yr Wyddfa
+  },
+  {
+    id:    'yorkshire_three_peaks',
+    name:  'Yorkshire Three Peaks',
+    desc:  'Pen-y-ghent, Whernside & Ingleborough',
+    icon:  '🌿',
+    hills: [2783, 2779, 2780],
+  },
+  {
+    id:    'welsh_3000s',
+    name:  'Welsh 3000s',
+    desc:  'The seven peaks over 3,000ft in Wales',
+    icon:  '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+    hills: [1963, 1965, 1967, 1972, 1975, 1977, 2083],
+  },
+  {
+    id:    'munro_10',
+    name:  'Munro Apprentice',
+    desc:  'Bag your first 10 Munros',
+    icon:  '⛰',
+    type:  'count',
+    list:  'M',
+    target: 10,
+  },
+  {
+    id:    'munro_50',
+    name:  'Munro Veteran',
+    desc:  'Bag 50 Munros',
+    icon:  '🎖',
+    type:  'count',
+    list:  'M',
+    target: 50,
+  },
+  {
+    id:    'munro_100',
+    name:  'Centurion',
+    desc:  'Bag 100 Munros',
+    icon:  '💯',
+    type:  'count',
+    list:  'M',
+    target: 100,
+  },
+  {
+    id:    'munro_compleater',
+    name:  'Munro Compleater',
+    desc:  'Bag all 282 Munros',
+    icon:  '👑',
+    type:  'count',
+    list:  'M',
+    target: 282,
+  },
+];
+
+function checkBadges() {
+  return BADGES.map(badge => {
+    let earned = false;
+    let progress = 0;
+    let total = 0;
+
+    if (badge.hills) {
+      // Specific hill set — check all bagged
+      const baggedIds = new Set(HILLS.filter(h => h.bagged).map(h => h.id));
+      progress = badge.hills.filter(id => baggedIds.has(id)).length;
+      total    = badge.hills.length;
+      earned   = progress === total;
+    } else if (badge.type === 'count') {
+      total    = badge.target;
+      progress = getListHills(badge.list).filter(h => h.bagged).length;
+      earned   = progress >= total;
+    }
+
+    return { ...badge, earned, progress, total };
+  });
+}
+
+function updateBadges() {
+  const container = document.getElementById('badges-list');
+  if (!container) return;
+
+  const results = checkBadges();
+  const earned  = results.filter(b => b.earned);
+  const inProg  = results.filter(b => !b.earned && b.progress > 0);
+  const locked  = results.filter(b => !b.earned && b.progress === 0);
+
+  if (earned.length === 0 && inProg.length === 0) {
+    container.innerHTML = `
+      <div style="padding:1rem 0.5rem;text-align:center;color:var(--light-muted);font-size:0.8rem">
+        <div style="font-size:1.5rem;margin-bottom:0.4rem">🏅</div>
+        Log ascents to start earning badges
+      </div>`;
+    return;
+  }
+
+  const badgeHTML = [
+    // Earned badges — prominent
+    ...earned.map(b => `
+      <div class="badge-row" style="background:rgba(45,90,61,0.04);border-radius:6px;border:1px solid rgba(45,90,61,0.12)">
+        <div class="badge-icon earned">${b.icon}</div>
+        <div style="flex:1">
+          <div class="badge-name">${b.name}</div>
+          <div class="badge-earned-date">✓ Earned</div>
+        </div>
+        <div style="font-size:1rem">🎖</div>
+      </div>`),
+
+    // In-progress badges — with progress bar
+    ...inProg.map(b => {
+      const pct = Math.round((b.progress / b.total) * 100);
+      return `
+      <div class="badge-row">
+        <div class="badge-icon locked">${b.icon}</div>
+        <div style="flex:1">
+          <div class="badge-name" style="color:var(--text-mid)">${b.name}</div>
+          <div style="margin-top:0.3rem;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--forest);border-radius:2px;transition:width 0.6s ease"></div>
+          </div>
+          <div class="badge-progress" style="margin-top:0.2rem">${b.progress} / ${b.total}</div>
+        </div>
+      </div>`;
+    }),
+
+    // Locked count hint
+    locked.length > 0
+      ? `<div style="font-size:0.72rem;color:var(--light-muted);padding:0.3rem 0.5rem;text-align:center">
+           + ${locked.length} more badge${locked.length > 1 ? 's' : ''} to discover
+         </div>`
+      : '',
+  ].join('');
+
+  container.innerHTML = badgeHTML;
+}
+// ── DONATION TRACKER ──
+async function updateDonationTracker() {
+  const swtEl = document.getElementById('swt-total');
+  const mrsEl = document.getElementById('mrs-total');
+  if (!swtEl || !mrsEl) return;
+  // Hardcoded — update manually each quarter after actual donations are made
+  // Once the Worker has a /api/donations endpoint these can be fetched live
+  swtEl.textContent = '£0.00';
+  mrsEl.textContent = '£0.00';
+}
+if (document.getElementById('swt-total')) updateDonationTracker();
+
+function showLoading(title, sub) {
+  const o = document.getElementById('loading-overlay');
+  if (!o) return;
+  o.style.display = 'flex';
+  document.getElementById('loading-title').textContent = title || 'Loading…';
+  document.getElementById('loading-sub').textContent   = sub   || '';
+  document.getElementById('loading-bar').style.width   = '5%';
+  document.getElementById('loading-detail').textContent = '';
+}
+function updateLoading(detail, pct) {
+  const d = document.getElementById('loading-detail');
+  const b = document.getElementById('loading-bar');
+  if (d) d.textContent = detail || '';
+  if (b && pct !== undefined) b.style.width = Math.min(pct, 98) + '%';
+}
+function hideLoading() {
+  const o = document.getElementById('loading-overlay');
+  if (!o) return;
+  const b = document.getElementById('loading-bar');
+  if (b) b.style.width = '100%';
+  setTimeout(() => { o.style.display = 'none'; }, 450);
+}
+
+function showReconnectBanner() {
+  updateSyncStatus(`Session needs refresh · <a href="#" onclick="connectStrava();return false" style="color:var(--forest);font-weight:500;text-decoration:underline">Reconnect Strava</a>`);
+}
+
+// resync(true) = full history, resync() = incremental
+function resync(full = false) {
+  const session = getSession();
+  if (!session) return;
+  if (full) {
+    localStorage.removeItem(`summit_last_sync_${session.athlete_id}`);
+    toast('Full scan started…');
+  }
+  syncStrava(session);
+}
+
+// ── INIT ──
+async function init() {
+  try {
+    const res = await fetch('/hills.json');
+    HILLS = await res.json();
+    HILLS.forEach(h => {
+      h.bagged=false; h.date=null; h.source=null;
+      h.companions=null; h.conditions=null; h.notes=null;
+    });
+  } catch (e) {
+    console.error('Failed to load hills.json', e);
+    return;
+  }
+
+  // Handle ?upgraded=true return from Stripe (check before auth callback)
+  const wasUpgrade = window.location.search.includes('upgraded=true');
+
+  const fresh   = handleAuthCallback();
+  const session = fresh || getSession();
+  if (!session) return;
+
+  if (!session.user_id || session.user_id === 'undefined' || session.user_id === 'null') {
+    try {
+      const res = await fetch(`${WORKER}/api/user?athlete_id=${session.athlete_id}`);
+      if (res.ok) {
+        const data = await res.json();
+        session.user_id      = data.user_id;
+        session.premium      = data.premium || false;
+        session.premium_type = data.premium_type || null;
+        saveSession(session);
+      } else {
+        applySession(session); enterApp(); showReconnectBanner(); return;
+      }
+    } catch (e) {
+      applySession(session); enterApp(); showReconnectBanner(); return;
+    }
+  }
+
+  applySession(session);
+
+  if (fresh) {
+    showLoading('Scanning your hill history…', 'Checking your Strava activities against 2,548 hills');
+    enterApp();
+    await syncStravaWithProgress(session);
+    hideLoading();
+  } else {
+    enterApp();
+
+    // Handle upgrade return
+    if (wasUpgrade) {
+      await handleUpgradeReturn();
+    }
+
+    updateSyncStatus('Loading your summits…');
+    const loaded = await loadAscents(session);
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
+    if (loaded > 0) {
+      updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
+    } else {
+      updateSyncStatus(`No summits yet · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Sync Strava</a>`);
+    }
+  }
+}
+
+// First-run sync with progress bar in overlay
+async function syncStravaWithProgress(session) {
+  const settings = getSettings();
+  const SYNC_KEY = `summit_last_sync_${session.athlete_id}`;
+  const activityTypes = settings.includeRuns
+    ? ['Hike','Walk','TrailRun','Run'] : ['Hike','Walk','TrailRun'];
+
+  try {
+    const token = await getValidToken(session);
+    const syncStarted = Math.floor(Date.now() / 1000);
+    const premium  = isPremium();
+    const maxActs  = premium ? Infinity : FREE_ACTIVITY_LIMIT;
+    let page = 1, all = [];
+
+    updateLoading('Fetching your activities from Strava…', 15);
+    while (true) {
+      const res = await fetch(`${WORKER}/api/activities?page=${page}&per_page=100`,
+        { headers: { Authorization: `Bearer ${token}` } });
+      const acts = await res.json();
+      if (!Array.isArray(acts) || !acts.length) break;
+      const hillActs = acts.filter(a =>
+        activityTypes.includes(a.type) || activityTypes.includes(a.sport_type)
+      );
+      all = all.concat(hillActs);
+      updateLoading(`Found ${all.length} walks & hikes…`, 15 + Math.min(page * 4, 25));
+      if (acts.length < 100) break;
+      if (all.length >= maxActs) {
+        all = all.slice(0, maxActs);
+        break;
+      }
+      page++;
+    }
+
+    if (!premium && all.length >= FREE_ACTIVITY_LIMIT) {
+      updateLoading(`Scanning last ${FREE_ACTIVITY_LIMIT} activities (upgrade for full history)…`, 42);
+    } else {
+      updateLoading(`Scanning ${all.length} activities for summits…`, 42);
+    }
+    let detected = 0;
+    const newlyDetected = [];
+
+    for (let i = 0; i < all.length; i++) {
+      // Re-validate token every 50 activities in case it expires mid-scan
+      const currentToken = (i > 0 && i % 50 === 0)
+        ? await getValidToken(session)
+        : token;
+      const summits = await detectSummitsInActivity(all[i], currentToken);
+      for (const { hill, activity } of summits) {
+        const d = new Date(activity.start_date_local);
+        hill.bagged = true;
+        hill.date   = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        hill.source = 'strava';
+        newlyDetected.push({ hill, activity }); detected++;
+      }
+      if (i % 4 === 0) updateLoading(
+        `${i+1}/${all.length} checked · ${detected} summit${detected!==1?'s':''} found`,
+        42 + Math.round((i / all.length) * 45)
+      );
+    }
+
+    if (newlyDetected.length > 0) {
+      updateLoading(`Saving ${detected} summits…`, 90);
+      await saveAscents(session, newlyDetected);
+      for (const { hill, activity } of newlyDetected) {
+        ASCENTS.unshift({
+          id: 'strava-' + activity.id, user_id: session.user_id,
+          hill_id: hill.id, hill_name: hill.name, hill_lists: hill.lists,
+          height: hill.height, region: hill.region, date: hill.date,
+          source: 'strava', strava_activity_id: String(activity.id),
+          companions: null, conditions: null, notes: null, deleted_at: null,
+        });
+      }
+    }
+
+    localStorage.setItem(SYNC_KEY, syncStarted.toString());
+    updateLoading(detected > 0 ? `Found ${detected} summit${detected!==1?'s':''}!` : 'Scan complete — no new summits found', 100);
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
+
+    const msg = detected > 0
+      ? `✓ ${detected} summits detected`
+      : 'Strava scanned — no matches found';
+    updateSyncStatus(`${msg} · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Re-scan</a>`);
+
+  } catch (err) {
+    console.error(err);
+    updateLoading('Scan failed — you can retry from the dashboard', 100);
+    updateSyncStatus(`Sync failed · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Try again</a>`);
+  }
+}
+
+init();
+</script>
 </body>
 </html>
