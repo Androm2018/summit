@@ -370,6 +370,36 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .legend-swatch.b{background:var(--forest)}
 .legend-swatch.u{background:var(--contour-lt);border:1px solid var(--contour)}
 
+/* Empty states */
+.empty-state{padding:2rem 1.5rem;text-align:center;color:var(--light-muted);font-size:0.85rem;line-height:1.7}
+.empty-state-icon{font-size:2rem;margin-bottom:0.75rem;display:block}
+.empty-state-title{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--text-mid);margin-bottom:0.4rem}
+.empty-state-btn{
+  display:inline-block;margin-top:0.8rem;
+  background:var(--forest);color:white;
+  padding:0.55rem 1.2rem;border-radius:4px;
+  font-size:0.82rem;font-weight:500;cursor:pointer;border:none;
+  font-family:'DM Sans',sans-serif;transition:background 0.15s;
+}
+.empty-state-btn:hover{background:var(--forest-deep)}
+
+/* Nav active — left border treatment */
+.nav-item.active{
+  background:rgba(45,90,61,0.1);color:var(--forest);font-weight:500;
+  border-left:2px solid var(--forest);padding-left:calc(0.65rem - 2px);
+}
+
+/* Stat card hover */
+.stat-card{transition:transform 0.15s,box-shadow 0.15s}
+.stat-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+
+/* Page fade in */
+.app-page.active{animation:fadeIn 0.18s ease}
+
+/* Loading bar pulse */
+@keyframes loadingPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.loading-pulse{animation:loadingPulse 1.4s ease infinite}
+
 /* Progress */
 .progress-section{display:flex;flex-direction:column;align-items:center;padding:1.5rem 1.2rem}
 .progress-ring-wrap{position:relative;width:140px;height:140px;margin-bottom:1rem}
@@ -803,24 +833,24 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div class="stats-row">
             <div class="stat-card green">
               <div class="stat-label">Munros Bagged</div>
-              <div class="stat-value">47</div>
-              <div class="stat-sub">of 282 · 16.6%</div>
-              <div class="stat-change">↑ +3 this month</div>
+              <div class="stat-value" id="stat-munros">0</div>
+              <div class="stat-sub" id="stat-munros-sub">of 282 · 0%</div>
+              <div class="stat-change" id="stat-munros-change" style="visibility:hidden">—</div>
             </div>
             <div class="stat-card earth">
               <div class="stat-label">Total Ascents</div>
-              <div class="stat-value">61</div>
-              <div class="stat-sub">inc. repeat summits</div>
+              <div class="stat-value" id="stat-ascents">0</div>
+              <div class="stat-sub">across all lists</div>
             </div>
             <div class="stat-card water">
-              <div class="stat-label">Vertical Climbed</div>
-              <div class="stat-value">94km</div>
-              <div class="stat-sub">total elevation gain</div>
+              <div class="stat-label">All Lists</div>
+              <div class="stat-value" id="stat-all-lists">0</div>
+              <div class="stat-sub" id="stat-all-lists-sub">unique hills bagged</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Highest Summit</div>
-              <div class="stat-value" style="font-size:1.3rem;line-height:1.2">Ben Nevis</div>
-              <div class="stat-sub">1,345m · Aug 2023</div>
+              <div class="stat-value" id="stat-highest" style="font-size:1.1rem;line-height:1.3">—</div>
+              <div class="stat-sub" id="stat-highest-sub">—</div>
             </div>
           </div>
 
@@ -850,15 +880,11 @@ textarea.form-input{resize:vertical;min-height:80px}
                       <circle class="progress-ring-fill" id="progress-ring" cx="70" cy="70" r="56" stroke-dasharray="351.86" stroke-dashoffset="293.22"/>
                     </svg>
                     <div class="progress-center">
-                      <div class="progress-num">47</div>
-                      <div class="progress-den">of 282</div>
+                      <div class="progress-num" id="progress-num">0</div>
+                      <div class="progress-den" id="progress-den">of 282</div>
                     </div>
                   </div>
-                  <div class="list-pills">
-                    <div class="list-pill-sm">Corbetts <strong>12/222</strong></div>
-                    <div class="list-pill-sm">Grahams <strong>3/221</strong></div>
-                    <div class="list-pill-sm">Donalds <strong>0/89</strong></div>
-                  </div>
+                  <div class="list-pills" id="list-pills-dynamic"></div>
                 </div>
               </div>
               <!-- Recent -->
@@ -868,39 +894,8 @@ textarea.form-input{resize:vertical;min-height:80px}
                   <button class="card-link" onclick="showPage('list')">All →</button>
                 </div>
                 <div style="padding:0 1.1rem">
-                  <div class="activity-list">
-                    <div class="activity-row">
-                      <div class="activity-dot ad-strava">⚡</div>
-                      <div class="activity-main">
-                        <div class="activity-name">Cairn Gorm<span class="strava-pill">⚡ Strava</span></div>
-                        <div class="activity-meta">3 Apr 2026 · with Sarah K.</div>
-                      </div>
-                      <div class="activity-ht">1,245m</div>
-                    </div>
-                    <div class="activity-row">
-                      <div class="activity-dot ad-strava">⚡</div>
-                      <div class="activity-main">
-                        <div class="activity-name">Ben Macdui<span class="strava-pill">⚡ Strava</span></div>
-                        <div class="activity-meta">3 Apr 2026 · Cairngorm plateau</div>
-                      </div>
-                      <div class="activity-ht">1,309m</div>
-                    </div>
-                    <div class="activity-row">
-                      <div class="activity-dot ad-manual">✎</div>
-                      <div class="activity-main">
-                        <div class="activity-name">Beinn Eighe</div>
-                        <div class="activity-meta">22 Mar 2026 · solo</div>
-                      </div>
-                      <div class="activity-ht">1,010m</div>
-                    </div>
-                    <div class="activity-row">
-                      <div class="activity-dot ad-strava">⚡</div>
-                      <div class="activity-main">
-                        <div class="activity-name">Schiehallion<span class="strava-pill">⚡ Strava</span></div>
-                        <div class="activity-meta">8 Mar 2026 · David T., Fiona</div>
-                      </div>
-                      <div class="activity-ht">1,083m</div>
-                    </div>
+                  <div class="activity-list" id="recent-ascents-list">
+                    <div class="empty-state">Connect Strava to see your recent ascents here</div>
                   </div>
                 </div>
               </div>
@@ -1110,7 +1105,26 @@ textarea.form-input{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- FIRST-RUN LOADING OVERLAY -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:var(--canvas);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem">
+  <svg width="52" height="52" viewBox="0 0 32 32" fill="none">
+    <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
+    <ellipse cx="16" cy="17" rx="10" ry="5" stroke="#4a7c59" stroke-width="1.3" opacity="0.65"/>
+    <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
+    <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5"/>
+    <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
+    <line x1="16" y1="4" x2="16" y2="8" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="13.5" y1="6" x2="18.5" y2="6" stroke="#2d5a3d" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+  <div style="text-align:center">
+    <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:0.5rem" id="loading-title">Scanning your hill history…</div>
+    <div style="font-size:0.875rem;color:var(--muted)" id="loading-sub">Checking your Strava activities against 2,548 hills</div>
+  </div>
+  <div style="width:240px;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+    <div id="loading-bar" style="height:100%;background:var(--forest);border-radius:2px;width:0%;transition:width 0.4s ease"></div>
+  </div>
+  <div style="font-size:0.78rem;color:var(--light-muted)" id="loading-detail">Loading hill database…</div>
+</div>
 <div class="modal-overlay" id="log-modal">
   <div class="modal">
     <div class="modal-title">Log an Ascent</div>
@@ -1223,17 +1237,41 @@ function getBaggedCount(listCode) {
 
 // ── DASHBOARD ──
 function updateDashboard() {
-  const munros = getListHills('M');
-  const bagged = munros.filter(h => h.bagged);
-  const total = munros.length;
-  const pct = total > 0 ? bagged.length / total : 0;
+  const munros  = getListHills('M');
+  const bagged  = munros.filter(h => h.bagged);
+  const total   = munros.length;
+  const pct     = total > 0 ? bagged.length / total : 0;
+  const baggedAll = HILLS.filter(h => h.bagged);
 
-  // Stats cards
-  const statEls = document.querySelectorAll('.stat-value');
-  if (statEls[0]) statEls[0].textContent = bagged.length;
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('stat-munros',        bagged.length);
+  setEl('stat-munros-sub',    `of ${total} · ${Math.round(pct * 1000) / 10}%`);
+  setEl('stat-ascents',       ASCENTS.filter(a => !a.deleted_at).length);
+  setEl('stat-all-lists',     baggedAll.length);
 
-  const statSubs = document.querySelectorAll('.stat-sub');
-  if (statSubs[0]) statSubs[0].textContent = `of ${total} · ${Math.round(pct * 1000) / 10}%`;
+  const listsWithBagged = Object.keys(LIST_META).filter(l => getBaggedCount(l) > 0).length;
+  setEl('stat-all-lists-sub', `across ${listsWithBagged || 0} lists`);
+
+  const highest = [...baggedAll].sort((a,b) => b.height - a.height)[0];
+  if (highest) {
+    setEl('stat-highest',     highest.name);
+    setEl('stat-highest-sub', `${highest.height}m · ${highest.date || ''}`);
+  } else {
+    setEl('stat-highest',     '—');
+    setEl('stat-highest-sub', 'No summits yet');
+  }
+
+  const changeEl = document.getElementById('stat-munros-change');
+  if (changeEl) {
+    const now = new Date();
+    const thisMonth = bagged.filter(h => {
+      if (!h.date) return false;
+      const d = new Date(h.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+    changeEl.textContent = thisMonth > 0 ? `↑ +${thisMonth} this month` : '';
+    changeEl.style.visibility = thisMonth > 0 ? 'visible' : 'hidden';
+  }
 
   // Progress ring
   const ring = document.getElementById('progress-ring');
@@ -1243,48 +1281,28 @@ function updateDashboard() {
     ring.setAttribute('stroke-dashoffset', c);
     setTimeout(() => ring.setAttribute('stroke-dashoffset', c * (1 - pct)), 300);
   }
-  const progNum = document.querySelector('.progress-num');
-  if (progNum) progNum.textContent = bagged.length;
-  const progDen = document.querySelector('.progress-den');
-  if (progDen) progDen.textContent = `of ${total}`;
+  setEl('progress-num', bagged.length);
+  const denEl = document.getElementById('progress-den');
+  if (denEl) denEl.textContent = `of ${total}`;
 
-  // Sidebar list counts
+  // Sidebar nav counts
   document.querySelectorAll('.nav-item[data-list]').forEach(n => {
-    const code = n.dataset.list;
     const countEl = n.querySelector('.nav-count');
-    if (countEl) {
-      const b = getBaggedCount(code);
-      const t = LIST_META[code]?.total || '?';
-      countEl.textContent = `${b}/${t}`;
-    }
+    if (countEl) countEl.textContent = `${getBaggedCount(n.dataset.list)}/${LIST_META[n.dataset.list]?.total || '?'}`;
   });
 
-  // Mini pills
-  const pills = document.querySelector('.list-pills');
+  // List pills
+  const pills = document.getElementById('list-pills-dynamic');
   if (pills) {
     pills.innerHTML = Object.entries(LIST_META)
       .filter(([code]) => code !== 'M')
-      .map(([code, meta]) => {
-        const b = getBaggedCount(code);
-        return `<div class="list-pill-sm">${meta.name} <strong>${b}/${meta.total}</strong></div>`;
-      }).join('');
+      .map(([code, meta]) => `<div class="list-pill-sm">${meta.name} <strong>${getBaggedCount(code)}/${meta.total}</strong></div>`)
+      .join('');
   }
 
   // Footer
   const footerSub = document.querySelector('.footer-sub');
   if (footerSub) footerSub.textContent = `${bagged.length} Munros · ${Math.round(pct * 1000) / 10}%`;
-
-  // Highest summit
-  const highestBagged = bagged.sort((a, b) => b.height - a.height)[0];
-  if (highestBagged && statEls[3]) {
-    statEls[3].textContent = highestBagged.name;
-    if (statSubs[3]) statSubs[3].textContent = `${highestBagged.height}m · ${highestBagged.date || ''}`;
-  }
-
-  // Total ascents (unique bagged across all lists)
-  const allBagged = HILLS.filter(h => h.bagged);
-  if (statEls[1]) statEls[1].textContent = allBagged.length;
-  if (statSubs[1]) statSubs[1].textContent = `across all lists`;
 }
 
 // ── LIST VIEW ──
@@ -2146,31 +2164,32 @@ async function syncStrava(session) {
   }
 }
 
-// resync(true) = force full history, resync() = incremental
-function resync(full = false) {
-  const session = getSession();
-  if (!session) return;
-  if (full) {
-    localStorage.removeItem(`summit_last_sync_${session.athlete_id}`);
-    toast('Full scan started…');
-  }
-  syncStrava(session);
-}
-
 // ── RECENT ASCENTS FEED ──
 function updateRecentAscents() {
-  const feed = document.querySelector('#page-dashboard .activity-list');
+  const feed = document.getElementById('recent-ascents-list');
   if (!feed) return;
 
   const recent = HILLS
     .filter(h => h.bagged && h.date)
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .sort((a, b) => {
+      // Sort by date string — works with "11 Oct 2025" format
+      return new Date(b.date) - new Date(a.date);
+    })
     .slice(0, 5);
 
-  if (!recent.length) return;
+  if (!recent.length) {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-state-icon">⛰</span>
+        <div class="empty-state-title">No ascents yet</div>
+        Connect Strava to automatically import your hill walking history, or log an ascent manually.
+        <br><button class="empty-state-btn" onclick="resync()">Sync Strava</button>
+      </div>`;
+    return;
+  }
 
   feed.innerHTML = recent.map(h => `
-    <div class="activity-row">
+    <div class="activity-row" onclick="openHill(${h.id})" style="cursor:pointer">
       <div class="activity-dot ${h.source === 'strava' ? 'ad-strava' : 'ad-manual'}">
         ${h.source === 'strava' ? '⚡' : '✎'}
       </div>
@@ -2185,81 +2204,174 @@ function updateRecentAscents() {
     </div>`).join('');
 }
 
-// ── INIT ──
-async function init() {
-  // 1. Load hill database
-  try {
-    updateSyncStatus('Loading hill database…');
-    const res = await fetch('/hills.json');
-    HILLS = await res.json();
-    HILLS.forEach(h => {
-      h.bagged = false; h.date = null; h.source = null;
-      h.companions = null; h.conditions = null; h.notes = null;
-    });
-  } catch (e) {
-    console.error('Failed to load hills.json', e);
-    updateSyncStatus('Failed to load hill database');
-    return;
-  }
-
-  // 2. Check auth
-  const fresh = handleAuthCallback();
-  const session = fresh || getSession();
-
-  if (!session) return; // stay on landing page
-
-  // 3. If session is missing user_id, look it up silently by athlete_id
-  if (!session.user_id || session.user_id === 'undefined' || session.user_id === 'null') {
-    try {
-      updateSyncStatus('Restoring your account…');
-      const res = await fetch(`${WORKER}/api/user?athlete_id=${session.athlete_id}`);
-      if (res.ok) {
-        const data = await res.json();
-        session.user_id = data.user_id;
-        saveSession(session);
-      } else {
-        // User not in DB at all — need a fresh Strava auth
-        showReconnectBanner();
-        applySession(session);
-        enterApp();
-        return;
-      }
-    } catch (e) {
-      showReconnectBanner();
-      applySession(session);
-      enterApp();
-      return;
-    }
-  }
-
-  applySession(session);
-  enterApp();
-
-  // 4. Load saved ascents then update UI
-  updateSyncStatus('Loading your summits…');
-  const loaded = await loadAscents(session);
-
-  updateDashboard();
-  filterHills();
-  updateRecentAscents();
-  renderMap();
-
-  if (loaded > 0) {
-    updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
-  } else if (fresh) {
-    setTimeout(() => syncStrava(session), 400);
-  } else {
-    updateSyncStatus(`No summits found · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Run Strava sync</a>`);
-  }
+// ── LOADING OVERLAY ──
+function showLoading(title, sub) {
+  const o = document.getElementById('loading-overlay');
+  if (!o) return;
+  o.style.display = 'flex';
+  document.getElementById('loading-title').textContent = title || 'Loading…';
+  document.getElementById('loading-sub').textContent   = sub   || '';
+  document.getElementById('loading-bar').style.width   = '5%';
+  document.getElementById('loading-detail').textContent = '';
+}
+function updateLoading(detail, pct) {
+  const d = document.getElementById('loading-detail');
+  const b = document.getElementById('loading-bar');
+  if (d) d.textContent = detail || '';
+  if (b && pct !== undefined) b.style.width = Math.min(pct, 98) + '%';
+}
+function hideLoading() {
+  const o = document.getElementById('loading-overlay');
+  if (!o) return;
+  const b = document.getElementById('loading-bar');
+  if (b) b.style.width = '100%';
+  setTimeout(() => { o.style.display = 'none'; }, 450);
 }
 
 function showReconnectBanner() {
   updateSyncStatus(`Session needs refresh · <a href="#" onclick="connectStrava();return false" style="color:var(--forest);font-weight:500;text-decoration:underline">Reconnect Strava</a>`);
 }
 
-function resync() {
+// resync(true) = full history, resync() = incremental
+function resync(full = false) {
   const session = getSession();
-  if (session) syncStrava(session);
+  if (!session) return;
+  if (full) {
+    localStorage.removeItem(`summit_last_sync_${session.athlete_id}`);
+    toast('Full scan started…');
+  }
+  syncStrava(session);
+}
+
+// ── INIT ──
+async function init() {
+  try {
+    const res = await fetch('/hills.json');
+    HILLS = await res.json();
+    HILLS.forEach(h => {
+      h.bagged=false; h.date=null; h.source=null;
+      h.companions=null; h.conditions=null; h.notes=null;
+    });
+  } catch (e) {
+    console.error('Failed to load hills.json', e);
+    return;
+  }
+
+  const fresh   = handleAuthCallback();
+  const session = fresh || getSession();
+  if (!session) return;
+
+  if (!session.user_id || session.user_id === 'undefined' || session.user_id === 'null') {
+    try {
+      const res = await fetch(`${WORKER}/api/user?athlete_id=${session.athlete_id}`);
+      if (res.ok) {
+        const data = await res.json();
+        session.user_id = data.user_id;
+        saveSession(session);
+      } else {
+        applySession(session); enterApp(); showReconnectBanner(); return;
+      }
+    } catch (e) {
+      applySession(session); enterApp(); showReconnectBanner(); return;
+    }
+  }
+
+  applySession(session);
+
+  if (fresh) {
+    // ── FIRST-RUN: show loading overlay during full sync ──
+    showLoading('Scanning your hill history…', 'Checking your Strava activities against 2,548 hills');
+    enterApp();
+    await syncStravaWithProgress(session);
+    hideLoading();
+  } else {
+    // ── RETURNING USER: load from Supabase ──
+    enterApp();
+    updateSyncStatus('Loading your summits…');
+    const loaded = await loadAscents(session);
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+    if (loaded > 0) {
+      updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
+    } else {
+      updateSyncStatus(`No summits yet · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Sync Strava</a>`);
+    }
+  }
+}
+
+// First-run sync with progress bar in overlay
+async function syncStravaWithProgress(session) {
+  const settings = getSettings();
+  const SYNC_KEY = `summit_last_sync_${session.athlete_id}`;
+  const activityTypes = settings.includeRuns
+    ? ['Hike','Walk','TrailRun','Run'] : ['Hike','Walk','TrailRun'];
+
+  try {
+    const token = await getValidToken(session);
+    const syncStarted = Math.floor(Date.now() / 1000);
+    let page = 1, all = [];
+
+    updateLoading('Fetching your activities from Strava…', 15);
+    while (true) {
+      const res = await fetch(`${WORKER}/api/activities?page=${page}&per_page=100`,
+        { headers: { Authorization: `Bearer ${token}` } });
+      const acts = await res.json();
+      if (!Array.isArray(acts) || !acts.length) break;
+      const hillActs = acts.filter(a =>
+        activityTypes.includes(a.type) || activityTypes.includes(a.sport_type)
+      );
+      all = all.concat(hillActs);
+      updateLoading(`Found ${all.length} walks & hikes…`, 15 + Math.min(page * 4, 25));
+      if (acts.length < 100) break;
+      page++;
+    }
+
+    updateLoading(`Scanning ${all.length} activities for summits…`, 42);
+    let detected = 0;
+    const newlyDetected = [];
+
+    for (let i = 0; i < all.length; i++) {
+      const summits = await detectSummitsInActivity(all[i], token);
+      for (const { hill, activity } of summits) {
+        const d = new Date(activity.start_date_local);
+        hill.bagged = true;
+        hill.date   = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        hill.source = 'strava';
+        newlyDetected.push({ hill, activity }); detected++;
+      }
+      if (i % 4 === 0) updateLoading(
+        `${i+1}/${all.length} checked · ${detected} summit${detected!==1?'s':''} found`,
+        42 + Math.round((i / all.length) * 45)
+      );
+    }
+
+    if (newlyDetected.length > 0) {
+      updateLoading(`Saving ${detected} summits…`, 90);
+      await saveAscents(session, newlyDetected);
+      for (const { hill, activity } of newlyDetected) {
+        ASCENTS.unshift({
+          id: 'strava-' + activity.id, user_id: session.user_id,
+          hill_id: hill.id, hill_name: hill.name, hill_lists: hill.lists,
+          height: hill.height, region: hill.region, date: hill.date,
+          source: 'strava', strava_activity_id: String(activity.id),
+          companions: null, conditions: null, notes: null, deleted_at: null,
+        });
+      }
+    }
+
+    localStorage.setItem(SYNC_KEY, syncStarted.toString());
+    updateLoading(detected > 0 ? `Found ${detected} summit${detected!==1?'s':''}!` : 'Scan complete — no new summits found', 100);
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+
+    const msg = detected > 0
+      ? `✓ ${detected} summits detected`
+      : 'Strava scanned — no matches found';
+    updateSyncStatus(`${msg} · <a href="#" onclick="resync(true);return false" style="color:var(--forest);text-decoration:underline">Re-scan</a>`);
+
+  } catch (err) {
+    console.error(err);
+    updateLoading('Scan failed — you can retry from the dashboard', 100);
+    updateSyncStatus(`Sync failed · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Try again</a>`);
+  }
 }
 
 init();
