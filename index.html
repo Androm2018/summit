@@ -1359,20 +1359,26 @@ function openHill(id) {
 
   // Ascents panel
   const ascentTitle = document.getElementById('detail-ascents-title');
-  const ascentList = document.getElementById('detail-ascents-list');
+  const ascentList  = document.getElementById('detail-ascents-list');
   if (ascentTitle) ascentTitle.textContent = h.bagged ? 'My Ascents (1)' : 'My Ascents (0)';
   if (ascentList) {
-    ascentList.innerHTML = h.bagged ? `
-      <div class="ascent-item">
-        <div class="ascent-date">↑ ${h.date || 'Date unknown'}
-          ${h.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
-        </div>
-        <div class="ascent-companions">With: <span>${h.companions || 'Solo'}</span></div>
-        ${h.notes ? `<div class="ascent-notes">"${h.notes}"</div>` : ''}
-        ${h.conditions ? `<div class="ascent-source-tag">Conditions: ${h.conditions}</div>` : ''}
-        <div class="ascent-source-tag">${h.source === 'strava' ? '⚡ Auto-detected from Strava' : '✎ Manually logged'}</div>
-      </div>` :
-      '<div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged — log an ascent below</div>';
+    if (h.bagged) {
+      const dateDisplay = h.date || 'Date unknown';
+      const sourceIcon  = h.source === 'strava' ? '⚡ Auto-detected from Strava' : '✎ Manually logged';
+      ascentList.innerHTML = `
+        <div class="ascent-item">
+          <div class="ascent-date">
+            ↑ ${dateDisplay}
+            ${h.source === 'strava' ? '<span class="strava-pill">⚡ Strava</span>' : ''}
+          </div>
+          <div class="ascent-companions">With: <span>${h.companions || 'Solo'}</span></div>
+          ${h.conditions ? `<div class="ascent-notes" style="font-style:normal;color:var(--text-mid)">Conditions: ${h.conditions}</div>` : ''}
+          ${h.notes      ? `<div class="ascent-notes">"${h.notes}"</div>` : ''}
+          <div class="ascent-source-tag">${sourceIcon}</div>
+        </div>`;
+    } else {
+      ascentList.innerHTML = '<div style="padding:1.2rem;text-align:center;color:var(--light-muted);font-size:0.85rem">Not yet bagged — log an ascent below</div>';
+    }
   }
 
   document.getElementById('log-hill').value = h.name;
@@ -1394,20 +1400,88 @@ document.getElementById('log-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-function saveAscent() {
-  const h = document.getElementById('log-hill').value;
-  if (!h) { document.getElementById('log-hill').style.borderColor = 'var(--earth)'; return; }
-  // Mark hill as bagged if we can find it
-  const hill = HILLS.find(x => x.name.toLowerCase() === h.toLowerCase());
-  if (hill) {
-    hill.bagged = true;
-    hill.date = document.getElementById('log-date').value;
-    hill.source = 'manual';
+async function saveAscent() {
+  const hillName = document.getElementById('log-hill').value.trim();
+  if (!hillName) {
+    document.getElementById('log-hill').style.borderColor = 'var(--earth)';
+    return;
   }
+
+  const date     = document.getElementById('log-date').value;
+  const companions = document.getElementById('log-companions').value.trim();
+  const conditions = document.getElementById('log-conditions').value.trim();
+  const notes    = document.getElementById('log-notes').value.trim();
+
+  // Find the hill in our dataset
+  const hill = HILLS.find(h => h.name.toLowerCase() === hillName.toLowerCase())
+            || HILLS.find(h => h.name.toLowerCase().includes(hillName.toLowerCase()));
+
+  if (!hill) {
+    toast('Hill not found — check spelling');
+    return;
+  }
+
+  // Disable button while saving
+  const btn = document.querySelector('.btn-modal-primary');
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+
+  const session = getSession();
+
+  // Optimistically update the local state immediately
+  hill.bagged = true;
+  hill.date = date ? new Date(date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  hill.source = 'manual';
+  hill.companions = companions || null;
+  hill.conditions = conditions || null;
+  hill.notes = notes || null;
+
   closeModal();
   updateDashboard();
   filterHills();
-  toast('✓ Ascent of ' + h + ' saved');
+  updateRecentAscents();
+  renderMap();
+
+  // Save to Supabase
+  if (session?.user_id) {
+    try {
+      const token = await getValidToken(session);
+      const res = await fetch(`${WORKER}/api/ascents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: session.user_id,
+          ascents: [{
+            hill_id:    hill.id,
+            hill_name:  hill.name,
+            hill_lists: hill.lists,
+            height:     hill.height,
+            region:     hill.region,
+            date:       date || new Date().toISOString().split('T')[0],
+            source:     'manual',
+            companions,
+            conditions,
+            notes,
+          }],
+        }),
+      });
+      if (res.ok) {
+        toast(`✓ ${hill.name} saved to your logbook`);
+      } else {
+        toast(`✓ ${hill.name} saved locally — will sync shortly`);
+      }
+    } catch (e) {
+      console.error('Save failed:', e);
+      toast(`✓ ${hill.name} saved locally`);
+    }
+  } else {
+    toast(`✓ ${hill.name} saved — reconnect Strava to sync`);
+  }
+
+  // Reset button
+  if (btn) { btn.textContent = 'Save Ascent'; btn.disabled = false; }
 }
 
 function toast(msg) {
@@ -1488,27 +1562,33 @@ function updateSyncStatus(msg) {
 
 // ── TOKEN REFRESH ──
 async function getValidToken(session) {
+  if (!session) return null;
   const now = Math.floor(Date.now() / 1000);
-  // Refresh if token expires within 5 minutes
-  if (session.expires_at - now < 300) {
+  // Refresh if expired or expiring within 5 minutes
+  if ((session.expires_at - now) < 300) {
     try {
       const res = await fetch(`${WORKER}/auth/strava/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           refresh_token: session.refresh_token,
-          athlete_id: session.athlete_id,
+          athlete_id:    session.athlete_id,
         }),
       });
-      const data = await res.json();
-      if (data.access_token) {
-        session.access_token = data.access_token;
-        session.refresh_token = data.refresh_token;
-        session.expires_at = data.expires_at;
-        saveSession(session);
-        return data.access_token;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
+          session.access_token  = data.access_token;
+          session.refresh_token = data.refresh_token;
+          session.expires_at    = data.expires_at;
+          saveSession(session);
+          console.log('Token refreshed successfully');
+          return data.access_token;
+        }
       }
-    } catch (e) { console.warn('Token refresh failed', e); }
+    } catch (e) {
+      console.warn('Token refresh failed — using existing token', e);
+    }
   }
   return session.access_token;
 }
@@ -1519,23 +1599,32 @@ async function getValidToken(session) {
 async function loadAscents(session) {
   if (!session?.user_id) return 0;
   try {
+    const token = await getValidToken(session);
     const res = await fetch(
       `${WORKER}/api/ascents?user_id=${session.user_id}`,
-      { headers: { Authorization: `Bearer ${session.access_token}` } }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     const ascents = await res.json();
     if (!Array.isArray(ascents)) return 0;
 
-    let count = 0;
+    // Group by hill_id — keep most recent per hill but preserve all data
+    const byHill = {};
     for (const a of ascents) {
-      const hill = HILLS.find(h => h.id === a.hill_id);
+      if (!byHill[a.hill_id] || a.date > byHill[a.hill_id].date) {
+        byHill[a.hill_id] = a;
+      }
+    }
+
+    let count = 0;
+    for (const [hillId, a] of Object.entries(byHill)) {
+      const hill = HILLS.find(h => h.id === parseInt(hillId));
       if (hill) {
-        hill.bagged = true;
-        hill.date = a.date;
-        hill.source = a.source;
-        hill.companions = a.companions;
-        hill.conditions = a.conditions;
-        hill.notes = a.notes;
+        hill.bagged     = true;
+        hill.date       = a.date;
+        hill.source     = a.source;
+        hill.companions = a.companions || null;
+        hill.conditions = a.conditions || null;
+        hill.notes      = a.notes || null;
         count++;
       }
     }
