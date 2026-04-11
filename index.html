@@ -5,14 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Summit — Track Every British Hill</title>
 <meta name="description" content="Automatically track your Munros, Corbetts, Wainwrights and Marilyns from Strava GPS. The hill bagging app built for British hillwalkers."/>
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/summit-logo-192.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<!-- Social share preview -->
 <meta property="og:title" content="Summit — Track Every British Hill"/>
 <meta property="og:description" content="Connect Strava and Summit automatically detects every summit you've climbed. Free for Munros. Premium unlocks all 8 lists."/>
 <meta property="og:url" content="https://summitapp.uk"/>
 <meta property="og:type" content="website"/>
-<meta property="og:image" content="https://summitapp.uk/summit-icon-512.png"/>
-<meta name="twitter:card" content="summary"/>
+<meta property="og:image" content="https://summitapp.uk/summit-og-1200x630.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Summit — Track Every British Hill"/>
 <meta name="twitter:description" content="Auto-detect your Munros, Corbetts, Wainwrights and Marilyns from Strava. Free for Munros."/>
+<meta name="twitter:image" content="https://summitapp.uk/summit-og-1200x630.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
@@ -428,6 +436,29 @@ body{overflow-x:hidden}
   vertical-align:middle;
 }
 
+/* Leaderboard */
+.lb-row{
+  display:flex;align-items:center;gap:0.85rem;
+  padding:0.75rem 1.1rem;border-bottom:1px solid var(--border-lt);
+  transition:background 0.15s;
+}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:var(--paper-mid)}
+.lb-rank{font-family:'Libre Baskerville',serif;font-size:0.95rem;font-weight:700;color:var(--light-muted);width:28px;text-align:center;flex-shrink:0}
+.lb-rank.top3{color:var(--forest)}
+.lb-avatar{width:32px;height:32px;border-radius:50%;background:var(--forest);color:white;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0}
+.lb-avatar.is-you{background:var(--earth)}
+.lb-name{font-size:0.875rem;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-you-tag{font-size:0.65rem;background:var(--earth);color:white;padding:0.1rem 0.4rem;border-radius:10px;margin-left:0.4rem;vertical-align:middle;flex-shrink:0}
+.lb-count{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--forest);flex-shrink:0;text-align:right}
+.lb-count-label{font-size:0.65rem;color:var(--light-muted);display:block;text-align:right;line-height:1.2}
+.follow-row{display:flex;align-items:center;justify-content:space-between;padding:0.65rem 1rem;border-bottom:1px solid var(--border-lt);font-size:0.85rem}
+.follow-row:last-child{border-bottom:none}
+.follow-btn{font-size:0.72rem;padding:0.25rem 0.7rem;border-radius:3px;border:1px solid var(--forest);color:var(--forest);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;white-space:nowrap}
+.follow-btn:hover{background:var(--forest);color:white}
+.follow-btn.following{border-color:var(--border);color:var(--muted)}
+.follow-btn.following:hover{border-color:var(--path);color:var(--path)}
+
 /* Badges */
 .badge-row{
   display:flex;align-items:center;gap:0.75rem;
@@ -787,18 +818,11 @@ textarea.form-input{resize:vertical;min-height:80px}
   <nav class="landing-nav">
     <a href="#" class="logo" onclick="return false">
       <!-- Topo contour logo -->
-      <svg class="logo-mark" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
-        <ellipse cx="16" cy="17" rx="10" ry="5" stroke="#4a7c59" stroke-width="1.3" opacity="0.6"/>
-        <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.8"/>
-        <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5" opacity="1"/>
-        <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
-      <!-- Trig point pillar -->
-      <rect x="13.5" y="8" width="5" height="6" rx="0.5" fill="#2d5a3d" opacity="0.85"/>
-      <rect x="12.5" y="13.5" width="7" height="1.2" rx="0.2" fill="#2d5a3d"/>
-      <rect x="11.5" y="14.5" width="9" height="1.2" rx="0.2" fill="#1e3d29" opacity="0.7"/>
-      <circle cx="16" cy="8.5" r="0.9" fill="#7aab87"/>
-      </svg>
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
+</svg>
       <span class="logo-type">Summit</span>
     </a>
     <div style="display:flex;align-items:center;gap:1.2rem">
@@ -981,7 +1005,40 @@ textarea.form-input{resize:vertical;min-height:80px}
       <div style="text-align:center;font-size:0.75rem;color:var(--light-muted);margin-top:1.2rem">
         Secure payments via Stripe · 14-day money-back guarantee ·
         <a href="/terms.html" style="color:var(--light-muted)">Terms</a> ·
-        <a href="/privacy.html" style="color:var(--light-muted)">Privacy</a>
+        <a href="/privacy.html" style="color:var(--light-muted)">Privacy</a> ·
+        <a href="/contact.html" style="color:var(--light-muted)">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONATION TRACKER -->
+  <section style="padding:2.5rem 5%;background:var(--paper)">
+    <div style="max-width:700px;margin:0 auto">
+      <div style="background:var(--canvas);border:1px solid rgba(45,90,61,0.2);border-radius:10px;padding:1.8rem 2rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem">
+          <span style="font-size:1.5rem">🌿</span>
+          <div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:var(--text)">Giving back to the hills</div>
+            <div style="font-size:0.82rem;color:var(--muted)">10% of every subscription goes to two causes that matter to hillwalkers</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+          <div style="background:var(--paper);border-radius:6px;padding:1rem 1.1rem;border:1px solid var(--border)">
+            <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem">Scottish Wildlife Trust</div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--forest)" id="swt-total">£0</div>
+            <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.2rem">donated to date</div>
+          </div>
+          <div style="background:var(--paper);border-radius:6px;padding:1rem 1.1rem;border:1px solid var(--border)">
+            <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem">Mountain Rescue Scotland</div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--forest)" id="mrs-total">£0</div>
+            <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.2rem">donated to date</div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--light-muted);line-height:1.6">
+          Donations are made quarterly. 5% of net revenue to each charity.
+          <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:var(--forest)">Scottish Wildlife Trust</a> ·
+          <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>
+        </div>
       </div>
     </div>
   </section>
@@ -1007,7 +1064,8 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div style="display:flex;flex-direction:column;gap:0.35rem">
             <a href="/privacy.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Privacy Policy</a>
             <a href="/terms.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Terms of Service</a>
-            <a href="mailto:hello@summitapp.uk" style="color:rgba(255,255,255,0.6);text-decoration:none">Contact</a>
+            <a href="/contact.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Contact & Support</a>
+            <a href="mailto:hello@summitapp.uk" style="color:rgba(255,255,255,0.6);text-decoration:none">hello@summitapp.uk</a>
           </div>
         </div>
         <div>
@@ -1027,18 +1085,11 @@ textarea.form-input{resize:vertical;min-height:80px}
   <div class="app-layout">
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
-          <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
-          <ellipse cx="16" cy="17" rx="10" ry="5" stroke="#4a7c59" stroke-width="1.3" opacity="0.65"/>
-          <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
-          <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5"/>
-          <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
-      <!-- Trig point pillar -->
-      <rect x="13.5" y="8" width="5" height="6" rx="0.5" fill="#2d5a3d" opacity="0.85"/>
-      <rect x="12.5" y="13.5" width="7" height="1.2" rx="0.2" fill="#2d5a3d"/>
-      <rect x="11.5" y="14.5" width="9" height="1.2" rx="0.2" fill="#1e3d29" opacity="0.7"/>
-      <circle cx="16" cy="8.5" r="0.9" fill="#7aab87"/>
-        </svg>
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
+</svg>
         <span class="sidebar-logo-type">Summit</span>
       </div>
       <nav class="sidebar-nav">
@@ -1054,6 +1105,7 @@ textarea.form-input{resize:vertical;min-height:80px}
         <div class="nav-section-label">Account</div>
         <button class="nav-item" onclick="showPage('profile')"><span class="nav-item-icon">○</span>Profile</button>
         <button class="nav-item" onclick="showPage('settings')"><span class="nav-item-icon">⚙</span>Settings</button>
+        <button class="nav-item" onclick="showPage('leaderboard');loadLeaderboard()"><span class="nav-item-icon">🏆</span>Leaderboard</button>
         <div id="sidebar-upgrade-wrap"></div>
       </nav>
       <div class="sidebar-footer">
@@ -1329,6 +1381,12 @@ textarea.form-input{resize:vertical;min-height:80px}
               </div>
             </div>
 
+            <!-- Support -->
+            <div style="padding:1rem 0.25rem;text-align:center;font-size:0.78rem;color:var(--light-muted);line-height:2">
+              Need help? <a href="/contact.html" target="_blank" style="color:var(--forest);font-weight:500">Contact & Support</a> ·
+              <a href="mailto:hello@summitapp.uk" style="color:var(--light-muted)">hello@summitapp.uk</a>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1392,6 +1450,63 @@ textarea.form-input{resize:vertical;min-height:80px}
             </div>
           </div>
 
+          <!-- Support footer -->
+          <div style="padding:1.5rem 0.25rem;text-align:center;font-size:0.78rem;color:var(--light-muted);line-height:2">
+            <a href="/contact.html" target="_blank" style="color:var(--forest);font-weight:500">Contact & Support</a> ·
+            <a href="/privacy.html" target="_blank" style="color:var(--light-muted)">Privacy</a> ·
+            <a href="/terms.html" target="_blank" style="color:var(--light-muted)">Terms</a><br>
+            <a href="mailto:hello@summitapp.uk" style="color:var(--light-muted)">hello@summitapp.uk</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div id="page-leaderboard" class="app-page">
+        <div class="page-header">
+          <div><div class="page-title">Leaderboard</div><div class="page-sub" id="leaderboard-sub">Top hillwalkers on Summit</div></div>
+        </div>
+        <div class="content-area">
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:1.5rem" class="dash-grid">
+
+            <!-- Global leaderboard -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">🏆 Munro Rankings</span>
+                <span style="font-size:0.75rem;color:var(--light-muted)">Public profiles only</span>
+              </div>
+              <div id="leaderboard-list" style="padding:0">
+                <div class="empty-state"><span class="empty-state-icon">🏔</span>Loading rankings…</div>
+              </div>
+            </div>
+
+            <!-- Right column -->
+            <div style="display:flex;flex-direction:column;gap:1.2rem">
+
+              <!-- Find & follow -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Find Hillwalkers</span></div>
+                <div class="card-body">
+                  <div style="position:relative">
+                    <input class="form-input" id="follow-search" type="text"
+                      placeholder="Search by name…"
+                      oninput="searchUsers(this.value)"
+                      autocomplete="off"/>
+                    <div id="follow-suggestions" style="position:absolute;top:100%;left:0;right:0;background:var(--canvas);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:200px;overflow-y:auto;z-index:100;display:none"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- People you follow -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Following</span></div>
+                <div id="following-list" style="padding:0">
+                  <div style="padding:1rem;font-size:0.82rem;color:var(--light-muted);text-align:center">Nobody yet — search above to find hillwalkers</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1426,17 +1541,11 @@ textarea.form-input{resize:vertical;min-height:80px}
 
 <!-- FIRST-RUN LOADING OVERLAY -->
 <div id="loading-overlay" style="display:none;position:fixed;inset:0;background:var(--canvas);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem">
-  <svg width="52" height="52" viewBox="0 0 32 32" fill="none">
-    <ellipse cx="16" cy="18" rx="14" ry="7" stroke="#7aab87" stroke-width="1.2" opacity="0.45"/>
-    <ellipse cx="16" cy="17" rx="10" ry="5" stroke="#4a7c59" stroke-width="1.3" opacity="0.65"/>
-    <ellipse cx="16" cy="16" rx="6.5" ry="3.2" stroke="#2d5a3d" stroke-width="1.4" opacity="0.85"/>
-    <ellipse cx="16" cy="15.2" rx="3" ry="1.6" stroke="#1e3d29" stroke-width="1.5"/>
-    <circle cx="16" cy="14.8" r="1.2" fill="#2d5a3d"/>
-    <rect x="13.5" y="8" width="5" height="6" rx="0.5" fill="#2d5a3d" opacity="0.85"/>
-    <rect x="12.5" y="13.5" width="7" height="1.2" rx="0.2" fill="#2d5a3d"/>
-    <rect x="11.5" y="14.5" width="9" height="1.2" rx="0.2" fill="#1e3d29" opacity="0.7"/>
-    <circle cx="16" cy="8.5" r="0.9" fill="#7aab87"/>
-  </svg>
+  <svg width="52" height="52" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
+</svg>
   <div style="text-align:center">
     <div style="font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:0.5rem" id="loading-title">Scanning your hill history…</div>
     <div style="font-size:0.875rem;color:var(--muted)" id="loading-sub">Checking your Strava activities against 2,548 hills</div>
@@ -1636,8 +1745,9 @@ function showPage(p) {
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   const pg = document.getElementById('page-' + p);
   if (pg) pg.classList.add('active');
-  if (p === 'profile') updateProfilePage();
-  if (p === 'settings') updateSettingsPage();
+  if (p === 'profile')     updateProfilePage();
+  if (p === 'settings')    updateSettingsPage();
+  if (p === 'leaderboard') loadLeaderboard();
 }
 
 function switchList(listCode) {
@@ -3286,36 +3396,247 @@ function updateBadges() {
   if (!container) return;
 
   const results = checkBadges();
-  const earned  = results.filter(b => b.earned);
-  const locked  = results.filter(b => !b.earned);
 
-  if (earned.length === 0 && locked.every(b => b.progress === 0)) {
-    container.innerHTML = `<div style="padding:0.75rem 0.25rem;font-size:0.8rem;color:var(--light-muted);text-align:center">Complete challenges to earn badges</div>`;
+  container.innerHTML = results.map(b => {
+    const pct = b.total > 0 ? Math.round((b.progress / b.total) * 100) : 0;
+
+    if (b.earned) {
+      return `
+        <div class="badge-row" style="background:rgba(45,90,61,0.05);border-radius:6px;border:1px solid rgba(45,90,61,0.12)">
+          <div class="badge-icon earned">${b.icon}</div>
+          <div style="flex:1">
+            <div class="badge-name">${b.name}</div>
+            <div class="badge-earned-date">✓ Earned</div>
+          </div>
+          <div style="font-size:1rem">🎖</div>
+        </div>`;
+    }
+
+    if (b.progress > 0) {
+      return `
+        <div class="badge-row">
+          <div class="badge-icon locked">${b.icon}</div>
+          <div style="flex:1">
+            <div class="badge-name" style="color:var(--text-mid)">${b.name}</div>
+            <div style="margin-top:0.3rem;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:var(--forest);border-radius:2px"></div>
+            </div>
+            <div class="badge-progress">${b.progress} / ${b.total} · ${b.desc}</div>
+          </div>
+        </div>`;
+    }
+
+    // Not started — show locked, dim
+    return `
+      <div class="badge-row" style="opacity:0.55">
+        <div class="badge-icon locked">${b.icon}</div>
+        <div style="flex:1">
+          <div class="badge-name" style="color:var(--muted)">${b.name}</div>
+          <div class="badge-progress">${b.desc}</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--light-muted)">🔒</div>
+      </div>`;
+  }).join('');
+}
+// ── DONATION TRACKER ──
+async function updateDonationTracker() {
+  const swtEl = document.getElementById('swt-total');
+  const mrsEl = document.getElementById('mrs-total');
+  if (!swtEl || !mrsEl) return;
+  // Hardcoded — update manually each quarter after actual donations are made
+  // Once the Worker has a /api/donations endpoint these can be fetched live
+  swtEl.textContent = '£0.00';
+  mrsEl.textContent = '£0.00';
+}
+if (document.getElementById('swt-total')) updateDonationTracker();
+
+// ── LEADERBOARD ──
+
+let leaderboardData   = [];
+let followingIds      = new Set();
+let leaderboardLoaded = false;
+
+async function loadLeaderboard() {
+  if (leaderboardLoaded) { renderLeaderboard(); return; }
+  const session = getSession();
+
+  // Load global leaderboard + who we follow in parallel
+  const [lbRes, followRes] = await Promise.all([
+    fetch(`${WORKER}/api/leaderboard`).then(r => r.json()).catch(() => []),
+    session?.user_id
+      ? fetch(`${WORKER}/api/follows?user_id=${session.user_id}&type=following`,
+          { headers: { Authorization: `Bearer ${await getValidToken(session)}` } })
+          .then(r => r.json()).catch(() => [])
+      : Promise.resolve([]),
+  ]);
+
+  leaderboardData = Array.isArray(lbRes) ? lbRes : [];
+  followingIds    = new Set(followRes.map(f => f.following_id));
+  leaderboardLoaded = true;
+
+  renderLeaderboard();
+  loadFollowing();
+}
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboard-list');
+  if (!container) return;
+
+  if (!leaderboardData.length) {
+    container.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🏔</span>No rankings yet — be the first!</div>`;
     return;
   }
 
-  container.innerHTML = [
-    ...earned.map(b => `
-      <div class="badge-row">
-        <div class="badge-icon earned">${b.icon}</div>
-        <div>
-          <div class="badge-name">${b.name}</div>
-          <div class="badge-earned-date">✓ Earned</div>
-        </div>
-      </div>`),
-    ...locked.filter(b => b.progress > 0).map(b => `
-      <div class="badge-row">
-        <div class="badge-icon locked">${b.icon}</div>
-        <div>
-          <div class="badge-name" style="color:var(--muted)">${b.name}</div>
-          <div class="badge-progress">${b.progress}/${b.total} · ${b.desc}</div>
-        </div>
-      </div>`),
-    locked.filter(b => b.progress === 0).length > 0
-      ? `<div style="font-size:0.72rem;color:var(--light-muted);padding:0.4rem 0.5rem">${locked.filter(b => b.progress === 0).length} more badges to discover</div>`
-      : '',
-  ].join('');
+  const session   = getSession();
+  const myId      = session?.user_id;
+  const medals    = ['🥇','🥈','🥉'];
+
+  container.innerHTML = leaderboardData.map((u, i) => {
+    const rank     = i + 1;
+    const isYou    = u.id === myId;
+    const initials = u.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2);
+    const rankStr  = rank <= 3 ? medals[rank-1] : `${rank}`;
+    const isTop3   = rank <= 3;
+
+    return `<div class="lb-row" ${isYou ? 'style="background:rgba(139,69,19,0.04)"' : ''}>
+      <div class="lb-rank ${isTop3 ? 'top3' : ''}">${rankStr}</div>
+      <div class="lb-avatar ${isYou ? 'is-you' : ''}">${initials}</div>
+      <div class="lb-name">
+        ${u.name}
+        ${isYou ? '<span class="lb-you-tag">You</span>' : ''}
+      </div>
+      <div>
+        <div class="lb-count">${u.munro_count}</div>
+        <div class="lb-count-label">Munros</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update sub with user count
+  const subEl = document.getElementById('leaderboard-sub');
+  if (subEl) subEl.textContent = `${leaderboardData.length} hillwalkers ranked`;
 }
+
+async function loadFollowing() {
+  const session = getSession();
+  if (!session?.user_id) return;
+
+  const container = document.getElementById('following-list');
+  if (!container) return;
+
+  try {
+    const token = await getValidToken(session);
+    const res   = await fetch(
+      `${WORKER}/api/follows?user_id=${session.user_id}&type=following`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await res.json();
+
+    if (!data.length) {
+      container.innerHTML = `<div style="padding:1rem;font-size:0.82rem;color:var(--light-muted);text-align:center">Nobody yet</div>`;
+      return;
+    }
+
+    container.innerHTML = data.map(f => {
+      const user = f['users!following_id'] || {};
+      const initials = (user.name||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+      return `<div class="follow-row">
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <div class="lb-avatar" style="width:28px;height:28px;font-size:0.65rem">${initials}</div>
+          <span>${user.name || 'Unknown'}</span>
+        </div>
+        <button class="follow-btn following" onclick="unfollowUser('${f.following_id}', this)">Following</button>
+      </div>`;
+    }).join('');
+  } catch (e) { console.error('Load following failed', e); }
+}
+
+// User search for follow
+let searchTimer = null;
+function searchUsers(val) {
+  clearTimeout(searchTimer);
+  const box = document.getElementById('follow-suggestions');
+  if (!val || val.length < 2) { box.style.display = 'none'; return; }
+  searchTimer = setTimeout(async () => {
+    try {
+      const res  = await fetch(`${WORKER}/api/users/search?q=${encodeURIComponent(val)}`);
+      const data = await res.json();
+      if (!data.length) { box.style.display = 'none'; return; }
+
+      const session = getSession();
+      box.innerHTML = data
+        .filter(u => u.id !== session?.user_id)
+        .map(u => {
+          const isFollowing = followingIds.has(u.id);
+          return `<div class="follow-row" style="border-bottom:1px solid var(--border-lt)">
+            <span style="font-size:0.85rem">${u.name}</span>
+            <button class="follow-btn ${isFollowing ? 'following' : ''}"
+              onclick="toggleFollow('${u.id}', '${u.name}', this)">
+              ${isFollowing ? 'Following' : '+ Follow'}
+            </button>
+          </div>`;
+        }).join('');
+      box.style.display = 'block';
+    } catch (e) { console.error(e); }
+  }, 300);
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#follow-search') && !e.target.closest('#follow-suggestions')) {
+    const box = document.getElementById('follow-suggestions');
+    if (box) box.style.display = 'none';
+  }
+});
+
+async function toggleFollow(userId, userName, btn) {
+  const session = getSession();
+  if (!session?.user_id) return;
+  const isFollowing = followingIds.has(userId);
+
+  try {
+    const token = await getValidToken(session);
+    if (isFollowing) {
+      await fetch(`${WORKER}/api/follows`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ follower_id: session.user_id, following_id: userId }),
+      });
+      followingIds.delete(userId);
+      btn.textContent = '+ Follow';
+      btn.classList.remove('following');
+      toast(`Unfollowed ${userName}`);
+    } else {
+      await fetch(`${WORKER}/api/follows`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ follower_id: session.user_id, following_id: userId }),
+      });
+      followingIds.add(userId);
+      btn.textContent = 'Following';
+      btn.classList.add('following');
+      toast(`Now following ${userName}`);
+      loadFollowing(); // refresh following list
+    }
+  } catch (e) { toast('Something went wrong — try again'); }
+}
+
+async function unfollowUser(userId, btn) {
+  const session = getSession();
+  if (!session?.user_id) return;
+  try {
+    const token = await getValidToken(session);
+    await fetch(`${WORKER}/api/follows`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ follower_id: session.user_id, following_id: userId }),
+    });
+    followingIds.delete(userId);
+    btn.closest('.follow-row').remove();
+    toast('Unfollowed');
+    leaderboardLoaded = false; // force refresh next open
+  } catch (e) { toast('Something went wrong'); }
+}
+
 function showLoading(title, sub) {
   const o = document.getElementById('loading-overlay');
   if (!o) return;
