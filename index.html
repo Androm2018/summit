@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1027,6 +1028,30 @@ textarea.form-input{resize:vertical;min-height:80px}
               </div>
             </div>
 
+            <div class="card">
+              <div class="card-header"><span class="card-title">Import from Spreadsheet</span></div>
+              <div class="card-body">
+                <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Already have your hills logged in a spreadsheet? Download the template, fill in your ascents, and upload it back. Works with Excel (.xlsx) and CSV.</p>
+                <div style="display:flex;flex-direction:column;gap:0.65rem">
+                  <div class="export-row" onclick="downloadTemplate()">
+                    <span class="export-icon">⬇</span>
+                    <div>
+                      <div class="export-title">Download Import Template</div>
+                      <div class="export-sub">Excel template with all columns pre-filled</div>
+                    </div>
+                  </div>
+                  <label class="export-row" style="cursor:pointer" for="import-file-input">
+                    <span class="export-icon">⬆</span>
+                    <div>
+                      <div class="export-title">Upload Your Spreadsheet</div>
+                      <div class="export-sub">.xlsx or .csv — we'll match hills automatically</div>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(this)"/>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <!-- Strava card -->
             <div class="card">
               <div class="card-header"><span class="card-title">Strava Connection</span></div>
@@ -1125,6 +1150,21 @@ textarea.form-input{resize:vertical;min-height:80px}
   </div>
   <div style="font-size:0.78rem;color:var(--light-muted)" id="loading-detail">Loading hill database…</div>
 </div>
+
+<!-- IMPORT PREVIEW MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:600px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title">Import Ascents</div>
+    <div class="modal-sub" id="import-modal-sub">Review before importing</div>
+    <div id="import-summary" style="display:flex;gap:1rem;padding:0.75rem 1rem;background:var(--paper-mid);border-radius:4px;margin-bottom:1rem;font-size:0.82rem;flex-wrap:wrap"></div>
+    <div id="import-results" style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:4px;margin-bottom:1rem;max-height:360px"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeImportModal()">Cancel</button>
+      <button class="btn-modal-primary" id="import-confirm-btn" onclick="confirmImport()">Import matched ascents</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="log-modal">
   <div class="modal">
     <div class="modal-title">Log an Ascent</div>
@@ -1886,6 +1926,328 @@ function exportHillBagging() {
   const blob = new Blob(['hill_id,date,name\n'+rows.join('\n')], {type:'text/csv'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='summit-hill-bagging-export.csv'; a.click();
   toast(`Exported ${rows.length} ascents`);
+}
+
+// ── IMPORT ──
+
+// Download a pre-filled Excel template
+function downloadTemplate() {
+  if (!window.XLSX) { toast('Loading Excel library…'); return; }
+
+  // Build template with example rows and all columns
+  const headers = ['Hill Name', 'Date (YYYY-MM-DD)', 'Companions', 'Conditions', 'Notes'];
+  const examples = [
+    ['Ben Nevis',         '2023-08-14', 'Sarah, David', 'Clear summit, warm', 'Perfect day. Took the tourist track.'],
+    ['Cairn Gorm',        '2023-04-03', '',             'Snow above 900m',    ''],
+    ['Ben Lomond',        '2019-05-12', 'Solo',         'Misty all day',      'First Munro!'],
+    ['Schiehallion',      '2022-06-18', 'Family',       'Perfect visibility', 'Kids loved it'],
+    ['Beinn Eighe',       '',           '',             '',                   ''],
+  ];
+
+  const wsData = [headers, ...examples];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 30 },  // Hill Name
+    { wch: 18 },  // Date
+    { wch: 25 },  // Companions
+    { wch: 30 },  // Conditions
+    { wch: 40 },  // Notes
+  ];
+
+  // Style header row (bold)
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = ws[XLSX.utils.encode_cell({ r: 0, c })];
+    if (cell) {
+      cell.s = { font: { bold: true }, fill: { fgColor: { rgb: 'E2D8C4' } } };
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'My Ascents');
+
+  // Add a "Hill Lists" reference sheet
+  const listsData = [
+    ['List', 'Count', 'Description'],
+    ['Munros',     282,  'Scottish mountains over 3,000ft'],
+    ['Corbetts',   222,  'Scottish mountains 2,500-3,000ft'],
+    ['Grahams',    231,  'Scottish mountains 2,000-2,500ft'],
+    ['Donalds',    89,   'Southern Upland hills over 2,000ft'],
+    ['Wainwrights',214,  'Lake District fells'],
+    ['Marilyns',   2009, 'UK hills with 150m+ prominence'],
+  ];
+  const wsLists = XLSX.utils.aoa_to_sheet(listsData);
+  wsLists['!cols'] = [{ wch: 15 }, { wch: 8 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, wsLists, 'Hill Lists Reference');
+
+  XLSX.writeFile(wb, 'summit-import-template.xlsx');
+  toast('Template downloaded — fill in your ascents and upload');
+}
+
+// Handle file upload
+let importPreviewData = [];
+
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (!window.XLSX) {
+    toast('Excel library still loading — try again in a moment');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb   = XLSX.read(data, { type: 'array', cellDates: true });
+
+      // Use first sheet
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      if (rows.length < 2) {
+        toast('File appears empty — check you filled in the template');
+        return;
+      }
+
+      parseAndPreviewImport(rows);
+    } catch (err) {
+      console.error('Parse error:', err);
+      toast('Could not read file — make sure it\'s a valid .xlsx or .csv');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+
+  // Reset input so same file can be re-uploaded
+  input.value = '';
+}
+
+function parseAndPreviewImport(rows) {
+  // Find header row — look for a row containing "Hill Name" or "Name"
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(rows.length, 5); i++) {
+    const row = rows[i].map(c => String(c).toLowerCase());
+    if (row.some(c => c.includes('hill') || c.includes('name') || c.includes('mountain'))) {
+      headerIdx = i;
+      break;
+    }
+  }
+
+  const headers = rows[headerIdx].map(h => String(h).toLowerCase().trim());
+
+  // Find column indices flexibly
+  const colIdx = {
+    name:       headers.findIndex(h => h.includes('hill') || h.includes('name') || h.includes('mountain')),
+    date:       headers.findIndex(h => h.includes('date')),
+    companions: headers.findIndex(h => h.includes('companion') || h.includes('with') || h.includes('who')),
+    conditions: headers.findIndex(h => h.includes('condition') || h.includes('weather')),
+    notes:      headers.findIndex(h => h.includes('note') || h.includes('comment') || h.includes('memo')),
+  };
+
+  if (colIdx.name === -1) {
+    toast('Could not find a "Hill Name" column — please use the template');
+    return;
+  }
+
+  // Parse data rows
+  const dataRows = rows.slice(headerIdx + 1).filter(row => row[colIdx.name]?.toString().trim());
+
+  importPreviewData = dataRows.map(row => {
+    const rawName = String(row[colIdx.name] || '').trim();
+    const rawDate = colIdx.date >= 0 ? row[colIdx.date] : '';
+
+    // Parse date — handles Date objects, YYYY-MM-DD strings, DD/MM/YYYY, etc.
+    let dateStr = '';
+    if (rawDate) {
+      if (rawDate instanceof Date) {
+        dateStr = rawDate.toISOString().split('T')[0];
+      } else {
+        const s = String(rawDate).trim();
+        // Try YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) dateStr = s;
+        // Try DD/MM/YYYY
+        else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+          const [d, m, y] = s.split('/');
+          dateStr = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        }
+        // Try DD-MM-YYYY
+        else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
+          const [d, m, y] = s.split('-');
+          dateStr = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        }
+      }
+    }
+
+    // Fuzzy match against HILLS — try exact first, then case-insensitive, then partial
+    const nameLower = rawName.toLowerCase();
+    let matched = HILLS.find(h => h.name.toLowerCase() === nameLower)
+               || HILLS.find(h => h.name.toLowerCase().includes(nameLower))
+               || HILLS.find(h => nameLower.includes(h.name.toLowerCase()));
+
+    return {
+      rawName,
+      dateStr,
+      companions: colIdx.companions >= 0 ? String(row[colIdx.companions] || '').trim() : '',
+      conditions: colIdx.conditions >= 0 ? String(row[colIdx.conditions] || '').trim() : '',
+      notes:      colIdx.notes     >= 0 ? String(row[colIdx.notes]      || '').trim() : '',
+      matched,
+      skip: false,
+    };
+  });
+
+  showImportPreview();
+}
+
+function showImportPreview() {
+  const matched   = importPreviewData.filter(r => r.matched);
+  const unmatched = importPreviewData.filter(r => !r.matched);
+  const existing  = matched.filter(r => {
+    const key = `${r.matched.id}_${r.dateStr}`;
+    const deletedKeys = getDeletedKeys();
+    return ASCENTS.some(a => a.hill_id === r.matched.id && a.date === r.dateStr && !a.deleted_at)
+        && !deletedKeys.has(key);
+  });
+
+  // Summary bar
+  document.getElementById('import-summary').innerHTML = `
+    <span style="color:var(--forest);font-weight:500">✓ ${matched.length} matched</span>
+    ${unmatched.length > 0 ? `<span style="color:var(--earth)">⚠ ${unmatched.length} not found</span>` : ''}
+    ${existing.length > 0  ? `<span style="color:var(--muted)">↩ ${existing.length} already logged</span>` : ''}
+    <span style="color:var(--light-muted)">${importPreviewData.length} rows total</span>
+  `;
+
+  document.getElementById('import-modal-sub').textContent =
+    `${matched.length} ascents ready to import — review below`;
+
+  // Update confirm button
+  const btn = document.getElementById('import-confirm-btn');
+  btn.textContent = `Import ${matched.length} ascent${matched.length !== 1 ? 's' : ''}`;
+  btn.disabled = matched.length === 0;
+
+  // Results list
+  const results = document.getElementById('import-results');
+  results.innerHTML = importPreviewData.map((r, i) => {
+    if (r.matched) {
+      const lists = r.matched.lists.map(l => LIST_META[l]?.name || l).join(', ');
+      return `<div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.8rem 1rem;border-bottom:1px solid var(--border-lt);${i===0?'':''}">
+        <div style="width:18px;height:18px;border-radius:50%;background:var(--bagged-bg);border:1px solid rgba(45,90,61,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:0.7rem;color:var(--forest)">✓</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.875rem;font-weight:500;color:var(--text)">${r.matched.name}</div>
+          <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.15rem">${r.matched.height}m · ${lists}</div>
+          ${r.dateStr ? `<div style="font-size:0.72rem;color:var(--forest);margin-top:0.15rem">${formatDateForDisplay(r.dateStr)}${r.companions ? ' · with ' + r.companions : ''}</div>` : '<div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.15rem">No date</div>'}
+          ${r.notes ? `<div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:0.15rem">"${r.notes.substring(0,80)}${r.notes.length>80?'…':''}"</div>` : ''}
+        </div>
+        ${r.rawName.toLowerCase() !== r.matched.name.toLowerCase() ? `<div style="font-size:0.68rem;color:var(--light-muted);flex-shrink:0">matched from "${r.rawName}"</div>` : ''}
+      </div>`;
+    } else {
+      return `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;border-bottom:1px solid var(--border-lt);opacity:0.6">
+        <div style="width:18px;height:18px;border-radius:50%;background:var(--paper-mid);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;color:var(--light-muted)">?</div>
+        <div>
+          <div style="font-size:0.875rem;color:var(--muted)">${r.rawName}</div>
+          <div style="font-size:0.72rem;color:var(--light-muted);margin-top:0.1rem">Hill not found in database — will be skipped</div>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  // Open modal
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function formatDateForDisplay(isoDate) {
+  if (!isoDate) return '';
+  try {
+    const d = new Date(isoDate + 'T12:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return isoDate; }
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+  importPreviewData = [];
+}
+
+document.getElementById('import-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeImportModal();
+});
+
+async function confirmImport() {
+  const session = getSession();
+  if (!session?.user_id) { toast('Please reconnect Strava first'); return; }
+
+  const toImport = importPreviewData.filter(r => r.matched);
+  if (!toImport.length) return;
+
+  const btn = document.getElementById('import-confirm-btn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  try {
+    const token = await getValidToken(session);
+
+    const ascents = toImport.map(r => ({
+      hill_id:    r.matched.id,
+      hill_name:  r.matched.name,
+      hill_lists: r.matched.lists,
+      height:     r.matched.height,
+      region:     r.matched.region,
+      date:       r.dateStr || null,
+      source:     'import',
+      companions: r.companions || null,
+      conditions: r.conditions || null,
+      notes:      r.notes      || null,
+    }));
+
+    const res = await fetch(`${WORKER}/api/ascents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ user_id: session.user_id, ascents }),
+    });
+
+    if (!res.ok) throw new Error('Save failed');
+
+    // Update local state
+    for (const r of toImport) {
+      const h = r.matched;
+      const displayDate = r.dateStr
+        ? formatDateForDisplay(r.dateStr)
+        : null;
+
+      h.bagged = true;
+      if (!h.date || (displayDate && displayDate > h.date)) {
+        h.date       = displayDate;
+        h.source     = 'import';
+        h.companions = r.companions || null;
+        h.conditions = r.conditions || null;
+        h.notes      = r.notes      || null;
+      }
+
+      ASCENTS.unshift({
+        id:         'import-' + Date.now() + '-' + h.id,
+        user_id:    session.user_id,
+        hill_id:    h.id,    hill_name:  h.name,
+        hill_lists: h.lists, height:     h.height,
+        region:     h.region,
+        date:       r.dateStr || null,
+        source:     'import',
+        companions: r.companions || null,
+        conditions: r.conditions || null,
+        notes:      r.notes      || null,
+        deleted_at: null,
+      });
+    }
+
+    closeImportModal();
+    updateDashboard(); filterHills(); updateRecentAscents(); renderMap();
+    toast(`✓ ${toImport.length} ascents imported successfully`);
+
+  } catch (err) {
+    console.error('Import failed:', err);
+    btn.textContent = 'Import matched ascents'; btn.disabled = false;
+    toast('Import failed — please try again');
+  }
 }
 
 // ── CONSTANTS ──
