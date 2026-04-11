@@ -89,10 +89,10 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 
 /* Hero */
 .hero{
-  min-height:100vh;display:flex;align-items:center;
-  padding:8rem 5% 5rem;position:relative;z-index:1;
+  min-height:92vh;display:flex;align-items:center;
+  padding:6rem 5% 3.5rem;position:relative;z-index:1;
 }
-.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
 .hero-kicker{
   display:inline-flex;align-items:center;gap:0.5rem;
   border:1px solid var(--contour);color:var(--earth);
@@ -168,25 +168,25 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .strip-label{font-size:0.68rem;color:var(--light-muted);margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.05em}
 
 /* Features */
-.features-section{padding:6rem 5%;background:var(--paper)}
+.features-section{padding:3rem 5%;background:var(--paper)}
 .section-label{font-size:0.72rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--earth);margin-bottom:0.8rem}
 .section-h{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--text);letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
 .section-sub{font-size:1rem;color:var(--muted);line-height:1.75;font-weight:300;max-width:500px}
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:3rem}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem;margin-top:0}
 .feat-card{
   background:var(--canvas);border:1px solid var(--border);
-  border-radius:6px;padding:1.8rem;
+  border-radius:6px;padding:1.2rem;
   transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;
 }
 .feat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--contour)}
 .feat-icon{
-  width:40px;height:40px;border-radius:6px;
+  width:32px;height:32px;border-radius:5px;
   background:var(--bagged-bg);border:1px solid rgba(45,90,61,0.15);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;margin-bottom:1rem;
+  font-size:0.95rem;margin-bottom:0.75rem;
 }
-.feat-title{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.5rem}
-.feat-text{font-size:0.85rem;color:var(--muted);line-height:1.7;font-weight:300}
+.feat-title{font-family:'Libre Baskerville',serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.35rem}
+.feat-text{font-size:0.78rem;color:var(--muted);line-height:1.65;font-weight:300}
 
 /* Lists section */
 .lists-section{padding:5rem 5%;background:var(--paper-mid)}
@@ -713,21 +713,24 @@ textarea.form-input{resize:vertical;min-height:80px}
       </svg>
       <span class="logo-type">Summit</span>
     </a>
-    <button class="nav-cta" onclick="connectStrava()">Get Started</button>
+    <div style="display:flex;align-items:center;gap:1.2rem">
+      <a href="#pricing" style="font-size:0.85rem;color:var(--muted);text-decoration:none;font-weight:500">Pricing</a>
+      <button class="nav-cta" onclick="connectStrava()">Get Started Free</button>
+    </div>
   </nav>
 
   <section class="hero">
     <div class="hero-inner">
       <div>
-        <div class="hero-kicker">⛰ Scotland's hills, mapped</div>
+        <div class="hero-kicker">⛰ 2,548 UK hills tracked</div>
         <h1 class="hero-h1">Every summit.<br><em>Finally logged.</em></h1>
-        <p class="hero-sub">Connect Strava and Summit automatically detects every Munro, Corbett and Graham you've ever climbed — from your full GPS history. No manual entry.</p>
+        <p class="hero-sub">Connect Strava and Summit automatically finds every Munro, Corbett, Wainwright and Marilyn in your GPS history. Free for Munros. Premium unlocks everything.</p>
         <div class="hero-actions">
           <button class="strava-btn" onclick="connectStrava()">
             <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
             Connect with Strava — it's free
           </button>
-          <span class="hero-note">No credit card · Import full history · Works with existing Strava account</span>
+          <span class="hero-note">Free forever for Munros · No credit card · Full Strava history import</span>
         </div>
       </div>
 
@@ -771,69 +774,56 @@ textarea.form-input{resize:vertical;min-height:80px}
     </div>
   </section>
 
-  <section class="features-section">
+  <!-- FEATURES — compact, honest about what's built -->
+  <section class="features-section" style="padding:3.5rem 5%">
     <div style="max-width:1100px;margin:0 auto">
-      <p class="section-label">Why Summit</p>
-      <h2 class="section-h">Everything asked for.<br>Nothing missing.</h2>
-      <p class="section-sub">Every feature Munro Bagger users requested — notes, companions, multiple rounds, area search — and automatic Strava detection nobody else has built.</p>
-      <div class="feat-grid">
-        <div class="feat-card">
-          <div class="feat-icon">⚡</div>
-          <h3 class="feat-title">Strava Auto-Detection</h3>
-          <p class="feat-text">Connect once. Summit scans every GPS track you've ever recorded and automatically marks each summit you passed within 100m. Five years of hillwalking, populated in seconds.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">📝</div>
-          <h3 class="feat-title">Rich Ascent Logs</h3>
-          <p class="feat-text">Notes, companions, conditions, photos — per ascent, not per hill. Log your second round separately. Every detail of every day in the hills, preserved properly.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">🔍</div>
-          <h3 class="feat-title">Search by Area</h3>
-          <p class="feat-text">Filter by region, height, remoteness, season, or stalking closure. Find every Munro in Torridon, or every hill you climbed in winter. Not just by name.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
-          <h3 class="feat-title">Gaelic Pronunciations</h3>
-          <p class="feat-text">Every hill name with correct Gaelic pronunciation — IPA notation and a phonetic guide. Know how to say "A' Bhuidheanach Bheag" before someone asks at the compleation dinner.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">👥</div>
-          <h3 class="feat-title">Live Conditions</h3>
-          <p class="feat-text">Community conditions reports — snow cover, path state, river crossings, midges. Real intelligence from people on the hill today, not last summer.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">⬇</div>
-          <h3 class="feat-title">Export Anywhere</h3>
-          <p class="feat-text">Download your full log as CSV or in formats compatible with hill-bagging.co.uk and Hill Lists. Your data stays yours.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+      <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:0">
 
-  <section class="lists-section">
-    <div style="max-width:1100px;margin:0 auto">
-      <p class="section-label">Included lists</p>
-      <h2 class="section-h">Munros to Marilyns.</h2>
-      <p class="section-sub">Free for Munros. Premium unlocks every list — one app for a lifetime of bagging.</p>
-      <div class="lists-grid">
-        <div class="list-card"><div class="list-count">282</div><div class="list-name">Munros</div><div class="list-desc">Scotland's 3000ft peaks · Free</div></div>
-        <div class="list-card"><div class="list-count">222</div><div class="list-name">Corbetts</div><div class="list-desc">2500–3000ft Scottish hills</div></div>
-        <div class="list-card"><div class="list-count">221</div><div class="list-name">Grahams</div><div class="list-desc">2000–2500ft Scottish hills</div></div>
-        <div class="list-card"><div class="list-count">89</div><div class="list-name">Donalds</div><div class="list-desc">Southern Upland 2000ft hills</div></div>
-        <div class="list-card"><div class="list-count">226</div><div class="list-name">Munro Tops</div><div class="list-desc">All subsidiary tops</div></div>
-        <div class="list-card"><div class="list-count">214</div><div class="list-name">Wainwrights</div><div class="list-desc">Lake District fells</div></div>
-        <div class="list-card"><div class="list-count">1,556</div><div class="list-name">Marilyns</div><div class="list-desc">UK prominent summits</div></div>
-        <div class="list-card"><div class="list-count">15</div><div class="list-name">Welsh 3000s</div><div class="list-desc">Wales's highest peaks</div></div>
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⚡</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Auto-detects from Strava</h3>
+          <p class="feat-text" style="font-size:0.8rem">Scans your full GPS history. Every summit you passed within 150m — automatically logged. No manual entry for past walks.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📝</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Notes & companions per ascent</h3>
+          <p class="feat-text" style="font-size:0.8rem">Log conditions, who you were with, and how it felt. Multiple ascents of the same hill tracked separately — your second round is a different day.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🗺</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Interactive topo map</h3>
+          <p class="feat-text" style="font-size:0.8rem">Your bagged hills on a real topographic map. Zoom in to see contours and footpaths. Filter by list, region, or completion status.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📥</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Import from spreadsheet</h3>
+          <p class="feat-text" style="font-size:0.8rem">Already tracking hills in Excel? Download our template, fill it in, upload it back. Years of data imported in minutes.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📊</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Stats that mean something</h3>
+          <p class="feat-text" style="font-size:0.8rem">Total elevation, highest summit, this month's count, progress across every list. Your logbook does the maths.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⬇</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Export anywhere</h3>
+          <p class="feat-text" style="font-size:0.8rem">Download as CSV or in hill-bagging.co.uk format. Your data is yours — always exportable, never locked in.</p>
+        </div>
+
       </div>
     </div>
   </section>
 
   <!-- PRICING SECTION -->
-  <section style="padding:5rem 5% 2rem;background:var(--canvas)">
+  <section id="pricing" style="padding:3.5rem 5% 2.5rem;background:var(--canvas)">
     <div style="max-width:900px;margin:0 auto">
-      <h2 class="section-h" style="text-align:center">Simple, honest pricing</h2>
-      <p style="text-align:center;color:var(--muted);font-size:1rem;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock every hill in Britain.</p>
+      <h2 class="section-h" style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem)">Simple, honest pricing</h2>
+      <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:2rem;max-width:440px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock every hill in Britain.</p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
 
