@@ -1766,40 +1766,53 @@ function updateSettingsPage() {
 }
 
 // ── DELETE ASCENT ──
-function getDeletedIds() {
-  try { return new Set(JSON.parse(localStorage.getItem('summit_deleted') || '[]')); }
+// Cache deleted ascents by hillId_date — immune to UUID vs fake-ID mismatches
+function getDeletedKeys() {
+  try { return new Set(JSON.parse(localStorage.getItem('summit_deleted_v2') || '[]')); }
   catch { return new Set(); }
 }
-function addDeletedId(id) {
-  const ids = getDeletedIds();
-  ids.add(id);
-  localStorage.setItem('summit_deleted', JSON.stringify([...ids]));
+function addDeletedKey(hillId, date) {
+  const keys = getDeletedKeys();
+  keys.add(`${hillId}_${date}`);
+  localStorage.setItem('summit_deleted_v2', JSON.stringify([...keys]));
 }
 
 async function deleteAscent(ascentId, hillId) {
   if (!confirm('Delete this ascent?')) return;
 
-  // Immediately cache the ID locally — survives refresh even if Supabase PATCH fails
-  addDeletedId(ascentId);
+  // Find the ascent to get its date
+  const ascent = ASCENTS.find(a => a.id === ascentId);
+  const date = ascent?.date || '';
+
+  // Cache hillId+date — works even if Supabase fails or IDs mismatch
+  addDeletedKey(hillId, date);
 
   // Mark locally
   const idx = ASCENTS.findIndex(a => a.id === ascentId);
   if (idx > -1) ASCENTS[idx].deleted_at = new Date().toISOString();
 
-  // Try Supabase soft delete
+  // Try Supabase soft delete (best effort)
   const session = getSession();
   if (session?.user_id) {
     try {
       const token = await getValidToken(session);
-      const res = await fetch(`${WORKER}/api/ascents/${ascentId}`, {
+      // Try by ID first, then fall back to hill_id+date
+      const res = await fetch(`${WORKER}/api/ascents/${encodeURIComponent(ascentId)}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) console.warn('Soft delete failed on server — using local cache');
+      if (!res.ok) {
+        // Fallback: delete by hill_id and date
+        await fetch(`${WORKER}/api/ascents/by-hill`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ user_id: session.user_id, hill_id: hillId, date }),
+        });
+      }
     } catch (e) { console.warn('Delete request failed — using local cache', e); }
   }
 
-  // Update hills based on remaining ascents
+  // Update hills
   const remaining = ASCENTS.filter(a => a.hill_id === hillId && !a.deleted_at);
   const hill = HILLS.find(h => h.id === hillId);
   if (hill) {
@@ -1955,9 +1968,11 @@ async function loadAscents(session) {
     const ascents = await res.json();
     if (!Array.isArray(ascents)) return 0;
 
-    // Filter: remove server-deleted AND locally-cached deleted IDs
-    const deletedIds = getDeletedIds();
-    ASCENTS = ascents.filter(a => !a.deleted_at && !deletedIds.has(a.id));
+    // Filter: remove server-deleted AND locally-cached deleted (hillId_date) keys
+    const deletedKeys = getDeletedKeys();
+    ASCENTS = ascents.filter(a =>
+      !a.deleted_at && !deletedKeys.has(`${a.hill_id}_${a.date}`)
+    );
 
     // Apply to HILLS — use most recent non-deleted ascent per hill
     const byHill = {};
