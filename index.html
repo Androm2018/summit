@@ -1208,7 +1208,16 @@ textarea.form-input{resize:vertical;min-height:80px}
         <div class="content-area">
           <div class="profile-grid">
 
-            <!-- Identity card -->
+            <!-- Upgrade banner — shown for free users only -->
+            <div id="profile-upgrade-banner" class="card" style="background:linear-gradient(135deg,rgba(45,90,61,0.06),rgba(45,90,61,0.02));border:1.5px solid rgba(45,90,61,0.2)">
+              <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:0.95rem;font-weight:600;color:var(--forest);margin-bottom:0.3rem">⛰ Upgrade to Summit Premium</div>
+                  <div style="font-size:0.82rem;color:var(--muted)">Unlock Corbetts, Grahams, Wainwrights, Marilyns and full Strava history. From £3/month.</div>
+                </div>
+                <button class="btn-forest" onclick="openPricingModal('profile')" style="white-space:nowrap;flex-shrink:0">View plans</button>
+              </div>
+            </div>
             <div class="profile-top">
               <div class="avatar-lg" id="profile-avatar-lg">—</div>
               <div style="flex:1">
@@ -1294,7 +1303,16 @@ textarea.form-input{resize:vertical;min-height:80px}
         </div>
         <div class="content-area" style="max-width:600px">
 
-          <div class="card" style="margin-bottom:1.2rem">
+          <!-- Upgrade banner for free users -->
+          <div id="settings-upgrade-banner" class="card" style="margin-bottom:1.2rem;background:linear-gradient(135deg,rgba(45,90,61,0.06),rgba(45,90,61,0.02));border:1.5px solid rgba(45,90,61,0.2)">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+              <div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--forest);margin-bottom:0.25rem">⛰ Unlock all 8 lists</div>
+                <div style="font-size:0.78rem;color:var(--muted)">Corbetts, Grahams, Wainwrights, Marilyns & more · from £3/month</div>
+              </div>
+              <button class="btn-forest" onclick="openPricingModal('settings')" style="white-space:nowrap;flex-shrink:0;font-size:0.82rem;padding:0.5rem 1rem">Upgrade</button>
+            </div>
+          </div>
             <div class="card-header"><span class="card-title">Lists I'm Tracking</span></div>
             <div class="card-body" style="padding:0">
               <div id="settings-lists"></div>
@@ -1704,11 +1722,21 @@ function renderMap() {
   if (!mapEl) return;
 
   if (!leafletMap) {
+    const isMobile = window.innerWidth <= 900 || 'ontouchstart' in window;
+
     leafletMap = L.map('summit-map', {
-      center: [57.0, -4.5],
-      zoom: 6,
-      zoomControl: true,
+      center:          [57.0, -4.5],
+      zoom:            6,
+      zoomControl:     !isMobile,  // hide default zoom on mobile (use pinch)
+      scrollWheelZoom: !isMobile,  // scroll wheel on desktop only
+      tap:             false,       // fixes iOS double-tap issues
+      tapTolerance:    15,
     });
+
+    // On mobile, add zoom control bottom-right so it doesn't overlap
+    if (isMobile) {
+      L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
+    }
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
@@ -1717,7 +1745,7 @@ function renderMap() {
 
     mapMarkerLayer = L.layerGroup().addTo(leafletMap);
 
-    // Re-render markers when zoom changes (show more detail when zoomed in)
+    // Re-render markers when zoom changes
     leafletMap.on('zoomend', () => refreshMapMarkers());
   }
 
@@ -2120,6 +2148,11 @@ function toast(msg) {
 function updateProfilePage() {
   const session = getSession();
   if (!session) return;
+
+  // Show/hide upgrade banner
+  const banner = document.getElementById('profile-upgrade-banner');
+  if (banner) banner.style.display = session.premium ? 'none' : '';
+
   const parts = session.name.split(' ');
   const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
   const avatarEl = document.getElementById('profile-avatar-lg');
@@ -2165,6 +2198,11 @@ function updateProfilePage() {
 // ── SETTINGS PAGE ──
 function updateSettingsPage() {
   const settings = getSettings();
+
+  // Show/hide upgrade banner
+  const banner = document.getElementById('settings-upgrade-banner');
+  if (banner) banner.style.display = isPremium() ? 'none' : '';
+
   const radiusSel = document.getElementById('settings-radius');
   if (radiusSel) radiusSel.value = settings.detectionRadius;
   const runsToggle = document.getElementById('settings-include-runs');
