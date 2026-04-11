@@ -1472,7 +1472,7 @@ textarea.form-input{resize:vertical;min-height:80px}
             <!-- Global leaderboard -->
             <div class="card">
               <div class="card-header">
-                <span class="card-title">🏆 Munro Rankings</span>
+                <span class="card-title">🏆 UK Hills Rankings</span>
                 <span style="font-size:0.75rem;color:var(--light-muted)">Public profiles only</span>
               </div>
               <div id="leaderboard-list" style="padding:0">
@@ -3487,34 +3487,33 @@ function renderLeaderboard() {
     return;
   }
 
-  const session   = getSession();
-  const myId      = session?.user_id;
-  const medals    = ['🥇','🥈','🥉'];
+  const session = getSession();
+  const myId    = session?.user_id;
+  const medals  = ['🥇','🥈','🥉'];
 
   container.innerHTML = leaderboardData.map((u, i) => {
     const rank     = i + 1;
     const isYou    = u.id === myId;
     const initials = u.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2);
     const rankStr  = rank <= 3 ? medals[rank-1] : `${rank}`;
-    const isTop3   = rank <= 3;
 
     return `<div class="lb-row" ${isYou ? 'style="background:rgba(139,69,19,0.04)"' : ''}>
-      <div class="lb-rank ${isTop3 ? 'top3' : ''}">${rankStr}</div>
+      <div class="lb-rank ${rank <= 3 ? 'top3' : ''}">${rankStr}</div>
       <div class="lb-avatar ${isYou ? 'is-you' : ''}">${initials}</div>
       <div class="lb-name">
         ${u.name}
         ${isYou ? '<span class="lb-you-tag">You</span>' : ''}
       </div>
-      <div>
-        <div class="lb-count">${u.munro_count}</div>
-        <div class="lb-count-label">Munros</div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="lb-count">${u.total_count}</div>
+        <div class="lb-count-label">hills</div>
+        ${u.munro_count > 0 ? `<div class="lb-count-label" style="color:var(--forest)">${u.munro_count} Munros</div>` : ''}
       </div>
     </div>`;
   }).join('');
 
-  // Update sub with user count
   const subEl = document.getElementById('leaderboard-sub');
-  if (subEl) subEl.textContent = `${leaderboardData.length} hillwalkers ranked`;
+  if (subEl) subEl.textContent = `${leaderboardData.length} hillwalkers ranked · all UK hills`;
 }
 
 async function loadFollowing() {
