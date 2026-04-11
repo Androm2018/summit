@@ -708,7 +708,7 @@ body{overflow-x:hidden}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{
   background:var(--canvas);border:1px solid var(--border);
-  border-radius:8px;padding:1.8rem;width:90%;max-width:460px;
+  border-radius:8px;padding:1.8rem;width:min(90%,460px);max-width:calc(100vw - 2rem);
   box-shadow:var(--shadow-lg);
   transform:translateY(16px);transition:transform 0.2s;
 }
@@ -789,25 +789,22 @@ textarea.form-input{resize:vertical;min-height:80px}
 }
 
 @media(max-width:480px){
-  /* Feature cards — single column on small phones */
   .feat-grid{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr 1fr}
   .hero h1{font-size:2rem}
-
-  /* Landing pricing — single column on small phones */
   .landing-pricing-grid{grid-template-columns:1fr !important}
-
-  /* Pricing modal plan cards stack */
   .pricing-grid-mobile{grid-template-columns:1fr !important}
   .plan-card{margin-bottom:0.4rem}
-
-  /* Stat cards 1 column on very small screens */
-  .stats-row{grid-template-columns:1fr}
-
-  /* Tighten modal on small phones */
+  .stat-value{font-size:1.6rem}
+  .stat-card{padding:0.9rem}
+  .munro-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .page-header{flex-direction:column;align-items:flex-start;gap:0.6rem}
+  .page-header .btn-forest{align-self:flex-start;font-size:0.82rem;padding:0.5rem 0.9rem}
   .modal{padding:1.2rem;margin:0.5rem}
   .modal-overlay{align-items:flex-end}
   .modal{border-radius:12px 12px 0 0;max-height:92vh;overflow-y:auto}
+  #page-leaderboard .dash-grid{grid-template-columns:1fr !important}
+  .hill-meta-col{display:none}
 }
 </style>
 </head>
@@ -1160,7 +1157,7 @@ textarea.form-input{resize:vertical;min-height:80px}
                 <span class="card-title">My Hills — Interactive Map</span>
                 <button class="card-link" onclick="showPage('list')">View full list →</button>
               </div>
-              <div id="summit-map" style="height:420px;width:100%;"></div>
+              <div id="summit-map" style="height:min(420px,55vw);min-height:240px;width:100%;"></div>
               <div class="map-legend" id="map-legend">
                 <span><span class="legend-swatch b"></span>Bagged (0)</span>
                 <span><span class="legend-swatch u"></span>Remaining</span>
@@ -1557,7 +1554,7 @@ textarea.form-input{resize:vertical;min-height:80px}
 
 <!-- PRICING MODAL -->
 <div class="modal-overlay" id="pricing-modal">
-  <div class="modal" style="max-width:520px">
+  <div class="modal" style="max-width:min(520px,calc(100vw - 2rem))">
     <div style="text-align:center;padding:0.5rem 0 1.5rem">
       <div style="font-size:1.8rem;margin-bottom:0.5rem">⛰</div>
       <div class="modal-title" id="pricing-modal-title">Unlock all lists with Summit Premium</div>
@@ -1628,7 +1625,7 @@ textarea.form-input{resize:vertical;min-height:80px}
 
 <!-- IMPORT PREVIEW MODAL -->
 <div class="modal-overlay" id="import-modal">
-  <div class="modal" style="max-width:600px;max-height:85vh;display:flex;flex-direction:column">
+  <div class="modal" style="max-width:min(600px,calc(100vw - 2rem));max-height:85vh;display:flex;flex-direction:column">
     <div class="modal-title">Import Ascents</div>
     <div class="modal-sub" id="import-modal-sub">Review before importing</div>
     <div id="import-summary" style="display:flex;gap:1rem;padding:0.75rem 1rem;background:var(--paper-mid);border-radius:4px;margin-bottom:1rem;font-size:0.82rem;flex-wrap:wrap"></div>
@@ -3325,10 +3322,10 @@ const BADGES = [
   },
   {
     id:    'welsh_3000s',
-    name:  'Welsh 3000s',
-    desc:  'The seven peaks over 3,000ft in Wales',
+    name:  'Welsh High Peaks',
+    desc:  'Snowdon, Carnedd Llewelyn, Glyder Fawr, Y Garn, Elidir Fawr & Tryfan',
     icon:  '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
-    hills: [1963, 1965, 1967, 1972, 1975, 1977, 2083],
+    hills: [1963, 1965, 1967, 1972, 1975, 1977],
   },
   {
     id:    'munro_10',
