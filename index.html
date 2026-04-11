@@ -51,7 +51,8 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .logo-mark{display:inline-block;vertical-align:middle}
 
 /* ═══════════════ LANDING ═══════════════ */
-#landing{background:var(--canvas);overflow:hidden}
+#landing{background:var(--canvas);overflow-x:hidden}
+body{overflow-x:hidden}
 
 /* Subtle topo-line background texture */
 #landing::before{
@@ -722,15 +723,33 @@ textarea.form-input{resize:vertical;min-height:80px}
   .content-area{padding:1rem}
   .card{border-radius:6px}
 
-  /* Pricing page on mobile */
+  /* Landing pricing section — stack to single column */
+  .landing-pricing-grid{grid-template-columns:1fr !important}
   .pricing-grid-mobile{grid-template-columns:1fr !important}
+  .plan-card{padding:0.9rem 0.75rem}
+  .plan-price{font-size:1.4rem}
 }
 
 @media(max-width:480px){
-  .stats-row{grid-template-columns:1fr 1fr}
+  /* Feature cards — single column on small phones */
   .feat-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
   .hero h1{font-size:2rem}
-  .plan-card{padding:0.9rem 0.6rem}
+
+  /* Landing pricing — single column on small phones */
+  .landing-pricing-grid{grid-template-columns:1fr !important}
+
+  /* Pricing modal plan cards stack */
+  .pricing-grid-mobile{grid-template-columns:1fr !important}
+  .plan-card{margin-bottom:0.4rem}
+
+  /* Stat cards 1 column on very small screens */
+  .stats-row{grid-template-columns:1fr}
+
+  /* Tighten modal on small phones */
+  .modal{padding:1.2rem;margin:0.5rem}
+  .modal-overlay{align-items:flex-end}
+  .modal{border-radius:12px 12px 0 0;max-height:92vh;overflow-y:auto}
 }
 </style>
 </head>
@@ -865,7 +884,7 @@ textarea.form-input{resize:vertical;min-height:80px}
       <h2 class="section-h" style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem)">Simple, honest pricing</h2>
       <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:2rem;max-width:440px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock every hill in Britain.</p>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
+      <div class="landing-pricing-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
 
         <!-- Free -->
         <div style="background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:2rem 1.5rem">
