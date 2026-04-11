@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Contact & Support — Summit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f4eddf;--canvas:#faf6ee;--forest:#2d5a3d;--text:#1a1916;
+  --muted:#7a7060;--border:#d6cbb8;--earth:#8b4513;--light-muted:#b0a898;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.7}
+nav{background:var(--canvas);border-bottom:1px solid var(--border);padding:1rem 5%;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;color:var(--forest);text-decoration:none;display:flex;align-items:center;gap:0.5rem}
+.back{font-size:0.85rem;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--forest)}
+main{max-width:800px;margin:0 auto;padding:3rem 5% 5rem}
+h1{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;margin-bottom:0.5rem}
+.sub{font-size:0.95rem;color:var(--muted);margin-bottom:3rem}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:3rem}
+.contact-card{
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:8px;padding:1.5rem;
+}
+.contact-card-icon{font-size:1.8rem;margin-bottom:0.75rem}
+.contact-card h2{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.contact-card p{font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:0.75rem}
+.contact-card a{color:var(--forest);font-weight:500;text-decoration:none}
+.contact-card a:hover{text-decoration:underline}
+.faq-section h2{font-family:'Libre Baskerville',serif;font-size:1.3rem;font-weight:700;margin-bottom:1.5rem}
+.faq{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:0.75rem}
+.faq-q{
+  padding:1rem 1.2rem;font-size:0.9rem;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--canvas);user-select:none;
+}
+.faq-q:hover{background:var(--paper)}
+.faq-q::after{content:'▾';color:var(--muted);font-size:0.8rem;transition:transform 0.2s}
+.faq.open .faq-q::after{transform:rotate(180deg)}
+.faq-a{
+  display:none;padding:0 1.2rem 1rem;
+  font-size:0.85rem;color:var(--muted);line-height:1.75;
+  border-top:1px solid var(--border);background:var(--canvas);
+}
+.faq.open .faq-a{display:block}
+a{color:var(--forest)}
+@media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
+</svg>
+    Summit
+  </a>
+  <a href="/" class="back">← Back to Summit</a>
+</nav>
+
+<main>
+  <h1>Contact & Support</h1>
+  <p class="sub">Got a question, found a bug, or just want to say hello? We're a small team and we read every message.</p>
+
+  <div class="contact-grid">
+    <div class="contact-card">
+      <div class="contact-card-icon">✉️</div>
+      <h2>General Enquiries</h2>
+      <p>Questions about the app, your account, or anything else — drop us an email and we'll get back to you within 2 working days.</p>
+      <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-card-icon">🐛</div>
+      <h2>Report a Bug</h2>
+      <p>Something not working? Tell us what happened, what you expected, and what device/browser you're using. Screenshots help enormously.</p>
+      <a href="mailto:bugs@summitapp.uk">bugs@summitapp.uk</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-card-icon">💳</div>
+      <h2>Billing & Subscriptions</h2>
+      <p>Issues with a payment, need to cancel, or want to upgrade? We'll sort it out quickly. Include your Strava display name if possible.</p>
+      <a href="mailto:billing@summitapp.uk">billing@summitapp.uk</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-card-icon">🤝</div>
+      <h2>Partnerships & Press</h2>
+      <p>Interested in working with us — sponsorship, hill lists data, club partnerships, or press enquiries? We'd love to hear from you.</p>
+      <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>
+    </div>
+  </div>
+
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">Why didn't Summit detect my ascent from Strava?</div>
+      <div class="faq-a">Summit detects summits by checking whether any GPS point in your Strava activity passes within the detection radius (default 150m) of a known summit coordinate. If your GPS track didn't pass close enough to the precise summit, or if the activity was recorded with low GPS accuracy, it may be missed. You can increase the detection radius in Settings, or log the ascent manually by clicking "Log Ascent" and searching for the hill name. You can also re-run a full Strava scan from the dashboard.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I cancel my subscription?</div>
+      <div class="faq-a">You can cancel at any time by emailing <a href="mailto:billing@summitapp.uk">billing@summitapp.uk</a>. Your premium access continues until the end of your current billing period. We don't pro-rate cancellations but we do honour our 14-day money-back guarantee — if you cancel within 14 days of subscribing, email us and we'll refund you in full, no questions asked.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">What hill lists does Summit include?</div>
+      <div class="faq-a">Summit tracks all hills from the <a href="https://www.hills.database.co.uk" target="_blank">Database of British and Irish Hills (DoBIH)</a>, covering Munros (282), Corbetts (222), Grahams (231), Donalds (89), Wainwrights (214), Marilyns (2,009), Munro Tops (226), and the Welsh 3000s. Munros are available on the free plan. All other lists require Premium.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">My Strava activities are private — will Summit still work?</div>
+      <div class="faq-a">Yes. Summit requests read access to your activities via Strava's OAuth system, which grants access regardless of privacy settings on individual activities. Your data is only ever used to detect summits — we never share your GPS tracks or activity data with anyone.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I import hills I logged before getting Strava?</div>
+      <div class="faq-a">Yes — use the Excel import feature on the Profile page. Download the template, fill in your hills with dates and any notes, and upload it back. Summit will fuzzy-match the hill names against the full database and show you a preview before importing anything. Works with .xlsx and .csv files.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">Is my data safe? What happens if I delete my account?</div>
+      <div class="faq-a">Your ascent data is stored securely in our database (Supabase, hosted in the EU). We never sell your data. You can export everything at any time as CSV from the Profile page. If you delete your account, all your personal data is permanently deleted within 30 days. See our <a href="/privacy.html">Privacy Policy</a> for full details.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">How does Summit use my Strava data?</div>
+      <div class="faq-a">We request read-only access to your Strava activities. We use the GPS coordinates from your hiking, walking, and trail running activities to detect which hill summits you passed near. We store your name and Strava athlete ID to keep you logged in. We never post to Strava on your behalf, never read your personal profile beyond basic identity, and never share your data with third parties. See our <a href="/privacy.html">Privacy Policy</a> for full details.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">I found a hill that's missing or has the wrong coordinates</div>
+      <div class="faq-a">Summit's hill data comes from the Database of British and Irish Hills (DoBIH), which is maintained by a community of volunteers. If you spot an error, the best place to report it is directly to <a href="https://www.hills.database.co.uk" target="_blank">DoBIH</a> — corrections there will flow into Summit's next data update. For urgent issues, drop us an email at <a href="mailto:hello@summitapp.uk">hello@summitapp.uk</a>.</div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-q" onclick="toggleFaq(this)">Do you have an iOS or Android app?</div>
+      <div class="faq-a">Summit is currently a web app that works on all devices including iPhone and Android — just visit summitapp.uk in your browser and add it to your home screen for an app-like experience. A native iOS app is in development and coming soon.</div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+function toggleFaq(el) {
+  el.closest('.faq').classList.toggle('open');
+}
+</script>
+</body>
+</html>
