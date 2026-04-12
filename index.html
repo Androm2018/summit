@@ -447,6 +447,16 @@ body{overflow-x:hidden}
   vertical-align:middle;
 }
 
+/* Leaderboard tabs */
+.lb-tab{
+  padding:0.6rem 1rem;font-size:0.82rem;font-weight:500;
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all 0.15s;margin-bottom:-1px;
+}
+.lb-tab:hover{color:var(--text)}
+.lb-tab.active{color:var(--forest);border-bottom-color:var(--forest)}
+
 /* Leaderboard */
 .lb-row{
   display:flex;align-items:center;gap:0.85rem;
@@ -1031,7 +1041,7 @@ textarea.form-input{resize:vertical;min-height:80px}
           <strong>We donate 10% of every subscription</strong> — 5% to
           <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:var(--forest)">Scottish Wildlife Trust</a>
           and 5% to
-          <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>.
+          <a href="https://www.scottishmountainrescue.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>.
         </div>
       </div>
 
@@ -1070,7 +1080,7 @@ textarea.form-input{resize:vertical;min-height:80px}
         <div style="font-size:0.78rem;color:var(--light-muted);line-height:1.6">
           Donations are made quarterly. 5% of net revenue to each charity.
           <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:var(--forest)">Scottish Wildlife Trust</a> ·
-          <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>
+          <a href="https://www.scottishmountainrescue.org" target="_blank" style="color:var(--forest)">Mountain Rescue Scotland</a>
         </div>
       </div>
     </div>
@@ -1108,7 +1118,7 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div style="color:white;font-weight:500;margin-bottom:0.6rem">Giving back</div>
           <div style="display:flex;flex-direction:column;gap:0.35rem">
             <a href="https://www.scottishwildlifetrust.org.uk" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Scottish Wildlife Trust</a>
-            <a href="https://www.mountainrescuescotland.org" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Mountain Rescue Scotland</a>
+            <a href="https://www.scottishmountainrescue.org" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none">Mountain Rescue Scotland</a>
           </div>
         </div>
       </div>
@@ -1504,11 +1514,16 @@ textarea.form-input{resize:vertical;min-height:80px}
         <div class="content-area">
           <div style="display:grid;grid-template-columns:1fr 320px;gap:1.5rem" class="dash-grid">
 
-            <!-- Global leaderboard -->
+            <!-- Leaderboard with tabs -->
             <div class="card">
-              <div class="card-header">
+              <div class="card-header" style="padding-bottom:0;border-bottom:none">
                 <span class="card-title">🏆 UK Hills Rankings</span>
                 <span style="font-size:0.75rem;color:var(--light-muted)">Public profiles only</span>
+              </div>
+              <!-- Tabs -->
+              <div style="display:flex;gap:0;padding:0 1.1rem;border-bottom:1px solid var(--border-lt);margin-top:0.75rem">
+                <button class="lb-tab active" id="lb-tab-friends" onclick="switchLeaderboardTab('friends')">Following</button>
+                <button class="lb-tab" id="lb-tab-global" onclick="switchLeaderboardTab('global')">Global Top 50</button>
               </div>
               <div id="leaderboard-list" style="padding:0">
                 <div class="empty-state"><span class="empty-state-icon">🏔</span>Loading rankings…</div>
@@ -1782,7 +1797,7 @@ function showPage(p) {
   if (pg) pg.classList.add('active');
   if (p === 'profile')     updateProfilePage();
   if (p === 'settings')    updateSettingsPage();
-  if (p === 'leaderboard') loadLeaderboard();
+  if (p === 'leaderboard') { leaderboardLoaded = false; loadLeaderboard(); }
 }
 
 function switchList(listCode) {
@@ -3482,8 +3497,18 @@ async function updateDonationTracker() {
   const swtEl = document.getElementById('swt-total');
   const mrsEl = document.getElementById('mrs-total');
   if (!swtEl || !mrsEl) return;
-  // Hardcoded — update manually each quarter after actual donations are made
-  // Once the Worker has a /api/donations endpoint these can be fetched live
+
+  try {
+    const res  = await fetch(`${WORKER}/api/donations`);
+    if (res.ok) {
+      const data = await res.json();
+      const fmt  = n => n > 0 ? `£${n.toFixed(2)}` : '£0.00';
+      swtEl.textContent = fmt(data.swt || 0);
+      mrsEl.textContent = fmt(data.mrs || 0);
+      return;
+    }
+  } catch (e) { /* fall through */ }
+
   swtEl.textContent = '£0.00';
   mrsEl.textContent = '£0.00';
 }
@@ -3491,46 +3516,67 @@ if (document.getElementById('swt-total')) updateDonationTracker();
 
 // ── LEADERBOARD ──
 
-let leaderboardData   = [];
+let leaderboardData   = { global: [], friends: [] };
 let followingIds      = new Set();
 let leaderboardLoaded = false;
+let activeLeaderboardTab = 'friends';
 
 async function loadLeaderboard() {
   if (leaderboardLoaded) { renderLeaderboard(); return; }
+
   const session = getSession();
+  const userId  = session?.user_id || '';
 
-  // Load global leaderboard + who we follow in parallel
-  const [lbRes, followRes] = await Promise.all([
-    fetch(`${WORKER}/api/leaderboard`).then(r => r.json()).catch(() => []),
-    session?.user_id
-      ? fetch(`${WORKER}/api/follows?user_id=${session.user_id}&type=following`,
-          { headers: { Authorization: `Bearer ${await getValidToken(session)}` } })
-          .then(r => r.json()).catch(() => [])
-      : Promise.resolve([]),
-  ]);
+  const res = await fetch(`${WORKER}/api/leaderboard${userId ? `?user_id=${userId}` : ''}`)
+    .then(r => r.json()).catch(() => ({ global: [], friends: [] }));
 
-  leaderboardData = Array.isArray(lbRes) ? lbRes : [];
-  followingIds    = new Set(followRes.map(f => f.following_id));
+  leaderboardData   = { global: res.global || [], friends: res.friends || [] };
   leaderboardLoaded = true;
+
+  // Also load following set for follow buttons
+  if (userId) {
+    try {
+      const token     = await getValidToken(session);
+      const followRes = await fetch(
+        `${WORKER}/api/follows?user_id=${userId}&type=following`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(r => r.json()).catch(() => []);
+      followingIds = new Set(followRes.map(f => f.following_id));
+    } catch (e) {}
+  }
 
   renderLeaderboard();
   loadFollowing();
+}
+
+function switchLeaderboardTab(tab) {
+  activeLeaderboardTab = tab;
+  document.getElementById('lb-tab-friends').classList.toggle('active', tab === 'friends');
+  document.getElementById('lb-tab-global').classList.toggle('active', tab === 'global');
+  renderLeaderboard();
 }
 
 function renderLeaderboard() {
   const container = document.getElementById('leaderboard-list');
   if (!container) return;
 
-  if (!leaderboardData.length) {
-    container.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🏔</span>No rankings yet — be the first!</div>`;
-    return;
-  }
+  const data    = activeLeaderboardTab === 'friends'
+    ? leaderboardData.friends
+    : leaderboardData.global;
 
   const session = getSession();
   const myId    = session?.user_id;
   const medals  = ['🥇','🥈','🥉'];
 
-  container.innerHTML = leaderboardData.map((u, i) => {
+  if (!data.length) {
+    const msg = activeLeaderboardTab === 'friends'
+      ? `<div class="empty-state"><span class="empty-state-icon">👥</span><div class="empty-state-title">No friends yet</div>Search for hillwalkers in the panel on the right and follow them to see how you compare.</div>`
+      : `<div class="empty-state"><span class="empty-state-icon">🏔</span>No rankings yet — be the first!</div>`;
+    container.innerHTML = msg;
+    return;
+  }
+
+  container.innerHTML = data.map((u, i) => {
     const rank     = i + 1;
     const isYou    = u.id === myId;
     const initials = u.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2);
@@ -3552,7 +3598,11 @@ function renderLeaderboard() {
   }).join('');
 
   const subEl = document.getElementById('leaderboard-sub');
-  if (subEl) subEl.textContent = `${leaderboardData.length} hillwalkers ranked · all UK hills`;
+  if (subEl) {
+    subEl.textContent = activeLeaderboardTab === 'friends'
+      ? `${data.length} hillwalker${data.length !== 1 ? 's' : ''} you follow`
+      : `${data.length} hillwalkers ranked · all UK hills`;
+  }
 }
 
 async function loadFollowing() {
