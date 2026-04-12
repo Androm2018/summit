@@ -6,6 +6,11 @@
 <title>Summit — Track Every British Hill</title>
 <meta name="description" content="Automatically track your Munros, Corbetts, Wainwrights and Marilyns from Strava GPS. The hill bagging app built for British hillwalkers."/>
 <!-- Favicons -->
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#2d5a3d"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Summit"/>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
 <link rel="icon" type="image/png" sizes="192x192" href="/summit-logo-192.png"/>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
@@ -1371,6 +1376,26 @@ textarea.form-input{resize:vertical;min-height:80px}
               </div>
             </div>
 
+            <!-- Username card -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Username</span></div>
+              <div class="card-body">
+                <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Choose a username to appear on the leaderboard instead of your full name.</p>
+                <div style="display:flex;gap:0.6rem;align-items:flex-start">
+                  <div style="flex:1;position:relative">
+                    <input class="form-input" id="username-input" type="text"
+                      placeholder="e.g. highland_bagger"
+                      maxlength="20"
+                      oninput="checkUsername(this.value)"
+                      style="padding-right:2rem"/>
+                    <span id="username-status" style="position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);font-size:0.9rem"></span>
+                  </div>
+                  <button class="btn-forest" id="username-save-btn" onclick="saveUsername()" disabled style="flex-shrink:0;padding:0.6rem 1rem">Save</button>
+                </div>
+                <div id="username-msg" style="font-size:0.75rem;margin-top:0.4rem;color:var(--muted)">3–20 characters · letters, numbers and underscores</div>
+              </div>
+            </div>
+
             <!-- Export card -->
             <div class="card">
               <div class="card-header"><span class="card-title">Export Data</span></div>
@@ -1587,6 +1612,17 @@ textarea.form-input{resize:vertical;min-height:80px}
     </nav>
 
   </div>
+</div>
+
+<!-- ADD TO HOME SCREEN BANNER -->
+<div id="add-to-home-banner" style="display:none;position:fixed;bottom:72px;left:1rem;right:1rem;z-index:300;background:var(--forest);color:white;border-radius:10px;padding:0.9rem 1rem;align-items:center;gap:0.8rem;box-shadow:0 8px 24px rgba(0,0,0,0.2)">
+  <span style="font-size:1.4rem">🏔</span>
+  <div style="flex:1">
+    <div style="font-size:0.85rem;font-weight:600">Add Summit to your home screen</div>
+    <div style="font-size:0.72rem;opacity:0.8;margin-top:0.1rem">Works like a native app · no App Store needed</div>
+  </div>
+  <button onclick="triggerInstall()" style="background:white;color:var(--forest);border:none;padding:0.4rem 0.8rem;border-radius:5px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">Add</button>
+  <button onclick="dismissHomeScreenPrompt()" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;padding:0 0.2rem;flex-shrink:0">✕</button>
 </div>
 
 <!-- FIRST-RUN LOADING OVERLAY -->
@@ -2392,9 +2428,133 @@ function updateProfilePage() {
     if (w > 0) items.push(`◻ ${w} Wainwrights`);
     ach.innerHTML = items.map(i => `<div class="achiev">${i}</div>`).join('');
   }
+
+  // Populate existing username if set
+  const session = getSession();
+  const usernameInput = document.getElementById('username-input');
+  if (usernameInput && session?.username) {
+    usernameInput.value = session.username;
+    document.getElementById('username-status').textContent = '✓';
+    document.getElementById('username-msg').textContent = `Your leaderboard name: @${session.username}`;
+  }
 }
 
-// ── SETTINGS PAGE ──
+// ── USERNAME ──
+let usernameTimer = null;
+
+function checkUsername(val) {
+  clearTimeout(usernameTimer);
+  const statusEl = document.getElementById('username-status');
+  const msgEl    = document.getElementById('username-msg');
+  const saveBtn  = document.getElementById('username-save-btn');
+  if (!statusEl) return;
+
+  if (!val || val.length < 3) {
+    statusEl.textContent = '';
+    msgEl.textContent = '3–20 characters · letters, numbers and underscores';
+    saveBtn.disabled = true;
+    return;
+  }
+
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(val)) {
+    statusEl.textContent = '✗';
+    statusEl.style.color = 'var(--path)';
+    msgEl.textContent = 'Letters, numbers and underscores only';
+    saveBtn.disabled = true;
+    return;
+  }
+
+  statusEl.textContent = '…';
+  statusEl.style.color = 'var(--muted)';
+  msgEl.textContent = 'Checking availability…';
+  saveBtn.disabled = true;
+
+  usernameTimer = setTimeout(async () => {
+    const session = getSession();
+    try {
+      const res  = await fetch(`${WORKER}/api/user/username/check?username=${val}&user_id=${session?.user_id}`);
+      const data = await res.json();
+      if (data.available) {
+        statusEl.textContent = '✓';
+        statusEl.style.color = 'var(--forest)';
+        msgEl.textContent = `@${val} is available`;
+        saveBtn.disabled = false;
+      } else {
+        statusEl.textContent = '✗';
+        statusEl.style.color = 'var(--path)';
+        msgEl.textContent = `@${val} is already taken`;
+        saveBtn.disabled = true;
+      }
+    } catch (e) {
+      statusEl.textContent = '';
+      msgEl.textContent = 'Could not check — try again';
+    }
+  }, 500);
+}
+
+async function saveUsername() {
+  const session  = getSession();
+  const username = document.getElementById('username-input')?.value?.trim();
+  if (!session?.user_id || !username) return;
+
+  const btn = document.getElementById('username-save-btn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  try {
+    const token = await getValidToken(session);
+    const res   = await fetch(`${WORKER}/api/user/username`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ user_id: session.user_id, username }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      session.username = username;
+      saveSession(session);
+      document.getElementById('username-msg').textContent = `✓ Username set to @${username} — appears on leaderboard`;
+      toast(`Username set to @${username}`);
+    } else {
+      toast(data.error || 'Could not save username');
+    }
+  } catch (e) {
+    toast('Could not save — try again');
+  }
+  btn.textContent = 'Save'; btn.disabled = false;
+}
+
+// ── ADD TO HOME SCREEN ──
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+function showAddToHomeScreen() {
+  const banner = document.getElementById('add-to-home-banner');
+  if (banner) banner.style.display = 'flex';
+}
+
+function dismissHomeScreenPrompt() {
+  const banner = document.getElementById('add-to-home-banner');
+  if (banner) banner.style.display = 'none';
+  localStorage.setItem('summit_hs_dismissed', '1');
+}
+
+async function triggerInstall() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      dismissHomeScreenPrompt();
+      toast('Summit added to your home screen 🏔');
+    }
+    deferredInstallPrompt = null;
+  } else {
+    // iOS — show instructions
+    toast('Tap the Share button, then "Add to Home Screen"');
+  }
+}
 function updateSettingsPage() {
   const settings = getSettings();
 
@@ -3842,6 +4002,10 @@ async function init() {
     updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
     if (loaded > 0) {
       updateSyncStatus(`${loaded} summits loaded · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Re-sync Strava</a>`);
+      // Show add to home screen after 3s on mobile if not dismissed before
+      if (window.innerWidth <= 900 && !localStorage.getItem('summit_hs_dismissed')) {
+        setTimeout(showAddToHomeScreen, 3000);
+      }
     } else {
       updateSyncStatus(`No summits yet · <a href="#" onclick="resync();return false" style="color:var(--forest);text-decoration:underline">Sync Strava</a>`);
     }
