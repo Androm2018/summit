@@ -3816,6 +3816,27 @@ async function init() {
       await handleUpgradeReturn();
     }
 
+    // ── Silently re-check premium status on every load ──
+    // Catches cases where webhook fired after session was cached
+    if (session.user_id && !wasUpgrade) {
+      fetch(`${WORKER}/api/stripe/status?user_id=${session.user_id}`)
+        .then(r => r.json())
+        .then(data => {
+          const changed = data.premium !== session.premium ||
+                          data.premium_type !== session.premium_type;
+          if (changed) {
+            session.premium      = data.premium || false;
+            session.premium_type = data.premium_type || null;
+            saveSession(session);
+            applyPremiumUI(session.premium);
+            if (data.premium && !session.premium) {
+              toast('🎉 Premium unlocked! All lists now available.');
+            }
+          }
+        })
+        .catch(() => {}); // silent — don't block anything
+    }
+
     updateSyncStatus('Loading your summits…');
     const loaded = await loadAscents(session);
     updateDashboard(); filterHills(); updateRecentAscents(); renderMap(); updateBadges();
