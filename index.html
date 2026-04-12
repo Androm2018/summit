@@ -157,11 +157,14 @@ body{overflow-x:hidden}
 .map-card{
   background:var(--canvas);
   border:1px solid var(--border);
-  border-radius:8px;
-  box-shadow:var(--shadow-lg);
+  border-radius:10px;
+  box-shadow:0 24px 64px rgba(26,25,22,0.14),0 4px 16px rgba(26,25,22,0.08);
   overflow:hidden;
   position:relative;
+  transform:rotate(1deg);
+  transition:transform 0.3s ease;
 }
+.map-card:hover{transform:rotate(0.3deg) translateY(-2px)}
 .map-card-header{
   padding:0.9rem 1.2rem;
   border-bottom:1px solid var(--border-lt);
@@ -187,21 +190,29 @@ body{overflow-x:hidden}
 
 /* Features */
 .features-section{padding:3rem 5%;background:var(--paper)}
-.section-label{font-size:0.72rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--earth);margin-bottom:0.8rem}
+.section-label{font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--forest);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem}.section-label::before{content:"";display:inline-block;width:20px;height:1.5px;background:var(--forest);opacity:0.5}
 .section-h{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--text);letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
 .section-sub{font-size:1rem;color:var(--muted);line-height:1.75;font-weight:300;max-width:500px}
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem;margin-top:0}
 .feat-card{
-  background:var(--canvas);border:1px solid var(--border);
-  border-radius:6px;padding:1.2rem;
+  background:var(--canvas);border:1px solid var(--border-lt);
+  border-radius:8px;padding:1.3rem;
   transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;
+  position:relative;overflow:hidden;
 }
-.feat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--contour)}
+.feat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--forest),var(--moss));
+  opacity:0;transition:opacity 0.2s;
+}
+.feat-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,25,22,0.1);border-color:var(--contour)}
+.feat-card:hover::before{opacity:1}
 .feat-icon{
-  width:32px;height:32px;border-radius:5px;
-  background:var(--bagged-bg);border:1px solid rgba(45,90,61,0.15);
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--bagged-bg),rgba(45,90,61,0.04));
+  border:1px solid rgba(45,90,61,0.12);
   display:flex;align-items:center;justify-content:center;
-  font-size:0.95rem;margin-bottom:0.75rem;
+  font-size:1rem;margin-bottom:0.8rem;
 }
 .feat-title{font-family:'Libre Baskerville',serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.35rem}
 .feat-text{font-size:0.78rem;color:var(--muted);line-height:1.65;font-weight:300}
@@ -831,8 +842,8 @@ textarea.form-input{resize:vertical;min-height:80px}
   <section class="hero">
     <div class="hero-inner">
       <div>
-        <div class="hero-kicker">⛰ 2,548 UK hills tracked</div>
-        <h1 class="hero-h1">Every summit.<br><em>Finally logged.</em></h1>
+        <div class="hero-kicker">🏔 The UK hill bagging app</div>
+        <h1 class="hero-h1">Every summit,<br><em>finally logged.</em></h1>
         <p class="hero-sub">Connect Strava and Summit automatically finds every Munro, Corbett, Wainwright and Marilyn in your GPS history. Free for Munros. Premium unlocks everything.</p>
         <div class="hero-actions">
           <button class="strava-btn" onclick="connectStrava()">
@@ -882,6 +893,31 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
     </div>
   </section>
+
+  <!-- SOCIAL PROOF BAR -->
+  <div style="background:var(--paper-mid);border-top:1px solid var(--border-lt);border-bottom:1px solid var(--border-lt);padding:0.9rem 5%;z-index:1;position:relative">
+    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:2.5rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+        <span style="color:var(--forest);font-weight:600">2,548</span> hills across 8 lists
+      </div>
+      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+        <span style="color:var(--forest);font-weight:600">Munros, Corbetts, Grahams</span>
+      </div>
+      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+        <span style="color:var(--forest);font-weight:600">Wainwrights, Marilyns</span> & more
+      </div>
+      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+        <span style="color:var(--forest);font-weight:600">DoBIH</span> database
+      </div>
+      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+        🌿 <span>10% donated to Scottish charities</span>
+      </div>
+    </div>
+  </div>
 
   <!-- FEATURES — compact, honest about what's built -->
   <section class="features-section" style="padding:3.5rem 5%">
@@ -1050,10 +1086,13 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
       <div style="display:flex;gap:3rem;flex-wrap:wrap">
         <div>
-          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Product</div>
+          <div style="color:white;font-weight:500;margin-bottom:0.6rem">Hill Lists</div>
           <div style="display:flex;flex-direction:column;gap:0.35rem">
-            <a href="#" onclick="connectStrava();return false" style="color:rgba(255,255,255,0.6);text-decoration:none">Get started</a>
-            <a href="#pricing" style="color:rgba(255,255,255,0.6);text-decoration:none">Pricing</a>
+            <a href="/munro-tracker.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Munro Tracker</a>
+            <a href="/corbett-tracker.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Corbett Tracker</a>
+            <a href="/wainwright-tracker.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Wainwright Tracker</a>
+            <a href="/marilyn-tracker.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Marilyn Tracker</a>
+            <a href="/hill-bagging-app.html" style="color:rgba(255,255,255,0.6);text-decoration:none">Hill Bagging App</a>
           </div>
         </div>
         <div>
