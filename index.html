@@ -199,6 +199,8 @@ body{overflow-x:hidden}
 .section-h{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--text);letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
 .section-sub{font-size:1rem;color:var(--muted);line-height:1.75;font-weight:300;max-width:500px}
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem;margin-top:0}
+@media(max-width:900px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
 .feat-card{
   background:var(--canvas);border:1px solid var(--border-lt);
   border-radius:8px;padding:1.3rem;
@@ -772,7 +774,6 @@ textarea.form-input{resize:vertical;min-height:80px}
   /* Landing */
   .hero-inner{grid-template-columns:1fr}
   .hero-visual{display:none}
-  .feat-grid{grid-template-columns:1fr 1fr}
   .lists-grid{grid-template-columns:1fr 1fr}
   .hero{min-height:auto;padding:5rem 5% 3rem}
 
@@ -815,7 +816,6 @@ textarea.form-input{resize:vertical;min-height:80px}
 }
 
 @media(max-width:480px){
-  .feat-grid{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr 1fr}
   .hero h1{font-size:2rem}
   .landing-pricing-grid{grid-template-columns:1fr !important}
@@ -857,15 +857,15 @@ textarea.form-input{resize:vertical;min-height:80px}
   <section class="hero">
     <div class="hero-inner">
       <div>
-        <div class="hero-kicker">🏔 The UK hill bagging app</div>
-        <h1 class="hero-h1">Every summit,<br><em>finally logged.</em></h1>
-        <p class="hero-sub">Connect Strava and Summit automatically finds every Munro, Corbett, Wainwright and Marilyn in your GPS history. Free for Munros. Premium unlocks everything.</p>
+        <div class="hero-kicker">🏔 The UK hill bagging logbook</div>
+        <h1 class="hero-h1">Your hills.<br><em>Your logbook.</em></h1>
+        <p class="hero-sub">Summit is the logbook built for British hillwalkers. Connect Strava and every Munro, Corbett, Wainwright and Marilyn you've ever climbed is imported automatically. Then log companions, conditions and memories — and see how you rank against other baggers.</p>
         <div class="hero-actions">
           <button class="strava-btn" onclick="connectStrava()">
             <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
             Connect with Strava — it's free
           </button>
-          <span class="hero-note">Free forever for Munros · No credit card · Full Strava history import</span>
+          <span class="hero-note">Free forever for Munros · No credit card · Strava history imported in minutes</span>
         </div>
       </div>
 
@@ -902,7 +902,7 @@ textarea.form-input{resize:vertical;min-height:80px}
             </div>
           </div>
           <div style="padding:0.8rem 1.2rem;border-top:1px solid var(--border-lt);font-size:0.72rem;color:var(--light-muted);display:flex;align-items:center;gap:0.4rem">
-            <span class="sync-dot"></span>Detected automatically from your Strava GPS tracks
+            <span class="sync-dot"></span>Imported automatically · log notes & companions per ascent
           </div>
         </div>
       </div>
@@ -929,7 +929,7 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
       <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
-        🌿 <span>10% donated to Scottish charities</span>
+        🌿 <span>10% donated to <strong>Mountain Rescue Scotland</strong> & <strong>Scottish Wildlife Trust</strong></span>
       </div>
     </div>
   </div>
@@ -937,42 +937,42 @@ textarea.form-input{resize:vertical;min-height:80px}
   <!-- FEATURES — compact, honest about what's built -->
   <section class="features-section" style="padding:3.5rem 5%">
     <div style="max-width:1100px;margin:0 auto">
-      <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:0">
-
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⚡</div>
-          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Auto-detects from Strava</h3>
-          <p class="feat-text" style="font-size:0.8rem">Scans your full GPS history. Every summit you passed within 150m — automatically logged. No manual entry for past walks.</p>
-        </div>
+      <div class="feat-grid" style="gap:1rem;margin-top:0">
 
         <div class="feat-card" style="padding:1.4rem">
           <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📝</div>
-          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Notes & companions per ascent</h3>
-          <p class="feat-text" style="font-size:0.8rem">Log conditions, who you were with, and how it felt. Multiple ascents of the same hill tracked separately — your second round is a different day.</p>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">A real logbook, not just a list</h3>
+          <p class="feat-text" style="font-size:0.8rem">Log companions, conditions and memories per ascent. Climbed the same hill twice? Both days are in your logbook separately — because they were different days.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🏆</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Leaderboard & friends</h3>
+          <p class="feat-text" style="font-size:0.8rem">See how your tally compares to other UK hillwalkers. Follow friends, track rivals, celebrate completions together. Rank by total hills across all 8 lists.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⚡</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Strava history imported instantly</h3>
+          <p class="feat-text" style="font-size:0.8rem">Connect Strava once and Summit scans your entire GPS history — every summit within 150m automatically imported. No manual entry for years of past walks.</p>
         </div>
 
         <div class="feat-card" style="padding:1.4rem">
           <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🗺</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Interactive topo map</h3>
-          <p class="feat-text" style="font-size:0.8rem">Your bagged hills on a real topographic map. Zoom in to see contours and footpaths. Filter by list, region, or completion status.</p>
+          <p class="feat-text" style="font-size:0.8rem">Your bagged hills on a real topographic map with contour lines. Filter by list, region, or completion status. See what's left at a glance.</p>
+        </div>
+
+        <div class="feat-card" style="padding:1.4rem">
+          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🏅</div>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Badges & milestones</h3>
+          <p class="feat-text" style="font-size:0.8rem">Earn badges for Three Peaks, Welsh High Peaks, Yorkshire Three Peaks and more. Progress bars show how close you are to the next milestone across every list.</p>
         </div>
 
         <div class="feat-card" style="padding:1.4rem">
           <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📥</div>
-          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Import from spreadsheet</h3>
-          <p class="feat-text" style="font-size:0.8rem">Already tracking hills in Excel? Download our template, fill it in, upload it back. Years of data imported in minutes.</p>
-        </div>
-
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📊</div>
-          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Stats that mean something</h3>
-          <p class="feat-text" style="font-size:0.8rem">Total elevation, highest summit, this month's count, progress across every list. Your logbook does the maths.</p>
-        </div>
-
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⬇</div>
-          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Export anywhere</h3>
-          <p class="feat-text" style="font-size:0.8rem">Download as CSV or in hill-bagging.co.uk format. Your data is yours — always exportable, never locked in.</p>
+          <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Already tracking in Excel?</h3>
+          <p class="feat-text" style="font-size:0.8rem">Download our template, fill in your hills with dates, upload it back. Years of records imported in minutes. Your data is always exportable — never locked in.</p>
         </div>
 
       </div>
@@ -982,8 +982,8 @@ textarea.form-input{resize:vertical;min-height:80px}
   <!-- PRICING SECTION -->
   <section id="pricing" style="padding:3.5rem 5% 2.5rem;background:var(--canvas)">
     <div style="max-width:900px;margin:0 auto">
-      <h2 class="section-h" style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem)">Simple, honest pricing</h2>
-      <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:2rem;max-width:440px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock every hill in Britain.</p>
+      <h2 class="section-h" style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem)">Your logbook, your price</h2>
+      <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock all 8 lists, the full leaderboard, and your complete Strava history.</p>
 
       <div class="landing-pricing-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
 
