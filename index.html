@@ -1479,6 +1479,8 @@ textarea.form-input{resize:vertical;min-height:80px}
               <button class="btn-forest" onclick="openPricingModal('settings')" style="white-space:nowrap;flex-shrink:0;font-size:0.82rem;padding:0.5rem 1rem">Upgrade</button>
             </div>
           </div>
+
+          <div class="card" style="margin-bottom:1.2rem">
             <div class="card-header"><span class="card-title">Lists I'm Tracking</span></div>
             <div class="card-body" style="padding:0">
               <div id="settings-lists"></div>
@@ -1507,6 +1509,22 @@ textarea.form-input{resize:vertical;min-height:80px}
                 </div>
                 <label class="toggle">
                   <input type="checkbox" id="settings-include-runs" onchange="saveSettings()" checked/>
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="card-header"><span class="card-title">Privacy</span></div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text)">Public profile</div>
+                  <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">Show your name and hill count on the leaderboard. Turn off to be hidden from all rankings.</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="settings-public-profile" onchange="savePublicProfile(this.checked)" checked/>
                   <span class="toggle-track"></span>
                 </label>
               </div>
@@ -1787,6 +1805,28 @@ function saveSettings() {
   s.trackedLists    = [...document.querySelectorAll('.settings-list-toggle:checked')].map(el => el.dataset.list);
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   toast('Settings saved');
+}
+
+async function savePublicProfile(isPublic) {
+  const session = getSession();
+  if (!session?.user_id) return;
+
+  try {
+    const token = await getValidToken(session);
+    const res = await fetch(`${WORKER}/api/user/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ user_id: session.user_id, public_profile: isPublic }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      session.public_profile = isPublic;
+      saveSession(session);
+      toast(isPublic ? 'Profile is now public · visible on leaderboard' : 'Profile is now private · hidden from leaderboard');
+    }
+  } catch (e) {
+    toast('Could not save — try again');
+  }
 }
 
 const LIST_META = {
@@ -2556,10 +2596,18 @@ async function triggerInstall() {
 }
 function updateSettingsPage() {
   const settings = getSettings();
+  const session  = getSession();
 
   // Show/hide upgrade banner
   const banner = document.getElementById('settings-upgrade-banner');
   if (banner) banner.style.display = isPremium() ? 'none' : '';
+
+  // Public profile toggle — read from session
+  const pubToggle = document.getElementById('settings-public-profile');
+  if (pubToggle) {
+    // Default true if not set
+    pubToggle.checked = session?.public_profile !== false;
+  }
 
   const radiusSel = document.getElementById('settings-radius');
   if (radiusSel) radiusSel.value = settings.detectionRadius;
@@ -3038,6 +3086,7 @@ function handleAuthCallback() {
     expires_at:    parseInt(p.get('expires_at')),
     premium:       p.get('premium') === '1',
     premium_type:  p.get('premium_type') || null,
+    public_profile: true, // default — will be refreshed from server
   };
   saveSession(session);
   history.replaceState(null, '', window.location.pathname);
@@ -3738,14 +3787,15 @@ function renderLeaderboard() {
   container.innerHTML = data.map((u, i) => {
     const rank     = i + 1;
     const isYou    = u.id === myId;
-    const initials = u.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2);
+    const initials = (u.display_name || u.name || '?').split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2);
+    const displayName = u.display_name || u.name || 'Hillwalker';
     const rankStr  = rank <= 3 ? medals[rank-1] : `${rank}`;
 
     return `<div class="lb-row" ${isYou ? 'style="background:rgba(139,69,19,0.04)"' : ''}>
       <div class="lb-rank ${rank <= 3 ? 'top3' : ''}">${rankStr}</div>
       <div class="lb-avatar ${isYou ? 'is-you' : ''}">${initials}</div>
       <div class="lb-name">
-        ${u.name}
+        ${displayName}
         ${isYou ? '<span class="lb-you-tag">You</span>' : ''}
       </div>
       <div style="text-align:right;flex-shrink:0">
@@ -3815,10 +3865,11 @@ function searchUsers(val) {
         .filter(u => u.id !== session?.user_id)
         .map(u => {
           const isFollowing = followingIds.has(u.id);
+          const displayName = u.display_name || u.name || 'Hillwalker';
           return `<div class="follow-row" style="border-bottom:1px solid var(--border-lt)">
-            <span style="font-size:0.85rem">${u.name}</span>
+            <span style="font-size:0.85rem">${displayName}</span>
             <button class="follow-btn ${isFollowing ? 'following' : ''}"
-              onclick="toggleFollow('${u.id}', '${u.name}', this)">
+              onclick="toggleFollow('${u.id}', '${displayName}', this)">
               ${isFollowing ? 'Following' : '+ Follow'}
             </button>
           </div>`;
