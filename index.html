@@ -2430,7 +2430,6 @@ function updateProfilePage() {
   }
 
   // Populate existing username if set
-  const session = getSession();
   const usernameInput = document.getElementById('username-input');
   if (usernameInput && session?.username) {
     usernameInput.value = session.username;
