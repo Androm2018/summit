@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Marilyn Tracker — Track UK Marilyns with Summit</title>
+<meta name="description" content="Track all 2,009 UK Marilyns with Summit. Auto-detect ascents from Strava GPS tracks. The only hill bagging app covering every prominent UK summit."/>
+<meta name="keywords" content="marilyn tracker, uk hill bagging app, track marilyns, prominent hills uk, marilyn bagging app"/>
+<meta property="og:title" content="Marilyn Tracker — Track UK Marilyns with Summit"/>
+<meta property="og:description" content="Track all 2,009 UK Marilyns with Summit. Auto-detect ascents from Strava GPS tracks. The only hill bagging app covering every prominent UK summit."/>
+<meta property="og:url" content="https://summitapp.uk/marilyn-tracker.html"/>
+<meta property="og:image" content="https://summitapp.uk/summit-og-1200x630.png"/>
+<meta property="og:type" content="website"/>
+<link rel="canonical" href="https://summitapp.uk/marilyn-tracker.html"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f4eddf;--canvas:#faf6ee;--forest:#2d5a3d;--text:#1a1916;
+  --muted:#7a7060;--border:#d6cbb8;--light-muted:#9e9486;
+  --shadow-md:0 4px 16px rgba(26,25,22,0.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.7;overflow-x:hidden}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(244,237,223,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:1rem 5%;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;color:var(--forest);text-decoration:none;display:flex;align-items:center;gap:0.5rem}
+.nav-links{display:flex;align-items:center;gap:1.2rem}
+.nav-links a{font-size:0.85rem;color:var(--muted);text-decoration:none;font-weight:500}
+.nav-cta{background:var(--forest);color:white;border:none;padding:0.55rem 1.2rem;border-radius:4px;font-size:0.875rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.nav-cta:hover{background:#1e3d29}
+.hero{padding:9rem 5% 5rem;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:4rem;align-items:center}
+.kicker{display:inline-flex;align-items:center;gap:0.5rem;border:1px solid var(--border);color:var(--muted);font-size:0.75rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;padding:0.3rem 0.85rem;border-radius:2px;margin-bottom:1.4rem}
+h1{font-family:'Libre Baskerville',serif;font-size:clamp(2.4rem,4vw,3.6rem);font-weight:700;line-height:1.1;letter-spacing:-0.02em;margin-bottom:1.2rem;color:var(--text)}
+h1 em{color:#5a4070;font-style:italic}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.75;max-width:460px;margin-bottom:2rem;font-weight:300}
+.strava-btn{display:inline-flex;align-items:center;gap:0.75rem;background:#FC4C02;color:white;border:none;padding:0.9rem 1.8rem;border-radius:5px;font-size:0.95rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 16px rgba(252,76,2,0.25);margin-bottom:0.75rem}
+.hero-note{font-size:0.78rem;color:var(--light-muted);display:block}
+.strava-btn svg{width:20px;height:20px;fill:white}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;background:var(--canvas);border:1px solid var(--border);border-radius:8px;padding:1.2rem}
+.stat-item{text-align:center}
+.stat-num{font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;color:#5a4070;margin-bottom:0.2rem}
+.stat-lbl{font-size:0.72rem;color:var(--muted)}
+section{padding:4rem 5%;max-width:1100px;margin:0 auto}
+h2{font-family:'Libre Baskerville',serif;font-size:1.8rem;font-weight:700;margin-bottom:1rem;letter-spacing:-0.01em}
+.about-list{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem}
+.about-card{background:var(--canvas);border:1px solid var(--border);border-radius:8px;padding:1.4rem}
+.about-card h3{font-family:'Libre Baskerville',serif;font-size:0.95rem;font-weight:700;margin-bottom:0.4rem;color:var(--text)}
+.about-card p{font-size:0.85rem;color:var(--muted);line-height:1.7}
+.cta-section{background:var(--forest);color:white;padding:4rem 5%;text-align:center}
+.cta-section h2{color:white;margin-bottom:0.75rem}
+.cta-section p{color:rgba(255,255,255,0.7);font-size:1rem;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto}
+.cta-btn{display:inline-flex;align-items:center;gap:0.75rem;background:white;color:var(--forest);border:none;padding:0.9rem 2rem;border-radius:5px;font-size:1rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+footer{background:var(--text);color:rgba(255,255,255,0.5);padding:2rem 5%;font-size:0.82rem;text-align:center}
+footer a{color:rgba(255,255,255,0.5);text-decoration:none;margin:0 0.75rem}
+@media(max-width:768px){.hero{grid-template-columns:1fr;padding-top:7rem}.stats-row{grid-template-columns:1fr 1fr}.about-list{grid-template-columns:1fr}}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Summit",
+  "applicationCategory": "SportsApplication",
+  "operatingSystem": "Web, iOS, Android",
+  "description": "Track all 2,009 UK Marilyns with Summit. Auto-detect ascents from Strava GPS tracks. The only hill bagging app covering every prominent UK summit.",
+  "url": "https://summitapp.uk",
+  "offers": [
+    {"@type": "Offer", "price": "0", "priceCurrency": "GBP", "description": "Free for Munros"},
+    {"@type": "Offer", "price": "3", "priceCurrency": "GBP", "priceSpecification": {"@type": "UnitPriceSpecification", "billingDuration": "P1M"}},
+    {"@type": "Offer", "price": "25", "priceCurrency": "GBP", "priceSpecification": {"@type": "UnitPriceSpecification", "billingDuration": "P1Y"}}
+  ]
+}
+</script>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="16" fill="#f4eddf"/>
+      <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
+    </svg>
+    Summit
+  </a>
+  <div class="nav-links">
+    <a href="/#pricing">Pricing</a>
+    <a href="/contact.html">Support</a>
+    <button class="nav-cta" onclick="window.location.href='/'">Get Started Free</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div>
+    <div class="kicker">○ 2,009 Marilyns · UK prominent summits</div>
+    <h1>Track Every UK Marilyn with <em>Summit</em></h1>
+    <p class="hero-sub">Summit tracks all 2,009 UK Marilyns — every hill with 150m+ topographic prominence. From Scottish islands to Welsh hills to English peaks. Auto-detected from your Strava history.</p>
+    <button class="strava-btn" onclick="window.location.href='/'">
+      <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+      Connect with Strava — it's free
+    </button>
+    <span class="hero-note">Free forever for Munros · No credit card required</span>
+  </div>
+  <div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num">2,009</div><div class="stat-lbl">Marilyns to bag</div></div>
+      <div class="stat-item"><div class="stat-num">150m+</div><div class="stat-lbl">Min prominence</div></div>
+      <div class="stat-item"><div class="stat-num">All UK</div><div class="stat-lbl">Coverage</div></div>
+      <div class="stat-item"><div class="stat-num">Premium</div><div class="stat-lbl">Unlocks all lists</div></div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h2>About the Marilyns</h2>
+  <p style="font-size:1rem;color:var(--muted);line-height:1.75;max-width:700px">UK hills with at least 150m of topographic prominence on all sides, regardless of height. The name is a playful counterpart to Munros — named after Marilyn Monroe. Covering the whole of Britain and Ireland.</p>
+
+  <div class="about-list">
+    <div class="about-card">
+      <h3>⚡ Auto-detected from Strava</h3>
+      <p>Connect your Strava account once and Summit scans your entire GPS history — detecting every Marilyn you've passed within 150m of the summit coordinates. No manual entry for past walks.</p>
+    </div>
+    <div class="about-card">
+      <h3>📝 Rich ascent logs</h3>
+      <p>Log companions, conditions and personal notes per ascent. Multiple ascents of the same hill tracked separately — your second round of a summit is its own day in your logbook.</p>
+    </div>
+    <div class="about-card">
+      <h3>🗺 Interactive topo map</h3>
+      <p>Your bagged hills on a real topographic map. Zoom in to see contour lines and footpaths. Filter by region or completion status. See your progress at a glance.</p>
+    </div>
+    <div class="about-card">
+      <h3>🏆 UK Leaderboard</h3>
+      <p>See how your Marilyns total compares to other hillwalkers across the UK. Follow friends, track rivals, celebrate completions together.</p>
+    </div>
+  </div>
+</section>
+
+<div class="cta-section">
+  <h2>Start tracking your Marilyns today</h2>
+  <p>Free for Munros · Premium unlocks all 8 lists from £3/month</p>
+  <button class="cta-btn" onclick="window.location.href='/'">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="#FC4C02"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+    Connect Strava — it's free
+  </button>
+</div>
+
+<footer>
+  <a href="/">Summit</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/#pricing">Pricing</a>
+  <br><br>© 2026 Summit · <a href="https://www.scottishwildlifetrust.org.uk" target="_blank">Scottish Wildlife Trust</a> · <a href="https://www.mountainrescuescotland.org" target="_blank">Mountain Rescue Scotland</a>
+</footer>
+</body>
+</html>
