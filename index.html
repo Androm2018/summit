@@ -76,22 +76,28 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 #landing{background:var(--canvas);overflow-x:hidden}
 body{overflow-x:hidden}
 
-/* Subtle topo-line background texture */
+/* Clean topo radial gradient only — no diagonal lines */
 #landing::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:
-    radial-gradient(ellipse 120% 80% at 50% 0%,rgba(45,90,61,0.04) 0%,transparent 60%),
-    repeating-linear-gradient(35deg,transparent,transparent 48px,rgba(184,153,106,0.06) 49px,transparent 50px),
-    repeating-linear-gradient(-35deg,transparent,transparent 48px,rgba(184,153,106,0.04) 49px,transparent 50px);
+    radial-gradient(ellipse 140% 60% at 60% -10%,rgba(45,90,61,0.05) 0%,transparent 55%),
+    radial-gradient(ellipse 80% 40% at 10% 80%,rgba(184,153,106,0.06) 0%,transparent 50%);
 }
 
 .landing-nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:1rem 5%;
-  background:rgba(244,237,223,0.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
+  padding:1.1rem 5%;
+  background:transparent;
+  border-bottom:1px solid transparent;
+  transition:background 0.4s,border-color 0.4s,box-shadow 0.4s;
+}
+.landing-nav.scrolled{
+  background:rgba(250,246,238,0.95);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom-color:var(--border);
+  box-shadow:0 1px 24px rgba(26,25,22,0.06);
 }
 .logo{
   display:flex;align-items:center;gap:0.6rem;
@@ -100,59 +106,89 @@ body{overflow-x:hidden}
 .logo-type{
   font-family:'Libre Baskerville',serif;
   font-size:1.25rem;font-weight:700;
-  color:var(--forest);letter-spacing:-0.01em;
+  color:white;letter-spacing:-0.01em;
+  transition:color 0.4s;
 }
+.landing-nav.scrolled .logo-type{color:var(--forest)}
 .nav-cta{
-  background:var(--forest);color:var(--canvas);
-  border:none;padding:0.55rem 1.3rem;border-radius:4px;
+  background:rgba(255,255,255,0.12);color:white;
+  border:1px solid rgba(255,255,255,0.2);
+  padding:0.55rem 1.3rem;border-radius:4px;
   font-size:0.875rem;font-weight:500;
-  transition:background 0.2s,transform 0.15s;
+  transition:background 0.2s,transform 0.15s,border-color 0.2s,color 0.4s;
+  backdrop-filter:blur(4px);
 }
-.nav-cta:hover{background:var(--forest-deep);transform:translateY(-1px)}
+.nav-cta:hover{background:rgba(255,255,255,0.2);transform:translateY(-1px)}
+.landing-nav.scrolled .nav-cta{
+  background:var(--forest);color:white;border-color:var(--forest);
+}
+.landing-nav.scrolled .nav-pricing-link{color:var(--muted) !important}
+.landing-nav.scrolled .logo-bg{fill:#f4eddf !important}
+.landing-nav.scrolled .logo-mountain{fill:#2d5a3d !important}
+.landing-nav.scrolled .logo-snow{fill:rgba(244,237,223,0.6) !important}
 
-/* Hero */
+/* Hero — dark */
 .hero{
-  min-height:92vh;display:flex;align-items:center;
-  padding:6rem 5% 3.5rem;position:relative;z-index:1;
+  min-height:94vh;display:flex;align-items:center;
+  padding:7rem 5% 4rem;position:relative;z-index:1;
+  background:linear-gradient(160deg,#0f1f15 0%,#1a2e1f 50%,#0d1a12 100%);
+  overflow:hidden;
 }
-.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.hero::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:200px;
+  background:linear-gradient(to bottom,transparent,var(--canvas));
+  pointer-events:none;z-index:2;
+}
+/* Radial glow in hero */
+.hero::before{
+  content:'';position:absolute;
+  top:-20%;right:-10%;
+  width:60%;height:80%;
+  background:radial-gradient(ellipse,rgba(74,124,89,0.18) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+}
+.hero-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;position:relative;z-index:3}
 .hero-kicker{
   display:inline-flex;align-items:center;gap:0.5rem;
-  border:1px solid var(--contour);color:var(--earth);
-  font-size:0.75rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
-  padding:0.3rem 0.85rem;border-radius:2px;
-  margin-bottom:1.4rem;
+  border:1px solid rgba(122,171,135,0.3);color:rgba(122,171,135,0.9);
+  font-size:0.72rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.35rem 0.9rem;border-radius:20px;
+  background:rgba(45,90,61,0.2);
+  margin-bottom:1.6rem;
   opacity:0;animation:fadeUp 0.5s 0.1s forwards;
 }
 .hero-h1{
   font-family:'Libre Baskerville',serif;
-  font-size:clamp(2.8rem,5vw,4.2rem);
-  font-weight:700;line-height:1.1;
-  color:var(--text);letter-spacing:-0.03em;
-  margin-bottom:1.2rem;
+  font-size:clamp(3rem,5.5vw,5.2rem);
+  font-weight:700;line-height:1.05;
+  color:white;letter-spacing:-0.04em;
+  margin-bottom:1.4rem;
   opacity:0;animation:fadeUp 0.6s 0.2s forwards;
 }
-.hero-h1 em{color:var(--forest);font-style:italic}
+.hero-h1 em{
+  color:var(--sage);font-style:italic;
+}
 .hero-sub{
-  font-size:1.05rem;color:var(--muted);line-height:1.75;
-  max-width:480px;margin-bottom:2.5rem;font-weight:300;
+  font-size:1.05rem;color:rgba(255,255,255,0.55);line-height:1.8;
+  max-width:460px;margin-bottom:2.8rem;font-weight:300;
   opacity:0;animation:fadeUp 0.6s 0.3s forwards;
 }
 .hero-actions{
-  display:flex;flex-direction:column;align-items:flex-start;gap:0.9rem;
+  display:flex;flex-direction:column;align-items:flex-start;gap:1rem;
   opacity:0;animation:fadeUp 0.6s 0.4s forwards;
 }
 .strava-btn{
   display:inline-flex;align-items:center;gap:0.75rem;
   background:#FC4C02;color:white;border:none;
-  padding:0.9rem 1.8rem;border-radius:5px;
-  font-size:0.95rem;font-weight:500;
-  box-shadow:0 4px 16px rgba(252,76,2,0.25);
+  padding:1rem 2rem;border-radius:6px;
+  font-size:0.95rem;font-weight:600;
+  box-shadow:0 4px 24px rgba(252,76,2,0.35),0 0 0 1px rgba(252,76,2,0.1);
   transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+  letter-spacing:0.01em;
 }
-.strava-btn:hover{background:#e04400;transform:translateY(-2px);box-shadow:0 8px 24px rgba(252,76,2,0.35)}
+.strava-btn:hover{background:#e04400;transform:translateY(-2px);box-shadow:0 8px 32px rgba(252,76,2,0.45)}
 .strava-btn svg{width:20px;height:20px;fill:white}
-.hero-note{font-size:0.78rem;color:var(--light-muted)}
+.hero-note{font-size:0.78rem;color:rgba(255,255,255,0.35)}
 
 /* Hero visual — topo map card */
 .hero-visual{
@@ -161,15 +197,15 @@ body{overflow-x:hidden}
 }
 .map-card{
   background:var(--canvas);
-  border:1px solid var(--border);
-  border-radius:10px;
-  box-shadow:0 24px 64px rgba(26,25,22,0.14),0 4px 16px rgba(26,25,22,0.08);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;
+  box-shadow:0 40px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06),0 0 60px rgba(74,124,89,0.15);
   overflow:hidden;
   position:relative;
-  transform:rotate(1deg);
-  transition:transform 0.3s ease;
+  transform:rotate(1.5deg);
+  transition:transform 0.4s ease,box-shadow 0.4s ease;
 }
-.map-card:hover{transform:rotate(0.3deg) translateY(-2px)}
+.map-card:hover{transform:rotate(0.5deg) translateY(-4px);box-shadow:0 50px 100px rgba(0,0,0,0.55),0 0 80px rgba(74,124,89,0.2)}
 .map-card-header{
   padding:0.9rem 1.2rem;
   border-bottom:1px solid var(--border-lt);
@@ -190,51 +226,50 @@ body{overflow-x:hidden}
   padding:0.9rem 1rem;border-right:1px solid var(--border-lt);text-align:center;
 }
 .strip-item:last-child{border-right:none}
-.strip-num{font-family:'Libre Baskerville',serif;font-size:1.6rem;font-weight:700;color:var(--forest);line-height:1}
+.strip-num{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--forest);line-height:1;letter-spacing:-0.02em}
 .strip-label{font-size:0.68rem;color:var(--light-muted);margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.05em}
 
 /* Features */
 .features-section{padding:3rem 5%;background:var(--paper)}
 .section-label{font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--forest);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem}.section-label::before{content:"";display:inline-block;width:20px;height:1.5px;background:var(--forest);opacity:0.5}
-.section-h{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--text);letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
+.section-h{font-family:'Libre Baskerville',serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text);letter-spacing:-0.03em;line-height:1.15;margin-bottom:1rem}
 .section-sub{font-size:1rem;color:var(--muted);line-height:1.75;font-weight:300;max-width:500px}
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem;margin-top:0}
 @media(max-width:900px){.feat-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
 .feat-card{
-  background:var(--canvas);border:1px solid var(--border-lt);
-  border-radius:8px;padding:1.3rem;
-  transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;
-  position:relative;overflow:hidden;
+  background:var(--canvas);
+  border:1px solid var(--border-lt);
+  border-left:3px solid transparent;
+  border-radius:0 8px 8px 0;
+  padding:1.5rem 1.4rem;
+  transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s;
+  position:relative;
 }
-.feat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--forest),var(--moss));
-  opacity:0;transition:opacity 0.2s;
+.feat-card:hover{
+  border-left-color:var(--forest);
+  box-shadow:0 4px 20px rgba(26,25,22,0.08);
+  transform:translateX(2px);
 }
-.feat-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,25,22,0.1);border-color:var(--contour)}
-.feat-card:hover::before{opacity:1}
 .feat-icon{
-  width:36px;height:36px;border-radius:8px;
-  background:linear-gradient(135deg,var(--bagged-bg),rgba(45,90,61,0.04));
-  border:1px solid rgba(45,90,61,0.12);
-  display:flex;align-items:center;justify-content:center;
-  font-size:1rem;margin-bottom:0.8rem;
+  font-size:1.3rem;margin-bottom:0.9rem;display:block;
+  line-height:1;
 }
-.feat-title{font-family:'Libre Baskerville',serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.35rem}
-.feat-text{font-size:0.78rem;color:var(--muted);line-height:1.65;font-weight:300}
+.feat-title{font-family:'Libre Baskerville',serif;font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;letter-spacing:-0.01em}
+.feat-text{font-size:0.82rem;color:var(--muted);line-height:1.7;font-weight:300}
 
 /* Lists section */
 .lists-section{padding:5rem 5%;background:var(--paper-mid)}
 .lists-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
 .list-card{
   background:var(--canvas);border:1px solid var(--border);
-  border-radius:6px;padding:1.3rem;
-  display:flex;flex-direction:column;gap:0.2rem;
-  transition:border-color 0.15s;
+  border-bottom:2px solid transparent;
+  border-radius:6px;padding:1.4rem;
+  display:flex;flex-direction:column;gap:0.25rem;
+  transition:border-color 0.2s,transform 0.2s;
 }
-.list-card:hover{border-color:var(--moss)}
-.list-count{font-family:'Libre Baskerville',serif;font-size:1.8rem;font-weight:700;color:var(--forest)}
+.list-card:hover{border-bottom-color:var(--forest);transform:translateY(-2px)}
+.list-count{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--forest);letter-spacing:-0.02em}
 .list-name{font-size:0.875rem;font-weight:500;color:var(--text)}
 .list-desc{font-size:0.75rem;color:var(--light-muted)}
 
@@ -815,6 +850,7 @@ textarea.form-input{resize:vertical;min-height:80px}
   .plan-price{font-size:1.4rem}
 }
 
+@media(max-width:700px){.how-grid{grid-template-columns:1fr !important;gap:2rem}}
 @media(max-width:480px){
   .stats-row{grid-template-columns:1fr 1fr}
   .hero h1{font-size:2rem}
@@ -841,20 +877,26 @@ textarea.form-input{resize:vertical;min-height:80px}
   <nav class="landing-nav">
     <a href="#" class="logo" onclick="return false">
       <!-- Topo contour logo -->
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="16" fill="#f4eddf"/>
-  <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/>
-  <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="#f4eddf" opacity="0.6"/>
-</svg>
+      <svg class="nav-logo-svg" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="16" fill="rgba(255,255,255,0.12)" class="logo-bg"/>
+        <polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="white" class="logo-mountain"/>
+        <polygon points="16,9.25 14.9,11.9 17.1,11.9" fill="rgba(255,255,255,0.4)" class="logo-snow"/>
+      </svg>
       <span class="logo-type">Summit</span>
     </a>
     <div style="display:flex;align-items:center;gap:1.2rem">
-      <a href="#pricing" style="font-size:0.85rem;color:var(--muted);text-decoration:none;font-weight:500">Pricing</a>
+      <a href="#pricing" class="nav-pricing-link" style="font-size:0.85rem;text-decoration:none;font-weight:500;color:rgba(255,255,255,0.7);transition:color 0.4s">Pricing</a>
       <button class="nav-cta" onclick="connectStrava()">Get Started Free</button>
     </div>
   </nav>
 
   <section class="hero">
+    <!-- Mountain silhouette backdrop -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:55%;pointer-events:none;z-index:1;opacity:0.07">
+      <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,400 180,220 300,280 480,120 620,220 720,80 840,190 960,140 1080,210 1200,160 1320,220 1440,180 1440,400" fill="white"/>
+      </svg>
+    </div>
     <div class="hero-inner">
       <div>
         <div class="hero-kicker">🏔 The UK hill bagging logbook</div>
@@ -865,13 +907,24 @@ textarea.form-input{resize:vertical;min-height:80px}
             <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
             Connect with Strava — it's free
           </button>
-          <span class="hero-note">Free forever for Munros · No credit card · Strava history imported in minutes</span>
+          <span class="hero-note">Free forever for Munros &nbsp;·&nbsp; No credit card required &nbsp;·&nbsp; Full Strava history scanned in minutes</span>
         </div>
       </div>
 
       <!-- Preview card -->
       <div class="hero-visual">
         <div class="map-card">
+          <!-- Subtle topo contour background -->
+          <div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden;border-radius:10px">
+            <svg width="100%" height="100%" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="opacity:0.035">
+              <path d="M-20,180 Q60,140 140,160 Q200,175 260,145 Q320,115 420,130" fill="none" stroke="#2d5a3d" stroke-width="1.5"/>
+              <path d="M-20,210 Q50,170 130,190 Q195,205 260,175 Q325,145 420,160" fill="none" stroke="#2d5a3d" stroke-width="1.5"/>
+              <path d="M-20,240 Q40,200 120,220 Q190,235 255,205 Q330,175 420,190" fill="none" stroke="#2d5a3d" stroke-width="1.5"/>
+              <path d="M-20,150 Q80,110 160,130 Q210,145 265,115 Q315,88 420,100" fill="none" stroke="#2d5a3d" stroke-width="1"/>
+              <path d="M-20,120 Q90,80 170,100 Q220,115 270,85 Q310,60 420,70" fill="none" stroke="#2d5a3d" stroke-width="1"/>
+            </svg>
+          </div>
+          <div style="position:relative;z-index:1">
           <div class="map-card-header">
             <span class="map-card-title">Your Progress</span>
             <span class="map-card-badge">✓ Synced from Strava</span>
@@ -904,31 +957,32 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div style="padding:0.8rem 1.2rem;border-top:1px solid var(--border-lt);font-size:0.72rem;color:var(--light-muted);display:flex;align-items:center;gap:0.4rem">
             <span class="sync-dot"></span>Imported automatically · log notes & companions per ascent
           </div>
+          </div><!-- /z-index wrapper -->
         </div>
       </div>
     </div>
   </section>
 
   <!-- SOCIAL PROOF BAR -->
-  <div style="background:var(--paper-mid);border-top:1px solid var(--border-lt);border-bottom:1px solid var(--border-lt);padding:0.9rem 5%;z-index:1;position:relative">
+  <div style="background:var(--canvas);border-bottom:1px solid var(--border-lt);padding:1rem 5%;position:relative;z-index:1">
     <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:2.5rem;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted);white-space:nowrap">
         <span style="color:var(--forest);font-weight:600">2,548</span> hills across 8 lists
       </div>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted);white-space:nowrap">
         <span style="color:var(--forest);font-weight:600">Munros, Corbetts, Grahams</span>
       </div>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted);white-space:nowrap">
         <span style="color:var(--forest);font-weight:600">Wainwrights, Marilyns</span> & more
       </div>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted);white-space:nowrap">
         <span style="color:var(--forest);font-weight:600">DoBIH</span> database
       </div>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0"></div>
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted)">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted);white-space:nowrap">
         🌿 <span>10% donated to <strong>Mountain Rescue Scotland</strong> & <strong>Scottish Wildlife Trust</strong></span>
       </div>
     </div>
@@ -937,40 +991,45 @@ textarea.form-input{resize:vertical;min-height:80px}
   <!-- FEATURES — compact, honest about what's built -->
   <section class="features-section" style="padding:3.5rem 5%">
     <div style="max-width:1100px;margin:0 auto">
-      <div class="feat-grid" style="gap:1rem;margin-top:0">
+      <div style="margin-bottom:3rem">
+        <div class="section-label">What's inside</div>
+        <h2 class="section-h">More than just a list</h2>
+        <p class="section-sub">A full hillwalking logbook — with everything a serious bagger actually needs.</p>
+      </div>
+      <div class="feat-grid" style="gap:1.2rem;margin-top:0">
 
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📝</div>
+        <div class="feat-card">
+          <div class="feat-icon">📝</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">A real logbook, not just a list</h3>
           <p class="feat-text" style="font-size:0.8rem">Log companions, conditions and memories per ascent. Climbed the same hill twice? Both days are in your logbook separately — because they were different days.</p>
         </div>
 
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🏆</div>
+        <div class="feat-card">
+          <div class="feat-icon">🏆</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Leaderboard & friends</h3>
           <p class="feat-text" style="font-size:0.8rem">See how your tally compares to other UK hillwalkers. Follow friends, track rivals, celebrate completions together. Rank by total hills across all 8 lists.</p>
         </div>
 
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">⚡</div>
+        <div class="feat-card">
+          <div class="feat-icon">⚡</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Strava history imported instantly</h3>
           <p class="feat-text" style="font-size:0.8rem">Connect Strava once and Summit scans your entire GPS history — every summit within 150m automatically imported. No manual entry for years of past walks.</p>
         </div>
 
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🗺</div>
+        <div class="feat-card">
+          <div class="feat-icon">🗺</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Interactive topo map</h3>
           <p class="feat-text" style="font-size:0.8rem">Your bagged hills on a real topographic map with contour lines. Filter by list, region, or completion status. See what's left at a glance.</p>
         </div>
 
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">🏅</div>
+        <div class="feat-card">
+          <div class="feat-icon">🏅</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Badges & milestones</h3>
           <p class="feat-text" style="font-size:0.8rem">Earn badges for Three Peaks, Welsh High Peaks, Yorkshire Three Peaks and more. Progress bars show how close you are to the next milestone across every list.</p>
         </div>
 
-        <div class="feat-card" style="padding:1.4rem">
-          <div class="feat-icon" style="font-size:1.3rem;margin-bottom:0.6rem">📥</div>
+        <div class="feat-card">
+          <div class="feat-icon">📥</div>
           <h3 class="feat-title" style="font-size:0.95rem;margin-bottom:0.3rem">Already tracking in Excel?</h3>
           <p class="feat-text" style="font-size:0.8rem">Download our template, fill in your hills with dates, upload it back. Years of records imported in minutes. Your data is always exportable — never locked in.</p>
         </div>
@@ -979,10 +1038,43 @@ textarea.form-input{resize:vertical;min-height:80px}
     </div>
   </section>
 
+  <!-- HOW IT WORKS — dark section for contrast -->
+  <section style="background:var(--text);padding:4.5rem 5%;position:relative;overflow:hidden">
+    <!-- Subtle mountain silhouette background -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:160px;pointer-events:none;opacity:0.06">
+      <svg viewBox="0 0 1200 160" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,160 120,80 200,110 300,40 400,90 500,20 600,70 700,30 800,80 900,50 1000,90 1100,60 1200,80 1200,160" fill="white"/>
+      </svg>
+    </div>
+    <div style="max-width:1000px;margin:0 auto;position:relative;z-index:1">
+      <div style="text-align:center;margin-bottom:3.5rem">
+        <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.75rem">How it works</div>
+        <h2 style="font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:white;letter-spacing:-0.02em;line-height:1.2">Up and running in minutes</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem" class="how-grid">
+        <div style="text-align:center">
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:rgba(255,255,255,0.4)">1</div>
+          <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:white;margin-bottom:0.5rem">Connect Strava</h3>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7">One click. Summit requests read-only access to your activities. Nothing is ever posted to your Strava.</p>
+        </div>
+        <div style="text-align:center">
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:rgba(255,255,255,0.4)">2</div>
+          <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:white;margin-bottom:0.5rem">Your history is scanned</h3>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7">Summit checks every GPS point in every walk against 2,548 UK hill summits. Years of data imported in minutes.</p>
+        </div>
+        <div style="text-align:center">
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:rgba(255,255,255,0.4)">3</div>
+          <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;color:white;margin-bottom:0.5rem">Your logbook is ready</h3>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7">Every summit mapped and listed. Add notes and companions to any ascent. Track progress across every list.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- PRICING SECTION -->
   <section id="pricing" style="padding:3.5rem 5% 2.5rem;background:var(--canvas)">
     <div style="max-width:900px;margin:0 auto">
-      <h2 class="section-h" style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem)">Your logbook, your price</h2>
+      <h2 class="section-h" style="text-align:center;font-size:clamp(1.8rem,3vw,2.8rem);letter-spacing:-0.02em">Your logbook, your price</h2>
       <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto">Free for Munros forever. Upgrade to unlock all 8 lists, the full leaderboard, and your complete Strava history.</p>
 
       <div class="landing-pricing-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem">
@@ -1060,7 +1152,7 @@ textarea.form-input{resize:vertical;min-height:80px}
   </section>
 
   <!-- DONATION TRACKER -->
-  <section style="padding:2.5rem 5%;background:var(--paper)">
+  <section style="padding:3rem 5%;background:var(--canvas)">
     <div style="max-width:700px;margin:0 auto">
       <div style="background:var(--canvas);border:1px solid rgba(45,90,61,0.2);border-radius:10px;padding:1.8rem 2rem">
         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem">
