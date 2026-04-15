@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>How to Track Your Munros with Strava GPS — Summit</title>
+<meta name="description" content="Strava records every GPS point on your hillwalks. Learn how to use that data to automatically detect and log every Munro you've ever climbed — including years of past ascents."/>
+<meta property="og:title" content="How to Track Your Munros with Strava GPS"/>
+<meta property="og:description" content="Use your existing Strava GPS data to automatically log every Munro you've ever climbed. Here's how."/>
+<meta property="og:image" content="https://summitapp.uk/summit-og-1200x630.png"/>
+<link rel="canonical" href="https://summitapp.uk/blog/how-to-track-munros-with-strava.html"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to Track Your Munros with Strava GPS",
+  "description": "Strava records every GPS point on your hillwalks. Learn how to automatically detect and log every Munro you've ever climbed.",
+  "url": "https://summitapp.uk/blog/how-to-track-munros-with-strava.html",
+  "publisher": {"@type": "Organization", "name": "Summit", "url": "https://summitapp.uk"}
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#f4eddf;--canvas:#faf6ee;--forest:#2d5a3d;--text:#1a1916;--muted:#7a7060;--border:#d6cbb8;--light-muted:#9e9486}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.7}
+.article-body{max-width:720px;margin:0 auto;padding:3rem 5% 5rem}
+.article-body h2{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:700;margin:2.5rem 0 0.8rem;letter-spacing:-0.01em}
+.article-body h3{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;margin:2rem 0 0.6rem}
+.article-body p{margin-bottom:1.2rem;font-size:1rem;color:#3d3830;line-height:1.8;font-weight:300}
+.article-body ul,.article-body ol{margin:0.5rem 0 1.2rem 1.5rem}
+.article-body li{margin-bottom:0.5rem;font-size:1rem;color:#3d3830;line-height:1.7;font-weight:300}
+.article-body a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}
+.article-body strong{font-weight:600;color:var(--text)}
+.article-header{background:linear-gradient(160deg,#0f1f15,#1a2e1f);padding:5rem 5% 4rem;color:white}
+.article-header .category{font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(122,171,135,0.9);margin-bottom:1rem}
+.article-header h1{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:700;line-height:1.15;letter-spacing:-0.02em;max-width:700px;margin-bottom:1.2rem}
+.article-header .meta{font-size:0.82rem;color:rgba(255,255,255,0.45)}
+.cta-box{background:var(--forest);border-radius:10px;padding:2rem;margin:3rem 0;color:white}
+.cta-box h3{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;color:white}
+.cta-box p{font-size:0.9rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;font-weight:300;line-height:1.7}
+.cta-box a{display:inline-flex;align-items:center;background:white;color:var(--forest);padding:0.7rem 1.4rem;border-radius:5px;text-decoration:none;font-weight:600;font-size:0.9rem}
+.related{background:var(--canvas);border-top:1px solid var(--border);padding:3rem 5%}
+.related-inner{max-width:720px;margin:0 auto}
+.related h2{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem}
+.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.related-card{background:var(--paper);border:1px solid var(--border);border-radius:6px;padding:1.2rem;text-decoration:none;display:block;transition:border-color 0.15s}
+.related-card:hover{border-color:var(--forest)}
+.related-card .cat{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem}
+.related-card h3{font-family:'Libre Baskerville',serif;font-size:0.9rem;font-weight:700;color:var(--text);line-height:1.4}
+@media(max-width:600px){.related-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav style="position:sticky;top:0;z-index:100;background:rgba(250,246,238,0.96);backdrop-filter:blur(12px);border-bottom:1px solid #d6cbb8;padding:1rem 5%;display:flex;align-items:center;justify-content:space-between">
+  <a href="/" style="font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:#2d5a3d;text-decoration:none;display:flex;align-items:center;gap:0.5rem">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#f4eddf"/><polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/></svg>
+    Summit
+  </a>
+  <div style="display:flex;align-items:center;gap:1.2rem">
+    <a href="/blog.html" style="font-size:0.85rem;color:#7a7060;text-decoration:none">Blog</a>
+    <a href="/" style="background:#2d5a3d;color:white;border:none;padding:0.5rem 1.1rem;border-radius:4px;font-size:0.85rem;font-weight:500;text-decoration:none">Get Started Free</a>
+  </div>
+</nav>
+
+<div class="article-header">
+  <div style="max-width:720px;margin:0 auto">
+    <div class="category">Guide · Munros</div>
+    <h1>How to track your Munros with Strava GPS</h1>
+    <div class="meta">5 min read · April 2026</div>
+  </div>
+</div>
+
+<div class="article-body">
+
+<p>If you've been using Strava to record your hillwalks, you've been quietly building one of the most valuable datasets a Munro bagger can have: a complete GPS record of every walk you've ever done. The problem is that Strava doesn't know what a Munro is — it just records the route.</p>
+
+<p>This guide explains how to use that GPS data to automatically identify and log every Munro you've climbed, without manually cross-referencing walks against a list.</p>
+
+<h2>Why Strava GPS is perfect for Munro tracking</h2>
+
+<p>Every Strava activity recorded with a GPS device or phone stores a full latitude/longitude track — a series of GPS points captured every few seconds throughout your walk. For a typical Munro day, this might be 3,000–8,000 GPS points, each one precisely located on the map.</p>
+
+<p>The 282 Munros all have known summit coordinates (maintained by the <a href="https://www.hills.database.co.uk" target="_blank">Database of British and Irish Hills</a>). So the detection problem is simple in principle: did any GPS point in your walk pass within a reasonable distance of a known summit? If yes, you climbed it.</p>
+
+<p>In practice this works very reliably. Most Munro summits have a cairn or trig point that walkers naturally pass within a few metres of, so a detection radius of 100–150 metres catches virtually all genuine ascents while avoiding false positives from walks that merely pass below a summit.</p>
+
+<h2>The manual approach: why it's painful</h2>
+
+<p>You could in theory do this yourself: download your GPX file from Strava, open it in a mapping tool, and check each GPS point against a list of Munro coordinates. For one walk, this might take 20 minutes. For five years of walks, it would take days.</p>
+
+<p>Most Munro baggers don't bother and instead maintain a separate tick list in a notebook or spreadsheet, logging each ascent by memory. This works fine going forward but it means your historical Strava data — walks you might have done years before getting serious about bagging — is never used.</p>
+
+<h2>How automatic detection works</h2>
+
+<p>Apps like <a href="https://summitapp.uk">Summit</a> solve this by running the comparison at scale: they connect to the Strava API, download your full activity history, and check every GPS point in every walk against the summit coordinates for all 2,548 hills in the DoBIH database. For most users, this takes 2–5 minutes even with years of activities.</p>
+
+<p>The detection process works as follows:</p>
+
+<ol>
+  <li><strong>Activity fetch</strong> — the app retrieves your Strava activities, filtering for walking, hiking, and trail running types</li>
+  <li><strong>Stream download</strong> — for each activity, it downloads the GPS stream (the full list of lat/lng points)</li>
+  <li><strong>Distance check</strong> — for every GPS point, it calculates the distance to every nearby hill summit using the <a href="https://en.wikipedia.org/wiki/Haversine_formula" target="_blank">Haversine formula</a></li>
+  <li><strong>Threshold comparison</strong> — if any point falls within the detection radius (typically 100–150m, adjustable in settings), the summit is marked as bagged</li>
+  <li><strong>Date assignment</strong> — the ascent is logged with the date of the Strava activity</li>
+</ol>
+
+<p>The whole process runs in the background. For a user with 500 Strava activities, this might involve checking 2 million GPS points against 282 Munro coordinates — something that would be impossible to do manually but takes seconds computationally.</p>
+
+<h2>What you need to get started</h2>
+
+<p>Three things:</p>
+
+<ul>
+  <li>A Strava account with your hillwalking activities recorded (even old ones, even before you started Munro bagging)</li>
+  <li>Those activities recorded with GPS — this means your phone's GPS was on, or you wore a GPS watch. Activities uploaded manually without a GPS file won't have the location data needed for detection</li>
+  <li>An app that connects to Strava and runs the detection — Summit does this automatically, and it's free for Munros</li>
+</ul>
+
+<h2>What if I walked Munros before using Strava?</h2>
+
+<p>Pre-Strava ascents won't be in your GPS history. For these you have two options:</p>
+
+<ul>
+  <li><strong>Manual log</strong> — add the ascent manually through the app's log form, entering the hill name and date from memory or an old notebook</li>
+  <li><strong>Spreadsheet import</strong> — if you've kept any kind of log (even a rough list of hills and years), most apps including Summit let you import a spreadsheet. You don't need exact dates — approximate ones work fine</li>
+</ul>
+
+<h2>Tips for reliable detection</h2>
+
+<p><strong>Record on your phone, not just a watch.</strong> Some GPS watches record at lower resolution (every 30–60 seconds rather than every second), which can mean fewer points near a summit. Phone GPS tends to be higher density.</p>
+
+<p><strong>Don't skip the summit.</strong> This sounds obvious, but detection only works if you actually reached the summit. Walks that turn back below the summit won't be detected — correctly.</p>
+
+<p><strong>Adjust the detection radius if needed.</strong> The default 150m radius is correct for the vast majority of summits. In rare cases on large plateau summits (like some Cairngorm tops) where the summit cairn is harder to locate precisely, a slightly wider radius of 200–300m can help.</p>
+
+<p><strong>Re-run after any Strava imports.</strong> If you upload old GPX files from walks before you had Strava, run a manual re-sync afterwards to pick up any newly-detected summits.</p>
+
+<div class="cta-box">
+  <h3>Try it on your Strava history</h3>
+  <p>Summit connects to Strava and automatically detects every Munro (and Corbett, Wainwright, Marilyn and more) in your GPS history. Free for Munros. Use code BETA3 for 3 months premium free.</p>
+  <a href="https://summitapp.uk">Connect Strava — it's free →</a>
+</div>
+
+<h2>Frequently asked questions</h2>
+
+<h3>Does it work with Garmin or other GPS devices?</h3>
+<p>If your Garmin activities are synced to Strava (which most are by default), yes. The detection works on the GPS data regardless of which device recorded it. Some apps also accept GPX file uploads directly if you prefer to keep your activities off Strava.</p>
+
+<h3>Will it detect summits from walks I did years ago?</h3>
+<p>Yes, as long as those walks are in your Strava history with GPS data. Strava retains your full activity history indefinitely, so walks from 5 or 10 years ago should still be there and detectable.</p>
+
+<h3>What if I climbed a Munro as part of a bigger ridge day?</h3>
+<p>Detection doesn't care about your intended route — it just checks whether you passed near each summit. A ridge day covering 4 Munros will detect all 4 automatically.</p>
+
+<h3>How accurate is the detection?</h3>
+<p>Very accurate for summits with a clear highest point (most Munros). The rare false negatives tend to be on large plateau summits where GPS accuracy and the precise summit location can create edge cases. These can be manually corrected by adding the ascent through the log form.</p>
+
+</div>
+
+<div class="related">
+  <div class="related-inner">
+    <h2>More from the Summit blog</h2>
+    <div class="related-grid">
+      <a class="related-card" href="/blog/best-munro-bagging-apps.html">
+        <div class="cat">Comparison</div>
+        <h3>The best Munro bagging apps in 2026</h3>
+      </a>
+      <a class="related-card" href="/blog/munro-vs-corbett.html">
+        <div class="cat">Explainer</div>
+        <h3>Munros, Corbetts, Grahams, Marilyns — what's the difference?</h3>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer style="background:#1a1916;color:rgba(255,255,255,0.5);padding:2.5rem 5%;font-size:0.82rem">
+  <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <div style="font-family:'Libre Baskerville',serif;color:rgba(255,255,255,0.7);font-weight:700">Summit</div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+      <a href="/" style="color:rgba(255,255,255,0.5);text-decoration:none">App</a>
+      <a href="/blog.html" style="color:rgba(255,255,255,0.5);text-decoration:none">Blog</a>
+      <a href="/contact.html" style="color:rgba(255,255,255,0.5);text-decoration:none">Contact</a>
+      <a href="/munro-tracker.html" style="color:rgba(255,255,255,0.5);text-decoration:none">Munro Tracker</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
