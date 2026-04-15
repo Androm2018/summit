@@ -9,4 +9,9 @@
   <url><loc>https://summitapp.uk/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://summitapp.uk/privacy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://summitapp.uk/terms.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://summitapp.uk/blog.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://summitapp.uk/blog/how-to-track-munros-with-strava.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://summitapp.uk/blog/best-munro-bagging-apps.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://summitapp.uk/blog/munro-vs-corbett.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://summitapp.uk/blog/how-many-munros-have-i-climbed.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
 </urlset>
