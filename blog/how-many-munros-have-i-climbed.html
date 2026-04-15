@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>How Many Munros Have I Climbed? Find Out Automatically — Summit</title>
+<meta name="description" content="If you've been using Strava for your hillwalks, you've probably climbed more Munros than you realise. Here's how to find your actual Munro count automatically from your GPS history."/>
+<meta property="og:title" content="How Many Munros Have I Climbed? Find Out Automatically"/>
+<meta property="og:description" content="Use your Strava GPS history to automatically discover every Munro you've ever climbed."/>
+<meta property="og:image" content="https://summitapp.uk/summit-og-1200x630.png"/>
+<link rel="canonical" href="https://summitapp.uk/blog/how-many-munros-have-i-climbed.html"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How Many Munros Have I Climbed? Find Out Automatically",
+  "description": "Use your Strava GPS history to automatically discover every Munro you've ever climbed.",
+  "url": "https://summitapp.uk/blog/how-many-munros-have-i-climbed.html",
+  "publisher": {"@type": "Organization", "name": "Summit", "url": "https://summitapp.uk"}
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#f4eddf;--canvas:#faf6ee;--forest:#2d5a3d;--text:#1a1916;--muted:#7a7060;--border:#d6cbb8;--light-muted:#9e9486}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);line-height:1.7}
+.article-body{max-width:720px;margin:0 auto;padding:3rem 5% 5rem}
+.article-body h2{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:700;margin:2.5rem 0 0.8rem;letter-spacing:-0.01em}
+.article-body h3{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;margin:2rem 0 0.6rem}
+.article-body p{margin-bottom:1.2rem;font-size:1rem;color:#3d3830;line-height:1.8;font-weight:300}
+.article-body ul,.article-body ol{margin:0.5rem 0 1.2rem 1.5rem}
+.article-body li{margin-bottom:0.5rem;font-size:1rem;color:#3d3830;line-height:1.7;font-weight:300}
+.article-body a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}
+.article-body strong{font-weight:600;color:var(--text)}
+.article-header{background:linear-gradient(160deg,#0f1f15,#1a2e1f);padding:5rem 5% 4rem;color:white}
+.article-header .category{font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(122,171,135,0.9);margin-bottom:1rem}
+.article-header h1{font-family:'Libre Baskerville',serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:700;line-height:1.15;letter-spacing:-0.02em;max-width:700px;margin-bottom:1.2rem}
+.article-header .meta{font-size:0.82rem;color:rgba(255,255,255,0.45)}
+.step{display:flex;gap:1.2rem;margin:1.5rem 0;align-items:flex-start}
+.step-num{width:36px;height:36px;border-radius:50%;background:var(--forest);color:white;display:flex;align-items:center;justify-content:center;font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.95rem;flex-shrink:0;margin-top:0.1rem}
+.step-body h3{font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:0.3rem;color:var(--text)}
+.step-body p{font-size:0.9rem;color:#3d3830;line-height:1.7;margin:0;font-weight:300}
+.cta-box{background:var(--forest);border-radius:10px;padding:2rem;margin:3rem 0;color:white}
+.cta-box h3{font-family:'Libre Baskerville',serif;font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;color:white}
+.cta-box p{font-size:0.9rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;font-weight:300;line-height:1.7}
+.cta-box a{display:inline-flex;align-items:center;background:white;color:var(--forest);padding:0.7rem 1.4rem;border-radius:5px;text-decoration:none;font-weight:600;font-size:0.9rem}
+.callout{background:rgba(45,90,61,0.07);border-left:3px solid var(--forest);border-radius:0 6px 6px 0;padding:1.2rem 1.4rem;margin:1.5rem 0;font-size:0.9rem;color:#3d3830;line-height:1.7;font-weight:300}
+.related{background:var(--canvas);border-top:1px solid var(--border);padding:3rem 5%}
+.related-inner{max-width:720px;margin:0 auto}
+.related h2{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem}
+.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.related-card{background:var(--paper);border:1px solid var(--border);border-radius:6px;padding:1.2rem;text-decoration:none;display:block;transition:border-color 0.15s}
+.related-card:hover{border-color:var(--forest)}
+.related-card .cat{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem}
+.related-card h3{font-family:'Libre Baskerville',serif;font-size:0.9rem;font-weight:700;color:var(--text);line-height:1.4}
+@media(max-width:600px){.related-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav style="position:sticky;top:0;z-index:100;background:rgba(250,246,238,0.96);backdrop-filter:blur(12px);border-bottom:1px solid #d6cbb8;padding:1rem 5%;display:flex;align-items:center;justify-content:space-between">
+  <a href="/" style="font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:700;color:#2d5a3d;text-decoration:none;display:flex;align-items:center;gap:0.5rem">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#f4eddf"/><polygon points="2.5,25 9.25,17.5 12,19.4 16,9.25 20,19.4 22.75,17.5 29.5,25" fill="#2d5a3d"/></svg>
+    Summit
+  </a>
+  <div style="display:flex;align-items:center;gap:1.2rem">
+    <a href="/blog.html" style="font-size:0.85rem;color:#7a7060;text-decoration:none">Blog</a>
+    <a href="/" style="background:#2d5a3d;color:white;border:none;padding:0.5rem 1.1rem;border-radius:4px;font-size:0.85rem;font-weight:500;text-decoration:none">Get Started Free</a>
+  </div>
+</nav>
+
+<div class="article-header">
+  <div style="max-width:720px;margin:0 auto">
+    <div class="category">Guide · Munros</div>
+    <h1>How many Munros have I climbed? Find out automatically</h1>
+    <div class="meta">4 min read · April 2026</div>
+  </div>
+</div>
+
+<div class="article-body">
+
+<p>It's a question every hillwalker eventually asks — and the answer is often more than you'd expect. If you've been walking in Scotland for any length of time and recording on Strava, you may have climbed dozens of Munros without ever officially counting them.</p>
+
+<p>The problem is that most people don't keep a precise log. Walks get recorded on Strava or a GPS watch, but nobody cross-references each GPS track against the official Munro list. Years of hillwalking accumulate without a total.</p>
+
+<h2>The old way: going through your Strava history manually</h2>
+
+<p>You could in theory open each Strava activity, look at the map, identify which hills you passed, and check them against the Munro list. For someone with 50 hillwalks this might take an afternoon. For someone with 500 activities across several years, it would take days — and you'd still miss any Munros climbed on days with multiple tops.</p>
+
+<p>Most people don't bother and instead keep a rough mental count, or rely on a notebook they may or may not have updated consistently.</p>
+
+<h2>The automatic way: connect Strava once</h2>
+
+<p><a href="https://summitapp.uk">Summit</a> solves this by running the comparison automatically. Connect your Strava account and it downloads every walking, hiking and trail running activity you've ever recorded, then checks every GPS point in every activity against the coordinates of all 282 Munros. If you passed within 150 metres of a summit, it's logged — with the date from your Strava activity.</p>
+
+<p>For most users this takes 2–5 minutes and surfaces a Munro count that's often surprising. A common reaction is discovering 20–30 Munros from walks that were never officially "counted" because the user hadn't started bagging seriously yet.</p>
+
+<div class="callout">
+  The detection uses the Haversine formula to calculate the distance between each GPS point and each summit coordinate. With a 150m radius and typical Strava GPS density (one point per second), the accuracy is high enough that false negatives are rare and false positives are essentially impossible — you can't accidentally get credited for a Munro you didn't climb.
+</div>
+
+<h2>Step by step</h2>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h3>Go to summitapp.uk</h3>
+    <p>You don't need to download anything. Summit works in any browser on any device.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h3>Connect with Strava</h3>
+    <p>Click "Connect with Strava" and authorise read-only access. Summit never posts to your Strava or modifies anything — it only reads your activity history.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h3>Wait 2–5 minutes</h3>
+    <p>Summit scans your full activity history. You'll see a progress bar. The more activities you have, the longer it takes — typically 2 minutes for a few years of walks, up to 5–10 minutes for a very long history.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h3>See your Munro count</h3>
+    <p>Your dashboard shows your total Munro count, a list of all bagged summits with dates, and the ones still to bag. Your progress toward the 282 total is shown as a percentage and a progress ring.</p>
+  </div>
+</div>
+
+<h2>What about Munros climbed before Strava?</h2>
+
+<p>Any walks not recorded with GPS won't be automatically detected. For these you have two options:</p>
+
+<ul>
+  <li><strong>Manual log</strong> — click "Log Ascent" and search for the hill name. You can add an approximate date or leave it blank.</li>
+  <li><strong>Spreadsheet import</strong> — if you've kept any kind of list (even a rough one), download the import template, fill in your hills, and upload it back. Summit fuzzy-matches the names and shows you a preview before importing.</li>
+</ul>
+
+<h2>What if some Munros are missing?</h2>
+
+<p>A few reasons a genuine ascent might not be detected:</p>
+
+<ul>
+  <li><strong>Activity not recorded with GPS</strong> — manually-entered Strava activities without a GPS file won't have location data</li>
+  <li><strong>GPS accuracy on the day</strong> — in deep glens or on very cloudy days, GPS accuracy can drop. Rare but possible</li>
+  <li><strong>Summit coordinates off slightly</strong> — DoBIH coordinates are generally very accurate but edge cases exist</li>
+</ul>
+
+<p>For any missed ascents, manual logging takes 30 seconds and keeps your count correct.</p>
+
+<div class="cta-box">
+  <h3>Find your Munro count now</h3>
+  <p>Connect Strava and Summit automatically detects every Munro in your GPS history. Takes 2–5 minutes. Free forever for Munros — no credit card needed.</p>
+  <a href="https://summitapp.uk">Check my Munro count →</a>
+</div>
+
+</div>
+
+<div class="related">
+  <div class="related-inner">
+    <h2>More from the Summit blog</h2>
+    <div class="related-grid">
+      <a class="related-card" href="/blog/how-to-track-munros-with-strava.html">
+        <div class="cat">Guide</div>
+        <h3>How to track your Munros with Strava GPS</h3>
+      </a>
+      <a class="related-card" href="/blog/munro-vs-corbett.html">
+        <div class="cat">Explainer</div>
+        <h3>Munros, Corbetts, Grahams, Marilyns — what's the difference?</h3>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer style="background:#1a1916;color:rgba(255,255,255,0.5);padding:2.5rem 5%;font-size:0.82rem">
+  <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <div style="font-family:'Libre Baskerville',serif;color:rgba(255,255,255,0.7);font-weight:700">Summit</div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+      <a href="/" style="color:rgba(255,255,255,0.5);text-decoration:none">App</a>
+      <a href="/blog.html" style="color:rgba(255,255,255,0.5);text-decoration:none">Blog</a>
+      <a href="/munro-tracker.html" style="color:rgba(255,255,255,0.5);text-decoration:none">Munro Tracker</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
